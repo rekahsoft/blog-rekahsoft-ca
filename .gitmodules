@@ -1,0 +1,6 @@
+[submodule "jquery-address"]
+	path = jquery-address
+	url = https://github.com/asual/jquery-address.git
+[submodule "bootstrap"]
+	path = bootstrap
+	url = https://github.com/twbs/bootstrap.git

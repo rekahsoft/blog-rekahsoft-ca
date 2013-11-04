@@ -212,13 +212,20 @@ main = hakyllWith myConfig $ do
           >>= loadAndApplyTemplate "templates/default-nojs.html" newsNojsCtx
           >>= relativizeUrls
 
+    -- This route is used for the initial pass of the pages (nav-gen) and the final nojs page output
+    let pagesNoJsRoute = customRoute (\r -> if toFilePath r == "pages/home.markdown"
+                                   then "pages/index.markdown"
+                                   else toFilePath r) `composeRoutes`
+                gsubRoute "pages" (const "nojs")      `composeRoutes`
+                setExtension "html"
+    
     match "pages/*" $ version "nav-gen" $ do
-      route   $ customRoute (\r -> "nojs" </> toFilePath r) `composeRoutes` setExtension "html"
+      route   $ pagesNoJsRoute
       compile $ pandocCompiler
         >>= loadAndApplyTemplate "templates/page.html" defaultContext
     
     match "pages/*" $ version "nojs" $ do
-      route   $ customRoute (\r -> "nojs" </> toFilePath r) `composeRoutes` setExtension "html"
+      route   $ pagesNoJsRoute
       compile $ do
         -- Show a slideshow of news using js..limit to the 3 most recent posts
         recentNews <- loadAllSnapshots ("news/**" .&&. hasVersion "nojs") "content"

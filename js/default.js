@@ -24,78 +24,116 @@
 
 //------------------------
 
-$(document).ready(function () {
-    $.address.init(function(event) {
-	console.log("init:");
-    }).change(function(event) {
-	console.log("change " + event.value);
-	
-        // remove //pages from current url
-	var page_href = event.value;
-	console.log(event.value);
-	
+function newContentCallback() {
+    $('#page-content a').click(function (evt) {
+        var page_href = $(this).attr('href');
+        var external_url_regexp = /https?:\/\/.*/;
+
+        if (external_url_regexp.test(page_href)) {
+            window.location.href = page_href;
+        } else {
+            evt.preventDefault();
+            $.address.value(page_href);
+        }
+    });
+
+    $('#page-content a').click(function() {
+        scrollTo('#nav', 'fast');
+    });
+}
+
+function loadPageContent(page_href) {
+    var post_regexp = /posts\/.*/;
+    var tag_regexp = /tags\/.*/;
+
+    // Check whether the requested url is a post; otherwise assume its a page
+    if (post_regexp.test(page_href)) {
+        // Handle post urls (no change required to page_href)
+        $('#nav-menu li.active').removeClass('active');
+        $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
+    } else if (tag_regexp.test(page_href)) {
+        // Handle tag pages
+        $('#nav-menu li.active').removeClass('active');
+        $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
+    } else {
+        // Check if the page_href is empty or / and if so goto home
 	if (page_href == '/' || page_href == '') {
 	    page_href = '/home.html';
 	}
+	
+        // Initially set the active menuitem in the nav
 	$('a.menuitem[rel="address:' + page_href + '"]').closest('ul').find('li.active').removeClass('active');
 	$('a.menuitem[rel="address:' + page_href + '"]').closest('li').addClass('active');
-	
-        // set page_href ot full url for ajax call
+
+        // set page_href of full url for ajax call
         page_href = "pages" + page_href;
-        
-	$.ajax({
-	    url: page_href,
-	    type: 'GET',
-	    dataType: 'html',
-	    beforeSend: function (xhr, settings) {
-		// Set '#page-content.loading' to show page-content-loading graphic
-		$('#page-content').addClass('loading');
-		console.log('beforeSend a.menuitem');
-	    },
-	    success: function (dta) {
-		// no need to removeClass('loading'); done on server side
-		// use .addClass('fadeIn') to use a css transition *TODO*
-		$('#page-content').replaceWith(dta);
-	    },
-	    error: function (xhr, status) {
-		// replace loading graphic with loading error graphic
-		$('#page-content').removeClass('loading').addClass('loading-error');
-		
-		console.log('error retrieving page "' + page_href +'": ' + status);
-	    }
-	});
+    }
+
+    // Make the ajax request for the new page-content (whether it be a page or a post) *could change*
+    $.ajax({
+	url: page_href,
+	type: 'GET',
+	dataType: 'html',
+	beforeSend: function (xhr, settings) {
+	    // Add .loading to #page-content and #nav to facilitate a loading animation
+	    $('#page-content, #nav').addClass('loading');
+
+	    console.log('beforeSend a.menuitem');
+	},
+	success: function (dta) {
+            // Remove the loading gif
+            $('#page-content').removeClass('init');
+
+            // Replace old page-content with new page-content
+	    $('#page-content').replaceWith(dta);
+
+            // Stop loading animations in the nav and page-content-wrap
+            $('#page-content, #nav').removeClass('loading');
+
+            // Add new content callbacks
+            newContentCallback();
+	},
+	error: function (xhr, status) {
+	    /* Remove .loading then add .loading-error to #page-content and #nav to
+             * stop the loading animation and facilitate a loading error animation
+             */
+	    $('#page-content, #nav').removeClass('loading').addClass('loading-error');
+            
+	    console.log('error retrieving page "' + page_href +'": ' + status);
+	}
+    });
+}
+
+// Scroll to the top of a given element in a specified amount of time
+function scrollTo(elem, dur) {
+    $('html, body').animate({
+        scrollTop: $(elem).offset().top
+    }, dur);
+}
+
+$(document).ready(function () {
+    $.address.init(function(event) {
+	console.log("init:" + event.value);
+        $(window).load(function () {
+            loadPageContent(event.value);
+        });
     });
     
-    $('ul.navbar-nav a.menuitem').click(function() {
+    $('#nav-menu a.menuitem').click(function() {
 	$(this).closest('ul').find('li.active').removeClass('active');
 	$(this).closest('li').addClass('active');
 	//$('.navbar-collapse').collapse('hide');
     });
-    
+
+    // $('a.internal').click(function(evt) {
+    //     $.address.value($(this).attr('href')); 
+    // });
+
     // Callback for when the inital page has completely loaded (including images, etc..)
     $(window).load(function () {
-        // something
-    });
-    
-    // Load recent-news carousel
-    $.ajax({
-	url: 'recent-news.html',
-	type: 'GET',
-	dataType: 'html',
-	beforeSend: function (xhr, settings) {
-	    // Set '#page-content.loading' to show page-content-loading graphic
-	    //$('#page-content').addClass('loading');
-	    console.log('Attempting to retrieve recent-news..');
-	},
-	success: function (dta) {
-	    // no need to removeClass('loading'); done on server side
-	    // use .addClass('fadeIn') to use a css transition *TODO*
-	    $('#page-content').before(dta);
-	},
-	error: function (xhr, status) {
-	    // replace loading graphic with loading error graphic
-	    //$('#page-content').removeClass('loading').addClass('loading-error');
-	    console.log('Error retrieving recent-news"' + page_href +'": ' + status);
-	}
+        $.address.change(function(event) {
+	    console.log("change " + event.value);
+            loadPageContent(event.value);
+        });
     });
 });

@@ -1,0 +1,27 @@
+%article.post
+  %header
+    %h1.title
+      %a(href="$url$") $title$
+    %p.info
+      Posted on
+      %span.date $date$
+      $if(author)$ by
+      %span.author $author$
+      $endif$
+  
+  $if(teaser)$
+  $teaser$
+  $else$
+  $body$
+  $endif$
+  
+  %footer
+    .container
+      .eight.columns.alpha
+        $if(teaser)$
+        %a.read-more(rel="address:$virtualpath$" href="$url$") Read More
+        $else$
+        %span.no-teaser
+        $endif$
+      .eight.columns.omega
+        %p.tags $tags$

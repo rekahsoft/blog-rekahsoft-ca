@@ -1,0 +1,14 @@
+#nav.sixteen.columns
+  %ul#nav-menu
+    $for(pagesFirst)$
+    %li
+      %a.menuitem(href="$url$") $title$
+    $endfor$
+    $if(pageMid)$
+    %li.active
+      %a.menuitem(href="$url$") $title$
+    $endif$
+    $for(pagesLast)$
+    %li
+      %a.menuitem(href="$url$") $title$
+    $endfor$

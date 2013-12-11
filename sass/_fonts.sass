@@ -1,0 +1,40 @@
+// (C) Copyright Collin Doering 2013
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// File: _fonts.sass
+// Author: Collin J. Doering <rekahsoft@gmail.com>
+// Date: Dec 10, 2013
+// Description: Define all font-faces and related things
+
+@mixin custom-font($name, $weight, $style)
+  font-family: $name
+  src: url('/fonts/' + $name + '.ttf') format('truetype'), url('/fonts/' + $name + '.woff') format('woff'), url('/fonts/' + $name + '.otf') format('opentype')
+  font-weight: $weight
+  font-style: $style
+
+// Eventually switch to this instead of my custom mixin above
+// @include font-face(FreeMono, '/fonts/FreeMono')
+// @include font-face(FreeMono, '/fonts/FreeMonoBold', bold)
+// @include font-face(FreeMono, '/fonts/FreeMonoOblique', normal, oblique)
+// @include font-face(FreeMono, '/fonts/FreeMonoBoldOblique', bold, oblique)
+
+@font-face
+  @include custom-font(FreeMono, normal, normal)
+@font-face
+  @include custom-font(FreeMonoBold, bold, normal)
+@font-face
+  @include custom-font(FreeMonoOblique, normal, oblique)
+@font-face
+  @include custom-font(FreeMonoBoldOblique, bold, oblique)

@@ -1,0 +1,6 @@
+#nav.sixteen.columns.loading
+  %ul#nav-menu
+    $for(pages)$
+    %li
+      %a.menuitem(rel="address:$virtualpath$" href="$url$") $title$
+    $endfor$

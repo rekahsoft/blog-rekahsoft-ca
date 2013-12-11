@@ -1,0 +1,94 @@
+// (C) Copyright Collin Doering 2013
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// File: _src-highlight.sass
+// Author: Collin J. Doering <rekahsoft@gmail.com>
+// Date: Dec 10, 2013
+// Description: Css to style pygments output (based on: https://github.com/jaspervdj/hakyll/blob/master/web/css/syntax.css)
+
+//-------------------------------------------------------------------------------------
+// custom css for code highlighing (requires specifying .code-term)
+//-------------------------------------------------------------------------------------
+.code-term.sourceCode
+  display: block
+  background: #111
+  color: white
+  border-radius: 3px
+  padding: 0.5em 0
+  margin-bottom: 0.75em
+  overflow: auto
+  max-height: 50em
+
+//-------------------------------------------------------------------------------------
+// css for pandoc highlighting using default pandoc highlighter (?)
+//-------------------------------------------------------------------------------------
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode, table.sourceCode pre
+  margin: 0
+  padding: 0
+  border: 0
+  vertical-align: baseline
+  border: none
+
+td.lineNumbers
+  border-right: 1px solid #AAAAAA
+  text-align: right
+  color: #AAAAAA
+  padding-right: 8px
+  padding-left: 8px
+
+td.sourceCode
+  padding-left: 5px
+
+pre.sourceCode span.kw,code.sourceCode span.kw
+  color: #007020
+  font-weight: bold
+
+pre.sourceCode span.dt,code.sourceCode span.dt
+  color: #902000
+
+pre.sourceCode span.dv,code.sourceCode span.dv
+  color: #40a070
+
+pre.sourceCode span.bn,code.sourceCode span.bn
+  color: #40a070
+
+pre.sourceCode span.fl,code.sourceCode span.fl
+  color: #40a070
+
+pre.sourceCode span.ch,code.sourceCode span.ch
+  color: #4070a0
+
+pre.sourceCode span.st,code.sourceCode span.st
+  color: #4070a0
+
+pre.sourceCode span.co,code.sourceCode span.co
+  color: #60a0b0
+  font-style: italic
+
+pre.sourceCode span.ot,code.sourceCode span.ot
+  color: #007020
+
+pre.sourceCode span.al,code.sourceCode span.al
+  color: red
+  font-weight: bold
+
+pre.sourceCode span.fu,code.sourceCode span.fu
+  color: #06287e
+
+pre.sourceCode span.re,code.sourceCode span.re
+
+pre.sourceCode span.er,code.sourceCode span.er
+  color: red
+  font-weight: bold

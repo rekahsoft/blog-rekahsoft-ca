@@ -1,0 +1,43 @@
+!!! 5
+/[if lt IE 7] <html class="ie ie6" lang="en">
+/[if IE 7] <html class="ie ie7" lang="en"
+/[if IE 8] <html class="ie ie8" lang="en">
+<!-- [if (gte IE 9)|!(IE)]><!-->
+%html.en
+  %head
+    / Basic Page Needs
+    %meta(charset="utf-8")
+    %link(rel="shortcut icon" href="lib/images/favicon.png")
+
+    %title RekahSoft
+    %meta(name="description" content="Custom soltuions to unique problems")
+    %meta(name="author" content="Collin Doering")
+
+    / Mobile Specific Metas
+    %meta(name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1")
+
+    / CSS
+    %link(rel="stylesheet" href="lib/css/base.css")
+    %link(rel="stylesheet" href="lib/css/skeleton.css")
+    %link(rel="stylesheet" href="lib/css/layout.css")
+    / Custom styles for this template
+    %link(rel="stylesheet" href="default.css")
+
+    /[if lt IE 9]
+      %script(src="http://html5shim.googlecode.com/svn/trunk/html5.js")
+    
+    / Favicons
+    %link(rel="shortcut icon" href="lib/images/favicon.ico")
+    %link(rel="apple-touch-icon" href="lib/images/apple-touch-icon.png")
+    %link(rel="apple-touch-icon" sizes="72x72" href="lib/images/apple-touch-icon-72x72.png")
+    %link(rel="apple-touch-icon" sizes="114x114" href="lib/images/apple-touch-icon-114x114.png")
+
+  %body
+    .container
+      $partial("templates/partials/logo-banner.haml")$
+      $partial("templates/partials/nav-nojs.haml")$
+      $if(recentPosts)$
+      $partial("templates/partials/recent-posts-nojs.haml")$
+      $endif$
+      $body$
+      $partial("templates/partials/footer.haml")$

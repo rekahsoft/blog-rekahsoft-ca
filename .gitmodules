@@ -1,6 +1,6 @@
-[submodule "jquery-address"]
-	path = jquery-address
+[submodule "lib/Skeleton"]
+	path = lib/Skeleton
+	url = https://github.com/dhg/Skeleton.git
+[submodule "lib/jquery-address"]
+	path = lib/jquery-address
 	url = https://github.com/asual/jquery-address.git
-[submodule "bootstrap"]
-	path = bootstrap
-	url = https://github.com/twbs/bootstrap.git

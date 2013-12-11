@@ -1,0 +1,15 @@
+#recent-posts.sixteen.columns
+  .recent-post-item.active
+    %a(href="$url$")
+      %strong $mostRecentPostTitle$
+    $if(mostRecentPostTeaser)$
+    $mostRecentPostTeaser$
+    $else$
+    $mostRecentPostBody$
+    $endif$
+  
+  $for(recentPosts)$
+  .recent-post-item
+    %h1 $title$
+    $if(teaser)$ $teaser$ $else$ $body$ $endif$
+  $endfor$

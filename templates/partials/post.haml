@@ -1,0 +1,20 @@
+#post-page.container
+  %article.post
+    %header
+      %h1.title $title$
+      %p.info
+        Posted on
+        %span.date $date$
+        $if(author)$ by
+        %span.author $author$
+        $endif$
+    
+    $body$
+  
+    %footer
+      %hr
+      .container
+        .eight.columns.alpha
+          %a.read-more(href="$url$") See Comments
+        .eight.columns.omega
+          %p.tags $tags$

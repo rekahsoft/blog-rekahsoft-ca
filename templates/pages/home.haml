@@ -1,0 +1,16 @@
+#home-page.container.border-box
+  .eight.columns.alpha
+    %h1 About Me
+    #about-me-box
+      $aboutMe$
+  .seven.columns.offset-by-one.omega
+    #recent-posts
+      %h1 Recent Posts
+      %hr/
+      $partial("templates/partials/recent-posts-list.haml")$
+    #tag-cloud
+      %h1 Tag Cloud
+      %hr/
+      $tagCloud$
+  .sixteen.columns
+    $tools$

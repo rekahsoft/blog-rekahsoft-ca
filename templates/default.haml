@@ -3,7 +3,8 @@
 /[if IE 7] <html class="ie ie7" lang="en"
 /[if IE 8] <html class="ie ie8" lang="en">
 <!-- [if (gte IE 9)|!(IE)]><!-->
-%html.en
+%html.en(manifest='manifest.appcache')
+  // Work in progress on application cache;
   %head
     / Basic Page Needs
     %meta(charset="utf-8")
@@ -34,17 +35,18 @@
     // %link(rel="apple-touch-icon" sizes="72x72" href="lib/images/apple-touch-icon-72x72.png")
     // %link(rel="apple-touch-icon" sizes="114x114" href="lib/images/apple-touch-icon-114x114.png")
 
-    %noscript
-      #noscript-alert.container
-        .alert.alert-danger
-          %h1 This site requires javascript!
-          %p
-            If you insist on not using javascript we provide a simplified website
-            %a.alert-link(href="nojs/pages") here
   %body
     $partial("templates/partials/logo-banner.haml")$
     $partial("templates/partials/nav.haml")$
-    #page-content.sixteen.columns.container.init.loading
+
+    #page-content.init.loading
+      %noscript
+        #noscript-alert.container
+          %h1 This site requires javascript!
+          %p
+            If you insist on not using javascript we provide a simplified website
+            %a.alert-link(href="nojs/index.html") here
+
     $partial("templates/partials/footer.haml")$
 
     / External javascript libraries: JQuery, and JQuery-Address

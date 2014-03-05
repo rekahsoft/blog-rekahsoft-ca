@@ -16,7 +16,7 @@
 // File: default.sass
 // Author: Collin J. Doering <rekahsoft@gmail.com>
 // Date: Dec 5, 2013
-
+//
 // Use Bourbon
 @import 'sass/bourbon/bourbon'
 
@@ -28,28 +28,53 @@
 @import 'sass/blog-page'
 @import 'sass/contact-page'
 @import 'sass/tag-page'
-
+@import 'sass/post-page'
 @import 'sass/src-highlight'
 
 //-------------------------------------------------------------------------------------
 // General
 //-------------------------------------------------------------------------------------
+*
+  -webkit-backface-visibility: hidden
+
 body
   background: #efe
   font: 14px/21px FreeMono, monospace, Helvetica, Arial, sans-serif
-  -webkit-text-stroke: 0.3px
 
 h1,h2,h3,h4,h5,h6
   font-family: FreeMono
+h1
+  font-size: 2.5em
+h2
+  font-size: 2em
+h3
+  font-size: 1.75em
+h4
+  font-size: 1.5em
+h5
+  font-size: 1.25em
+h6
+  font-size: 1em
+
+ul, ol
+  padding-left: 1em
+
+hr
+  margin-bottom: 0.5em
+
+#noscript-alert
+  @include border-box(0, #FCD4D4)
+  text-align: center
 
 #page-content
   opacity: 1
-  @include transition(opacity 400ms)
+  @include transition(opacity 250ms ease-out)
+  margin-top: 1em
   overflow: hidden
 
   ul > li:before
-    content: "\2192 "
-    padding-right: 1em
+    content: "\2192"
+    padding-right: 0.5em
     font-size: 1.5em
 
   ul > li
@@ -58,15 +83,18 @@ h1,h2,h3,h4,h5,h6
     margin-bottom: 0.02em
 
 #page-content.loading
-  opacity: 0.45
+  opacity: 0.35
 
-#page-content.init.loading
-  background: url('/images/init-loading.gif') no-repeat 50%
-  height: 100px
-  padding: 1.5em 0
+#page-content.loading-done
+  @include transition(opacity 1s ease-in 0.5s)
+  opacity: 1
 
 #page-content.loading-error
   // do something
+
+#page-content.init.loading
+  background: url('/images/init-loading.gif') no-repeat 50%
+  height: 125px
 
 #page-content.init.loading-error
   // do something
@@ -77,7 +105,7 @@ h1,h2,h3,h4,h5,h6
 #footer-right
   text-align: right
 
-.container.border-box
+.border-box
   @include border-box()
 
 //-------------------------------------------------------------------------------------

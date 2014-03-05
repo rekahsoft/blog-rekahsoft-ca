@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings, TupleSections #-}
 ---------------------------------------------------------------------------------------------------------
--- (C) Copyright Collin Doering @!@YEAR@!@
+-- (C) Copyright Collin Doering 2013
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -24,11 +24,17 @@
 
 import Hakyll
 import Control.Monad
+import Data.Char (chr)
 import Data.Monoid (mappend,mconcat,(<>))
-import Data.List (sortBy)
+import Data.Maybe (maybeToList)
+import Data.List (sortBy,intercalate)
 import Data.Ord (comparing)
 import Data.Functor ((<$>))
-import System.FilePath ((</>))
+import Data.Time.Format (parseTime)
+import System.Locale (defaultTimeLocale)
+import Data.Time.Clock (UTCTime)
+import System.Random
+import System.FilePath (takeBaseName,takeFileName,(</>))
 import System.FilePath.Posix (takeBaseName)
 
 import Text.Parsec
@@ -46,28 +52,74 @@ feedConfig :: FeedConfiguration
 feedConfig = feedConfiguration Nothing
 
 main :: IO ()
-main = hakyllWith myConfig $ do
+main = do
+  -- Get a random number generator before going into Rules  monad
+  stdGen <- getStdGen
+  
+  hakyllWith myConfig $ do
 -- All Versions ------------------------------------------------------------------------------------------
     match "action/**" $ do
       route   idRoute
       compile copyFileCompiler
 
-    match (fromRegex "^sass/default.s[ac]ss$") $ do
+    pageIds <- getMatches "pages/**"
+    fontIds <- getMatches "fonts/**"
+    imageIds <- getMatches "images/**"
+    cssIds <- getMatches "css/**"
+    jsIds <- getMatches "js/**"
+    libIds <- getMatches "lib/**"
+    
+    allSassIds <- getMatches "sass/**"
+    let sassIds = filter (`notElem` badIds) allSassIds
+        badIds = filterMatches (fromRegex "^sass/bourbon/.*$|^sass/default.s[ac]ss$") allSassIds
+        manifestIds = sassIds ++ fontIds ++ imageIds ++ pageIds ++ cssIds ++ libIds ++ jsIds
+
+    sassDeps <- makePatternDependency $ fromList sassIds
+    manifestDeps <- makePatternDependency $ fromList manifestIds
+    
+    rulesExtraDependencies [sassDeps] $ match (fromRegex "^sass/default.s[ac]ss$") $ do
       route   $ gsubRoute "sass/" (const "") `composeRoutes` setExtension "css"
-      compile $ getResourceBody >>= withItemBody (fmap compressCss . unixFilter "sass" [])
+      compile $ getResourceBody
+        >>= saveSnapshot "original"
+        >>= withItemBody (fmap compressCss . unixFilter "sass" [])
+
+    rulesExtraDependencies [manifestDeps] $ create ["manifest.appcache"] $ do
+      route     idRoute
+      compile $ do
+        manifestCacheRoutesMaybe <- sequence $ liftM getRoute (fontIds ++ pageIds ++ imageIds ++ cssIds ++ libIds ++ jsIds)
+        let randomNum = random stdGen :: (Int, StdGen)
+            randomStr = show $ fst $ randomNum
+            manifestStart = unlines [ "CACHE MANIFEST"
+                                    , "# " ++ randomStr
+                                    , "" ]
+            manifestCacheSingles = unlines [ "/index.html"
+                                           , "/default.css" ]
+            manifestCache = unlines $ filter (not . null) $ fmap (maybe "" ("/"++)) manifestCacheRoutesMaybe
+            manifestFallback = unlines [""
+                                       , "FALLBACK:"
+                                       , "/posts/ /post-offline.html"
+                                       , "/tags/ /tags-offline.html"
+                                       , "" ]
+            manifestNetwork = unlines [ "NETWORK:"
+                                      , "*"
+                                      , "" ]
+        makeItem $ manifestStart ++ manifestCacheSingles ++ manifestCache ++ manifestFallback ++ manifestNetwork
+
+    -- TODO: This needs to be more robust
+    match "*-offline.html" $ do
+      route   idRoute
+      compile copyFileCompiler
 
     match "css/**" $ do
       route   idRoute
       compile compressCssCompiler
     
-    match "lib/Skeleton/stylesheets/*.css" $ do
-      route   $ gsubRoute "Skeleton/stylesheets" (const "css")
+    match "lib/Skeleton/*.css" $ do
+      route   $ gsubRoute "Skeleton" (const "css")
       compile compressCssCompiler
 
-    forM_ [("images/**", idRoute),
-           ("fonts/**", idRoute),
-           ("lib/Skeleton/images/*",
-               gsubRoute "Skeleton" $ const "")] $ \(p, r) ->
+    forM_ [ ("images/**", idRoute)
+          , ("fonts/**", idRoute) ] $ \(p, r) ->
       match p $ do
         route   r
         compile copyFileCompiler
@@ -79,10 +131,22 @@ main = hakyllWith myConfig $ do
     tags <- buildTags ("posts/**" .&&. hasNoVersion) (fromCapture "tags/*.html")
     tagsRules tags $ genTagRules tags
 
-    -- paginatedPosts <- buildPaginateWith 2 (\n -> fromFilePath $ "blog/page" ++ show n ++ ".html") ("posts/**" .&&. hasNoVersion)
+    -- paginatedPosts <- buildPaginateWith 3 (\n -> fromFilePath $ "blog/page" ++ show n ++ ".html") ("posts/**" .&&. hasNoVersion)
     -- paginatedPosts <- buildPaginate ("posts/**" .&&. hasNoVersion)
     -- paginateRules paginatedPosts (genPaginateRules tags paginatedPosts)
 
+    -- paginate 3 $ \index maxIndex itemsForPage -> do
+    --   let id = fromFilePath $ "blog/page" ++ show index ++ ".html"
+    --   create [id] $ do
+    --     route idRoute
+    --     compile $ do
+    --       -- items <- sequence $ map loadTeaser itemsForPage
+    --       -- let itemBodies = map itemBody items
+    --       --    postCtx = defaultContext -- TODO
+    --       makeItem ""
+    --         >>= saveSnapshot "content"
+    --         >>= loadAndApplyTemplate "templates/pages/blog.haml" (taggedPostCtx tags)
+    
     match "pages/*" $ do
       route   $ setExtension "html"
       compile $ do
@@ -103,21 +167,14 @@ main = hakyllWith myConfig $ do
         pg <- loadSnapshot (fromFilePath pageTemplate) "original"
           >>= withItemBody (unixFilter "haml" [])
           >>= applyAsTemplate (sectionCtx <> masterCtx)
-          >>= loadAndApplyTemplate "templates/page.haml" defaultContext
         makeItem . itemBody $ pg
         
-        -- pandocCompiler
-        --   >>= loadAndApplyTemplate (fromFilePath pageTemplate) masterCtx
-        --   >>= loadAndApplyTemplate "templates/page.haml" defaultContext
---          >>= relativizeUrls
-
     -- TODO: add "next" and "previous" while processing templates/partials/post.haml
     match "posts/**" $ do
       route   $ setExtension "html"
       compile $ pandocCompiler
         >>= saveSnapshot "content"
         >>= loadAndApplyTemplate "templates/partials/post.haml" (taggedPostCtx tags)
-        >>= loadAndApplyTemplate "templates/page.haml" defaultContext
 --        >>= relativizeUrls
 
     create ["atom.xml"] $ do
@@ -129,7 +186,7 @@ main = hakyllWith myConfig $ do
         renderAtom feedConfig feedCtx blogPosts
 
     forM_ [("js/**", idRoute),
-           ("lib/JQuery/*", gsubRoute "JQuery" $ const $ "js"),
+           ("lib/JQuery/*", gsubRoute "JQuery" $ const "js"),
            ("lib/jquery-address/src/jquery.address.js",
               customRoute $ const "lib/js/jquery.address.js")] $ \(p, r) ->
       match p $ do
@@ -148,6 +205,7 @@ main = hakyllWith myConfig $ do
           >>= applyAsTemplate indexCtx
           >>= loadAndApplyTemplate "templates/default.haml" indexCtx
           >>= relativizeUrls
+
 ---------------------------------------------------------------------------------------------------------
 -- NOJS Version -----------------------------------------------------------------------------------------
     -- -- tagsNoJs <- buildTags ("posts/**" .&&. hasVersion "nojs") (fromCapture "nojs/tags/*.html")
@@ -269,7 +327,6 @@ genTagRules tags tag pattern = do
 
     makeItem ""
       >>= loadAndApplyTemplate "templates/tag-page.haml" tagPageCtx
-      >>= loadAndApplyTemplate "templates/page.haml" defaultContext
   
   version "rss" $ do
     route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "xml"
@@ -277,13 +334,40 @@ genTagRules tags tag pattern = do
       >>= fmap (take 10) . recentFirst
       >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
 
--- genPaginateRules :: Tags -> Paginate -> PageNumber -> Pattern -> Rules ()
--- genPaginateRules tags paginate n pattern = do
---   route   $ idRoute
---   compile $ pandocCompiler
---     >>= loadAndApplyTemplate "templates/partials/post.haml" (taggedPostCtx tags <> paginateContext paginate)
---     >>= loadAndApplyTemplate "templates/page.haml" defaultContext
---     >>= relativizeUrls
+genPaginateRules :: Tags -> Paginate -> PageNumber -> Pattern -> Rules ()
+genPaginateRules tags paginate n pattern = do
+  route     idRoute
+  compile $ pandocCompiler
+    >>= loadAndApplyTemplate "templates/partials/post.haml" (taggedPostCtx tags <> paginateContext paginate)
+--    >>= loadAndApplyTemplate "templates/page.haml" defaultContext
+--    >>= relativizeUrls
+
+-- | Split list into equal sized sublists.
+-- https://github.com/ian-ross/blog
+chunk :: Int -> [a] -> [[a]]
+chunk n [] = []
+chunk n xs = ys : chunk n zs
+  where (ys,zs) = splitAt n xs
+
+paginate:: Int -> (Int -> Int -> [Identifier] -> Rules ()) -> Rules ()
+paginate itemsPerPage rules = do
+    identifiers <- getMatches "posts/*"
+
+    let sorted = sortBy (flip byDate) identifiers
+        chunks = chunk itemsPerPage sorted
+        maxIndex = length chunks
+        pageNumbers = take maxIndex [1..]
+        process i is = rules i maxIndex is
+    zipWithM_ process pageNumbers chunks
+        where
+            byDate id1 id2 =
+                let fn1 = takeFileName $ toFilePath id1
+                    fn2 = takeFileName $ toFilePath id2
+                    parseTime' fn = parseTime defaultTimeLocale "%Y-%m-%d" $ intercalate "-" $ take 3 $ splitAll "-" fn
+                in compare (parseTime' fn1 :: Maybe UTCTime) (parseTime' fn2 :: Maybe UTCTime)
+
+
+
 
 loadVersion :: String -> Identifier -> Compiler (Item String)
 loadVersion v i = load (setVersion (listAsMaybe v) i) >>= makeItem . itemBody

@@ -18,23 +18,22 @@
 // Date: Dec 10, 2013
 // Description: Define all font-faces and related things
 
-@mixin custom-font($name, $weight, $style)
-  font-family: $name
-  src: url('/fonts/' + $name + '.ttf') format('truetype'), url('/fonts/' + $name + '.woff') format('woff'), url('/fonts/' + $name + '.otf') format('opentype')
-  font-weight: $weight
-  font-style: $style
+// @mixin custom-font($name, $weight, $style)
+//   font-family: $name
+//   src: url('/fonts/' + $name + '.ttf') format('truetype'), url('/fonts/' + $name + '.woff') format('woff'), url('/fonts/' + $name + '.otf') format('opentype')
+//   font-weight: $weight
+//   font-style: $style
 
-// Eventually switch to this instead of my custom mixin above
-// @include font-face(FreeMono, '/fonts/FreeMono')
-// @include font-face(FreeMono, '/fonts/FreeMonoBold', bold)
-// @include font-face(FreeMono, '/fonts/FreeMonoOblique', normal, oblique)
-// @include font-face(FreeMono, '/fonts/FreeMonoBoldOblique', bold, oblique)
+@include font-face(FreeMono, '/fonts/FreeMono')
+@include font-face(FreeMono, '/fonts/FreeMonoBold', bold)
+@include font-face(FreeMono, '/fonts/FreeMonoOblique', normal, oblique)
+@include font-face(FreeMono, '/fonts/FreeMonoBoldOblique', bold, oblique)
 
-@font-face
-  @include custom-font(FreeMono, normal, normal)
-@font-face
-  @include custom-font(FreeMonoBold, bold, normal)
-@font-face
-  @include custom-font(FreeMonoOblique, normal, oblique)
-@font-face
-  @include custom-font(FreeMonoBoldOblique, bold, oblique)
+// @font-face
+//   @include custom-font(FreeMono, normal, normal)
+// @font-face
+//   @include custom-font(FreeMonoBold, bold, normal)
+// @font-face
+//   @include custom-font(FreeMonoOblique, normal, oblique)
+// @font-face
+//   @include custom-font(FreeMonoBoldOblique, bold, oblique)

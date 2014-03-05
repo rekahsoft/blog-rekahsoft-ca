@@ -13,7 +13,7 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 /**
  * File:. default.js
@@ -24,116 +24,125 @@
 
 //------------------------
 
-function newContentCallback() {
-    $('#page-content a').click(function (evt) {
-        var page_href = $(this).attr('href');
-        var external_url_regexp = /https?:\/\/.*/;
+(function () {
+    var page = (function () {
+        var pageId = '#page-content', navId = '#nav';
 
-        if (external_url_regexp.test(page_href)) {
-            window.location.href = page_href;
-        } else {
-            evt.preventDefault();
-            $.address.value(page_href);
+        function init() {
+            $(document).ready(function () {
+                $.address.init(function(event) {
+                    console.log("init:" + event.value);
+                    $(window).load(function () {
+                        loadPageContent(event.value);
+                    });
+                });
+
+                $('#nav-menu a.menuitem').click(function() {
+                    $(this).closest('ul').find('li.active').removeClass('active');
+                    $(this).closest('li').addClass('active');
+                    //$('.navbar-collapse').collapse('hide');
+                });
+
+                // Callback for when the inital page has completely loaded (including images, etc..)
+                $(window).load(function () {
+                    $.address.change(function(event) {
+                        console.log("change " + event.value);
+                        loadPageContent(event.value);
+                    });
+                });
+            });
         }
-    });
 
-    $('#page-content a').click(function() {
-        scrollTo('#nav', 'fast');
-    });
-}
+        function newContentCallback() {
+            $('#page-content a').click(function (evt) {
+                var page_href = $(this).attr('href');
+                var external_url_regexp = /https?:\/\/.*/;
 
-function loadPageContent(page_href) {
-    var post_regexp = /posts\/.*/;
-    var tag_regexp = /tags\/.*/;
+                if (external_url_regexp.test(page_href)) {
+                    window.location.href = page_href;
+                } else {
+                    evt.preventDefault();
+                    $.address.value(page_href);
+                }
+            });
+        }
 
-    // Check whether the requested url is a post; otherwise assume its a page
-    if (post_regexp.test(page_href)) {
-        // Handle post urls (no change required to page_href)
-        $('#nav-menu li.active').removeClass('active');
-        $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
-    } else if (tag_regexp.test(page_href)) {
-        // Handle tag pages
-        $('#nav-menu li.active').removeClass('active');
-        $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
-    } else {
-        // Check if the page_href is empty or / and if so goto home
-	if (page_href == '/' || page_href == '') {
-	    page_href = '/home.html';
-	}
-	
-        // Initially set the active menuitem in the nav
-	$('a.menuitem[rel="address:' + page_href + '"]').closest('ul').find('li.active').removeClass('active');
-	$('a.menuitem[rel="address:' + page_href + '"]').closest('li').addClass('active');
+        function loadPageContent(page_href) {
+            var post_regexp = /posts\/.*/;
+            var tag_regexp = /tags\/.*/;
 
-        // set page_href of full url for ajax call
-        page_href = "pages" + page_href;
-    }
+            // Check whether the requested url is a post; otherwise assume its a page
+            if (post_regexp.test(page_href)) {
+                // Handle post urls (no change required to page_href)
+                $('#nav-menu li.active').removeClass('active');
+                $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
+            } else if (tag_regexp.test(page_href)) {
+                // Handle tag pages
+                $('#nav-menu li.active').removeClass('active');
+                $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
+            } else {
+                // Check if the page_href is empty or / and if so goto home
+                if (page_href === '/' || page_href === '') {
+                    page_href = '/home.html';
+                }
 
-    // Make the ajax request for the new page-content (whether it be a page or a post) *could change*
-    $.ajax({
-	url: page_href,
-	type: 'GET',
-	dataType: 'html',
-	beforeSend: function (xhr, settings) {
-	    // Add .loading to #page-content and #nav to facilitate a loading animation
-	    $('#page-content, #nav').addClass('loading');
+                // Initially set the active menuitem in the nav
+                $('a.menuitem[rel="address:' + page_href + '"]').closest('ul').find('li.active').removeClass('active');
+                $('a.menuitem[rel="address:' + page_href + '"]').closest('li').addClass('active');
 
-	    console.log('beforeSend a.menuitem');
-	},
-	success: function (dta) {
-            // Remove the loading gif
-            $('#page-content').removeClass('init');
+                // set page_href of full url for ajax call
+                page_href = "pages" + page_href;
+            }
 
-            // Replace old page-content with new page-content
-	    $('#page-content').replaceWith(dta);
+            // Make the ajax request for the new page-content (whether it be a page or a post) *could change*
+            $.ajax({
+                url: page_href,
+                type: 'GET',
+                dataType: 'html',
+                beforeSend: function (xhr, settings) {
+                    // Add .loading to #page-content and #nav to facilitate a loading animation
+                    $('#page-content, #nav').removeClass('loading-done').addClass('loading');
 
-            // Stop loading animations in the nav and page-content-wrap
-            $('#page-content, #nav').removeClass('loading');
+                    console.log('beforeSend a.menuitem');
+                },
+                success: function (dta) {
+                    // Remove the initial loading gif (if its there)
+                    $('#page-content').removeClass('init');
 
-            // Add new content callbacks
-            newContentCallback();
-	},
-	error: function (xhr, status) {
-	    /* Remove .loading then add .loading-error to #page-content and #nav to
-             * stop the loading animation and facilitate a loading error animation
-             */
-	    $('#page-content, #nav').removeClass('loading').addClass('loading-error');
-            
-	    console.log('error retrieving page "' + page_href +'": ' + status);
-	}
-    });
-}
+                    // Stop animations in the nav and page-content and scroll to the top of the page in a set amount of time
+                    setTimeout(function () {
+                        // Replace old page-content with new page-content
+                        $('#page-content').html(dta);
 
-// Scroll to the top of a given element in a specified amount of time
-function scrollTo(elem, dur) {
-    $('html, body').animate({
-        scrollTop: $(elem).offset().top
-    }, dur);
-}
+                        $('#page-content, #nav').removeClass('loading');
 
-$(document).ready(function () {
-    $.address.init(function(event) {
-	console.log("init:" + event.value);
-        $(window).load(function () {
-            loadPageContent(event.value);
-        });
-    });
-    
-    $('#nav-menu a.menuitem').click(function() {
-	$(this).closest('ul').find('li.active').removeClass('active');
-	$(this).closest('li').addClass('active');
-	//$('.navbar-collapse').collapse('hide');
-    });
+                        if ($('body').scrollTop() > $('#nav').offset().top - 15) {
+                            $('html, body').animate({
+                                scrollTop: $('#nav').offset().top - 15
+                            }, 'fast');
+                        }
 
-    // $('a.internal').click(function(evt) {
-    //     $.address.value($(this).attr('href')); 
-    // });
+                        // Add new content callbacks
+                        newContentCallback();
+                    }, 250);
+                },
+                error: function (xhr, status) {
+                    /* Remove .loading then add .loading-error to #page-content and #nav to
+                     * stop the loading animation and facilitate a loading error animation
+                     */
+                    $('#page-content, #nav').removeClass('loading').addClass('loading-error');
 
-    // Callback for when the inital page has completely loaded (including images, etc..)
-    $(window).load(function () {
-        $.address.change(function(event) {
-	    console.log("change " + event.value);
-            loadPageContent(event.value);
-        });
-    });
-});
+                    console.log('error retrieving page "' + page_href +'": ' + status);
+                }
+            });
+        }
+
+        return {
+            init: init,
+            newContentCallback: newContentCallback,
+            loadPageContent: loadPageContent
+        };
+    }());
+
+    page.init();
+}());

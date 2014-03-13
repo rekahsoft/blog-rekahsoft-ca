@@ -1,6 +1,0 @@
-[submodule "lib/Skeleton"]
-	path = lib-src/Skeleton
-	url = https://github.com/dhg/Skeleton.git
-[submodule "lib/jquery-address"]
-	path = lib-src/jquery-address
-	url = https://github.com/asual/jquery-address.git

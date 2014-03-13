@@ -243,7 +243,7 @@ main = do
 
     forM_ [("js/**", idRoute),
            ("lib/JQuery/*", gsubRoute "JQuery" $ const "js"),
-           ("lib/jquery-address/src/jquery.address.js",
+           ("lib/jquery-address/jquery.address.js",
               customRoute $ const "lib/js/jquery.address.js")] $ \(p, r) ->
       match p $ do
           route   r

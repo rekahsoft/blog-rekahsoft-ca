@@ -10,6 +10,9 @@ Exceeding reaction chamber thermal limit. We have begun power-supply calibration
 
 Unidentified vessel travelling at sub warp speed, bearing 235.7. Fluctuations in energy readings from it, Captain. All transporters off. A strange set-up, but I'd say the graviton generator is depolarized. The dark colourings of the scrapes are the leavings of natural rubber, a type of non-conductive sole used by researchers experimenting with electricity. The molecules must have been partly de-phased by the anyon beam.
 
+And finally here is a touch of math:
+$e^x = \sum_{n=0}^\infty \frac{x^n}{n!}$
+
 <!--more-->
 Below should be some math if everything worked out alright
 
@@ -28,3 +31,8 @@ $\Box\diamond p\equiv\diamond p$
 $\int_{0}^{1} x dx = \left[ \frac{1}{2}x^2 \right]_{0}^{1} = \frac{1}{2}$
 
 $e^x = \sum_{n=0}^\infty \frac{x^n}{n!} = \lim_{n\rightarrow\infty} (1+x/n)^n$
+
+this is some subscripted~sub~ stuff^hello^.
+~~this is struck out~~
+
+$x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}$

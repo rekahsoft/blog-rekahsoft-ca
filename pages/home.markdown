@@ -5,16 +5,6 @@ date: 2013-10-12
 weight: 1
 ---
 
-$section("aboutMe")$
-Welcome to the home of [**Collin Doering**](/contact.html).
-
-Links that are loaded using js need further consideration. Specifically there are two options:
-
-1. Use anchor references (like above) which work but will break the nojs site!
-2. To have class="active", rel="address:virtualpath" and href set to the resource in question
-   This is what it should look like: <a class="internal" rel="address:/contact.html" href="pages/contact.html">Collin Proper</a>.
-$endsection$
-
 $section("tools")$
 Tools
 =====
@@ -28,6 +18,7 @@ This website was proudly made with open source software! Specifically:
 - [Sass][]
 - [Haml][]
 - [Bourbon][]
+- [MathJax][]
 - [Inkscape][]
 - [Gimp][]
 - [Gnu Emacs][]
@@ -42,8 +33,8 @@ Terms of Use
 This site is _Copyright 2013 © - Collin Doering_ and is distributed under the following terms.
 
 1. All rights reserved on the "#! λ Slang" name, as well as on the
-   [banner image](/images/logo-banner.svg), favicons~[1](/images/favicon.ico),
-   [2](/images/favicon.png)~ and any other image/artwork that embodies the likeness of "#! λ
+   [banner image](/images/logo-banner.svg), favicons([1](/images/favicon.ico),
+   [2](/images/favicon.png)) and any other image/artwork that embodies the likeness of "#! λ
    Slang"
 2. Not withstanding (1), all images and artwork are licensed under the
    [Creative Commons BY-NC-ND License][]
@@ -83,6 +74,7 @@ $section$
 [Sass]:http://sass-lang.com/
 [Haml]: http://haml.info/
 [Bourbon]: http://bourbon.io/
+[MathJax]: http://www.mathjax.org/
 [Inkscape]: http://inkscape.org/
 [Gimp]: http://www.gimp.org/
 [Gnu Emacs]: http://www.gnu.org/software/emacs/

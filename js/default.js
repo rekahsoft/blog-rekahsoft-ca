@@ -57,8 +57,12 @@
             $('#page-content a').click(function (evt) {
                 var page_href = $(this).attr('href');
                 var external_url_regexp = /https?:\/\/.*/;
-
-                if (external_url_regexp.test(page_href)) {
+                var mailto_regexp = /mailto:.*/;
+                var files_regexp = /files\/.*/;
+                
+                if (external_url_regexp.test(page_href)
+                    || mailto_regexp.test(page_href)
+                    || files_regexp.test(page_href)) {
                     window.location.href = page_href;
                 } else {
                     evt.preventDefault();
@@ -70,8 +74,8 @@
         function loadPageContent(page_href) {
             var post_regexp = /posts\/.*/;
             var tag_regexp = /tags\/.*/;
-
-            // Check whether the requested url is a post; otherwise assume its a page
+            
+            // Check whether the requested url is a post
             if (post_regexp.test(page_href)) {
                 // Handle post urls (no change required to page_href)
                 $('#nav-menu li.active').removeClass('active');
@@ -80,7 +84,7 @@
                 // Handle tag pages
                 $('#nav-menu li.active').removeClass('active');
                 $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
-            } else {
+            } else { // otherwise assume its a page
                 // Check if the page_href is empty or / and if so goto home
                 if (page_href === '/' || page_href === '') {
                     page_href = '/home.html';
@@ -114,8 +118,14 @@
                         // Replace old page-content with new page-content
                         $('#page-content').html(dta);
 
+                        // Stop page loading
                         $('#page-content, #nav').removeClass('loading');
 
+                        // Reload any new maths using MathJax
+                        $('#page-content .math').each(function (math_elem) {
+                            MathJax.Hub.Queue(["Typeset",MathJax.Hub,math_elem[0]]);
+                        });
+                        
                         if ($('body').scrollTop() > $('#nav').offset().top - 15) {
                             $('html, body').animate({
                                 scrollTop: $('#nav').offset().top - 15

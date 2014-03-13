@@ -15,7 +15,7 @@
 
     / Mobile Specific Metas
     %meta(name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1")
-
+    
     / CSS
     %link(rel="stylesheet" href="lib/css/base.css")
     %link(rel="stylesheet" href="lib/css/skeleton.css")
@@ -51,8 +51,9 @@
 
     / External javascript libraries: JQuery, and JQuery-Address
     / Placed at the end of the document so the pages load faster
-    %script(src="lib/js/jquery-1.9.1.js")
-    %script(src="lib/js/jquery.address.js")
+    %script(type="text/javascript" src="lib/js/jquery-1.9.1.js")
+    %script(type="text/javascript" src="lib/js/jquery.address.js")
+    %script(type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML")
 
     / Custom javascript for user interactivity
-    %script(src="js/default.js")
+    %script(type="text/javascript" src="js/default.js")

@@ -28,6 +28,7 @@ import Data.Char (chr)
 import Data.Monoid (mappend,mconcat,(<>))
 import Data.Maybe (maybeToList)
 import Data.List (sortBy,intercalate)
+import qualified Data.Set as S
 import Data.Ord (comparing)
 import Data.Functor ((<$>))
 import Data.Time.Format (parseTime)
@@ -38,22 +39,68 @@ import System.FilePath (takeBaseName,takeFileName,(</>))
 import System.FilePath.Posix (takeBaseName)
 
 import Text.Parsec
+import Text.Pandoc.Options
 import Control.Applicative hiding ((<|>),many)
 
 ---------------------------------------------------------------------------------------------------------
 
+pandocReaderOptions :: ReaderOptions
+pandocReaderOptions = defaultHakyllReaderOptions
+                  { readerExtensions = S.fromList
+                                       [ Ext_footnotes
+                                       , Ext_inline_notes
+                                       , Ext_pandoc_title_block
+                                       , Ext_yaml_metadata_block
+                                       , Ext_table_captions
+                                       , Ext_implicit_figures
+                                       , Ext_simple_tables
+                                       , Ext_multiline_tables
+                                       , Ext_grid_tables
+                                       , Ext_pipe_tables
+                                       , Ext_citations
+                                       , Ext_raw_tex
+                                       , Ext_raw_html
+                                       , Ext_tex_math_dollars
+                                       , Ext_latex_macros
+                                       , Ext_fenced_code_blocks
+                                       , Ext_fenced_code_attributes
+                                       , Ext_backtick_code_blocks
+                                       , Ext_inline_code_attributes
+                                       , Ext_markdown_in_html_blocks
+                                       , Ext_escaped_line_breaks
+                                       , Ext_fancy_lists
+                                       , Ext_startnum
+                                       , Ext_definition_lists
+                                       , Ext_example_lists
+                                       , Ext_all_symbols_escapable
+                                       , Ext_intraword_underscores
+                                       , Ext_blank_before_blockquote
+                                       , Ext_blank_before_header
+                                       , Ext_strikeout
+                                       , Ext_superscript
+                                       , Ext_subscript
+                                       , Ext_auto_identifiers
+                                       , Ext_header_attributes
+                                       , Ext_implicit_header_references
+                                       , Ext_line_blocks ]
+                  }
+
+pandocWriterOptions :: WriterOptions
+pandocWriterOptions = defaultHakyllWriterOptions
+                      { writerHtml5 = True
+                      , writerHTMLMathMethod = MathJax ""
+                      , writerEmailObfuscation = NoObfuscation -- ReferenceObfuscation
+                      }
+                  
 myConfig :: Configuration
 myConfig = defaultConfiguration
         { deployCommand = "rsync -rpogtzc --delete -e ssh _site/ collin@rekahsoft.ca:~/public_html/blog/"
         , previewPort = 3000
         }
 
-feedConfig :: FeedConfiguration
-feedConfig = feedConfiguration Nothing
-
 main :: IO ()
 main = do
-  -- Get a random number generator before going into Rules  monad
+  -- Get a random number generator before going into Rules monad
   stdGen <- getStdGen
   
   hakyllWith myConfig $ do
@@ -62,13 +109,19 @@ main = do
       route   idRoute
       compile copyFileCompiler
 
+    match "files/**" $ do
+      route   idRoute
+      compile copyFileCompiler
+
+    tags <- buildTags ("posts/**" .&&. hasNoVersion) (fromCapture "tags/*.html")
+    
     pageIds <- getMatches "pages/**"
     fontIds <- getMatches "fonts/**"
     imageIds <- getMatches "images/**"
     cssIds <- getMatches "css/**"
     jsIds <- getMatches "js/**"
     libIds <- getMatches "lib/**"
-    
+  
     allSassIds <- getMatches "sass/**"
     let sassIds = filter (`notElem` badIds) allSassIds
         badIds = filterMatches (fromRegex "^sass/bourbon/.*$|^sass/default.s[ac]ss$") allSassIds
@@ -94,7 +147,9 @@ main = do
                                     , "" ]
             manifestCacheSingles = unlines [ "/index.html"
                                            , "/default.css" ]
-            manifestCache = unlines $ filter (not . null) $ fmap (maybe "" ("/"++)) manifestCacheRoutesMaybe
+            tagsCache = unlines $ map (\(t,_) -> "/tags/" ++ t ++ ".html") $ tagsMap tags
+            manifestCacheFromIds = unlines $ filter (not . null) $ fmap (maybe "" ("/"++)) manifestCacheRoutesMaybe
+            manifestCache = manifestCacheFromIds ++ tagsCache
             manifestFallback = unlines [""
                                        , "FALLBACK:"
                                        , "/posts/ /post-offline.html"
@@ -102,13 +157,14 @@ main = do
                                        , "" ]
             manifestNetwork = unlines [ "NETWORK:"
                                       , "*"
+                                      , "http://*"
+                                      , "https://*"
                                       , "" ]
         makeItem $ manifestStart ++ manifestCacheSingles ++ manifestCache ++ manifestFallback ++ manifestNetwork
 
-    -- TODO: This needs to be more robust
-    match "*-offline.html" $ do
-      route   idRoute
-      compile copyFileCompiler
+    match "*-offline.haml" $ do
+      route $ setExtension "html"
+      compile $ getResourceBody >>= withItemBody (unixFilter "haml" [])
 
     match "css/**" $ do
       route   idRoute
@@ -128,7 +184,7 @@ main = do
       >>= withItemBody (fmap readTemplate . unixFilter "haml" [])
 ---------------------------------------------------------------------------------------------------------
 -- Default Version --------------------------------------------------------------------------------------
-    tags <- buildTags ("posts/**" .&&. hasNoVersion) (fromCapture "tags/*.html")
+    -- Generate tag pages
     tagsRules tags $ genTagRules tags
 
     -- paginatedPosts <- buildPaginateWith 3 (\n -> fromFilePath $ "blog/page" ++ show n ++ ".html") ("posts/**" .&&. hasNoVersion)
@@ -172,7 +228,7 @@ main = do
     -- TODO: add "next" and "previous" while processing templates/partials/post.haml
     match "posts/**" $ do
       route   $ setExtension "html"
-      compile $ pandocCompiler
+      compile $ pandocCompilerWith pandocReaderOptions pandocWriterOptions
         >>= saveSnapshot "content"
         >>= loadAndApplyTemplate "templates/partials/post.haml" (taggedPostCtx tags)
 --        >>= relativizeUrls
@@ -183,7 +239,7 @@ main = do
         let feedCtx = postCtx <> bodyField "description"
         blogPosts <- loadAllSnapshots ("posts/**" .&&. hasNoVersion) "content"
                        >>= fmap (take 10) . recentFirst
-        renderAtom feedConfig feedCtx blogPosts
+        renderAtom (feedConfiguration Nothing) feedCtx blogPosts
 
     forM_ [("js/**", idRoute),
            ("lib/JQuery/*", gsubRoute "JQuery" $ const "js"),
@@ -217,7 +273,7 @@ main = do
     --     let feedCtx = postCtx <> bodyField "description"
     --     blogPosts <- loadAllSnapshots ("posts/**" .&&. hasVersion "nojs") "content"
     --                    >>= fmap (take 10) . recentFirst
-    --     renderAtom feedConfig feedCtx blogPosts
+    --     renderAtom (feedConfiguration Nothing) feedCtx blogPosts
 
     -- create ["nojs/archive.html"] $ do
     --   route     idRoute
@@ -311,7 +367,7 @@ feedConfiguration title = FeedConfiguration
     { feedTitle = title'
     , feedDescription = "My encounters with math, programming, science and the world!"
     , feedAuthorName = "Collin J. Doering"
-    , feedAuthorEmail = "support@rekahsoft.ca"
+    , feedAuthorEmail = "collin.doering@rekahsoft.ca"
     , feedRoot = "http://blog.rekahsoft.ca"
     } where title' = maybe defaultTitle ((defaultTitle ++ "; Specifically on the topic of ") ++) title
             defaultTitle = "Technical Musings of a Minimalist"
@@ -398,7 +454,7 @@ sortByM f xs = liftM (map fst . sortBy (comparing snd)) $
 ---------------------------------------------------------------------------------------------------------
 --genSectionContext :: Item String -> Compiler (Context String)
 genSectionContext = fmap mconcat . sequence . map makeField . unSections . readSections . itemBody
-  where makeField (k, b) = constField k . itemBody <$> (makeItem b >>= return . writePandoc . readPandoc)
+  where makeField (k, b) = constField k . itemBody <$> (makeItem b >>= return . writePandocWith pandocWriterOptions . readPandocWith pandocReaderOptions)
 
 --readSections :: String -> Compiler (Context String)
 readSections :: String -> [Section String String]

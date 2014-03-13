@@ -1,20 +1,19 @@
-#home-page.container.border-box
-  .row
-    .eight.columns.alpha
-      %h1 About Me
-      #about-me-box
-        $aboutMe$
-    .seven.columns.offset-by-one.omega
-      #recent-posts
-        %h1 Recent Posts
-        %hr/
-        $partial("templates/partials/recent-posts-list.haml")$
-      #tag-cloud
-        %h1 Tag Cloud
-        %hr/
-        $tagCloud$
-  .row
-    #license.eight.columns.alpha
-      $license$
-    #tools.seven.columns.offset-by-one.omega
-      $tools$
+#home-page.container
+  .border-box
+    .row
+      .eight.columns.alpha
+        $partial("templates/partials/business-card.haml")$
+      .seven.columns.offset-by-one.omega
+        #recent-posts
+          %h1 Recent Posts
+          %hr/
+          $partial("templates/partials/recent-posts-list.haml")$
+        #tag-cloud
+          %h1 Tag Cloud
+          %hr/
+          $tagCloud$
+    .row
+      #license.eight.columns.alpha
+        $license$
+      #tools.seven.columns.offset-by-one.omega
+        $tools$

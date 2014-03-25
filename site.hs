@@ -249,7 +249,7 @@ main = do
           route   r
           compile $ getResourceString >>= withItemBody (unixFilter "jsmin" [])
 
-    match "index.html" $ do
+    create ["index.html"] $ do
       route   idRoute
       compile $ do
         -- Generate nav-bar from pages/* ordered by metadata 'weight'
@@ -257,7 +257,7 @@ main = do
             
         let indexCtx = listField "pages" pagesCtx (return pages) <> defaultContext
         
-        getResourceBody
+        makeItem "loading"
           >>= applyAsTemplate indexCtx
           >>= loadAndApplyTemplate "templates/default.haml" indexCtx
           >>= relativizeUrls

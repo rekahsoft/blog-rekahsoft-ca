@@ -24,19 +24,15 @@
 
 import Hakyll
 import Control.Monad
-import Data.Char (chr)
-import Data.Monoid (mappend,mconcat,(<>))
-import Data.Maybe (maybeToList)
+import Data.Monoid (mconcat,(<>))
 import Data.List (sortBy,intercalate)
 import qualified Data.Set as S
 import Data.Ord (comparing)
-import Data.Functor ((<$>))
 import Data.Time.Format (parseTime)
 import System.Locale (defaultTimeLocale)
 import Data.Time.Clock (UTCTime)
 import System.Random
-import System.FilePath (takeBaseName,takeFileName,(</>))
-import System.FilePath.Posix (takeBaseName)
+import System.FilePath (takeBaseName,takeFileName)
 
 import Text.Parsec
 import Text.Pandoc.Options
@@ -187,21 +183,21 @@ main = do
     -- Generate tag pages
     tagsRules tags $ genTagRules tags
 
-    -- paginatedPosts <- buildPaginateWith 3 (\n -> fromFilePath $ "blog/page" ++ show n ++ ".html") ("posts/**" .&&. hasNoVersion)
-    -- paginatedPosts <- buildPaginate ("posts/**" .&&. hasNoVersion)
-    -- paginateRules paginatedPosts (genPaginateRules tags paginatedPosts)
+    paginatedPosts <- buildPaginateWith
+                      (fmap (paginateEvery 8) . sortRecentFirst)
+                      ("posts/**" .&&. hasNoVersion)
+                      (\n -> fromCapture "pages/blog*.html" (show n))
 
-    -- paginate 3 $ \index maxIndex itemsForPage -> do
-    --   let id = fromFilePath $ "blog/page" ++ show index ++ ".html"
-    --   create [id] $ do
-    --     route idRoute
-    --     compile $ do
-    --       -- items <- sequence $ map loadTeaser itemsForPage
-    --       -- let itemBodies = map itemBody items
-    --       --    postCtx = defaultContext -- TODO
-    --       makeItem ""
-    --         >>= saveSnapshot "content"
-    --         >>= loadAndApplyTemplate "templates/pages/blog.haml" (taggedPostCtx tags)
+    paginateRules paginatedPosts $ \pageNum pattern -> do
+      route $ idRoute
+      compile $ do
+        posts <- recentFirst =<< loadAllSnapshots pattern "content"
+        let ctx = taggedPostCtx tags <>
+                  paginateContext paginatedPosts pageNum <>
+                  constField "weight" "0" <>
+                  listField "posts" (taggedPostCtx tags) (return posts)
+        makeItem ""
+          >>= loadAndApplyTemplate "templates/pages/blog.haml" ctx
     
     match "pages/*" $ do
       route   $ setExtension "html"
@@ -215,7 +211,6 @@ main = do
             pageTemplate = "templates/pages/" ++ pageName ++ ".haml"
             masterCtx = listField "recentPosts" (taggedPostCtx tags) (return recentPosts) <>
                         listField "posts" (taggedPostCtx tags) (return posts)             <>
---                        paginateContext paginatedPosts                                    <>
                         tagCloudField "tagCloud" 65 135 tags                              <>
                         defaultContext
 
@@ -253,7 +248,7 @@ main = do
       route   idRoute
       compile $ do
         -- Generate nav-bar from pages/* ordered by metadata 'weight'
-        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasNoVersion)
+        pages <- sortByM pageWeight =<< filterM (\i -> pageWeight i >>= return . (> 0)) =<< loadAll ("pages/*" .&&. hasNoVersion)
             
         let indexCtx = listField "pages" pagesCtx (return pages) <> defaultContext
         
@@ -390,11 +385,11 @@ genTagRules tags tag pattern = do
       >>= fmap (take 10) . recentFirst
       >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
 
-genPaginateRules :: Tags -> Paginate -> PageNumber -> Pattern -> Rules ()
-genPaginateRules tags paginate n pattern = do
-  route     idRoute
-  compile $ pandocCompiler
-    >>= loadAndApplyTemplate "templates/partials/post.haml" (taggedPostCtx tags <> paginateContext paginate)
+-- genPaginateRules :: Tags -> Paginate -> PageNumber -> Pattern -> Rules ()
+-- genPaginateRules tags paginate n pattern = do
+--   route     idRoute
+--   compile $ pandocCompiler
+--     >>= loadAndApplyTemplate "templates/partials/post.haml" (taggedPostCtx tags <> paginateContext paginate)
 --    >>= loadAndApplyTemplate "templates/page.haml" defaultContext
 --    >>= relativizeUrls
 

@@ -74,6 +74,7 @@
         function loadPageContent(page_href) {
             var post_regexp = /posts\/.*/;
             var tag_regexp = /tags\/.*/;
+            var blog_page_regexp = /blog\d*.html/;
             
             // Check whether the requested url is a post
             if (post_regexp.test(page_href)) {
@@ -88,6 +89,10 @@
                 // Check if the page_href is empty or / and if so goto home
                 if (page_href === '/' || page_href === '') {
                     page_href = '/home.html';
+                } else if (blog_page_regexp.test(page_href)) {
+                    // If page_href refers to a blog page set the 
+                    $('a.menuitem[rel="address:/blog.html"]').closest('ul').find('li.active').removeClass('active');
+                    $('a.menuitem[rel="address:/blog.html"]').closest('li').addClass('active');
                 }
 
                 // Initially set the active menuitem in the nav

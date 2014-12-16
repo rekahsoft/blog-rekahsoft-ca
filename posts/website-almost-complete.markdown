@@ -10,6 +10,8 @@ tags: general
 [This](/) website is almost done. Well..the content and theming still need to be completed, but
 for the most part things are complete.
 
+Testing links: [first post](/posts/first-post.html)
+
 Run a manual sweep of anomalous airborne or electromagnetic readings. Radiation levels in our
 atmosphere have increased by 3,000 percent. Electromagnetic and subspace wave fronts
 approaching synchronization. What is the strength of the ship's deflector shields at maximum

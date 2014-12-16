@@ -71,7 +71,7 @@ $section$
 [Skeleton]: http://www.getskeleton.com/
 [JQuery]: http://jquery.com
 [JQuery-address]: https://github.com/asual/jquery-address
-[Sass]:http://sass-lang.com/
+[Sass]: http://sass-lang.com/
 [Haml]: http://haml.info/
 [Bourbon]: http://bourbon.io/
 [MathJax]: http://www.mathjax.org/

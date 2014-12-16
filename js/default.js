@@ -5,12 +5,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -59,7 +59,7 @@
                 var external_url_regexp = /https?:\/\/.*/;
                 var mailto_regexp = /mailto:.*/;
                 var files_regexp = /files\/.*/;
-                
+
                 if (external_url_regexp.test(page_href)
                     || mailto_regexp.test(page_href)
                     || files_regexp.test(page_href)) {
@@ -79,7 +79,7 @@
             var post_regexp = /posts\/.*/;
             var tag_regexp = /tags\/.*/;
             var blog_page_regexp = /blog\d*.html/;
-            
+
             // Check whether the requested url is a post
             if (post_regexp.test(page_href)) {
                 // Handle post urls (no change required to page_href)
@@ -91,10 +91,13 @@
                 $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
             } else { // otherwise assume its a page
                 // Check if the page_href is empty or / and if so goto home
-                if (page_href === '/' || page_href === '') {
+                if (page_href === '/') {
                     page_href = '/home.html';
                 } else if (blog_page_regexp.test(page_href)) {
-                    // If page_href refers to a blog page set the 
+                    if (page_href === "/blog.html")
+                        page_href = "/blog1.html";
+
+                    // If page_href refers to a blog page set Blog to be the active menu item
                     $('a.menuitem[rel="address:/blog.html"]').closest('ul').find('li.active').removeClass('active');
                     $('a.menuitem[rel="address:/blog.html"]').closest('li').addClass('active');
                 }
@@ -114,7 +117,7 @@
                 dataType: 'html',
                 beforeSend: function (xhr, settings) {
                     // Add .loading to #page-content and #nav to facilitate a loading animation
-                    $('#page-content, #nav').removeClass('loading-done').addClass('loading');
+                    $('#page-content, #nav').removeClass('loading-done').removeClass('loading-error').addClass('loading');
 
                     console.log('beforeSend a.menuitem');
                 },
@@ -134,7 +137,7 @@
                         $('#page-content .math').each(function (math_elem) {
                             MathJax.Hub.Queue(["Typeset",MathJax.Hub,math_elem[0]]);
                         });
-                        
+
                         if ($('body').scrollTop() > $('#nav').offset().top - 15) {
                             $('html, body').animate({
                                 scrollTop: $('#nav').offset().top - 15

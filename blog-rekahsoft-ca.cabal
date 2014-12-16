@@ -62,7 +62,7 @@ executable blog-rekahsoft-ca
   
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.7 && <4.8,
-                       hakyll >=4.5,
+                       hakyll >=4.6,
                        pandoc >= 1.13,
                        parsec >= 3.1,
                        filepath >= 1.3,

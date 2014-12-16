@@ -25,14 +25,12 @@
 import Hakyll
 import Control.Monad
 import Data.Monoid (mconcat,(<>))
-import Data.List (sortBy,intercalate)
+import Data.List (sortBy)
+import Data.Map (toList, size)
 import qualified Data.Set as S
 import Data.Ord (comparing)
-import Data.Time.Format (parseTime)
-import System.Locale (defaultTimeLocale)
-import Data.Time.Clock (UTCTime)
 import System.Random
-import System.FilePath (takeBaseName,takeFileName)
+import System.FilePath (takeBaseName)
 
 import Text.Parsec
 import Text.Pandoc.Options
@@ -110,6 +108,11 @@ main = do
       compile copyFileCompiler
 
     tags <- buildTags ("posts/**" .&&. hasNoVersion) (fromCapture "tags/*.html")
+
+    paginatedPosts <- buildPaginateWith
+                      (fmap (paginateEvery 6) . sortRecentFirst)
+                      ("posts/**" .&&. hasNoVersion)
+                      (\n -> fromCapture "pages/blog*.html" (show n))
     
     pageIds <- getMatches "pages/**"
     fontIds <- getMatches "fonts/**"
@@ -137,26 +140,27 @@ main = do
       compile $ do
         manifestCacheRoutesMaybe <- sequence $ liftM getRoute (fontIds ++ pageIds ++ imageIds ++ cssIds ++ libIds ++ jsIds)
         let randomNum = random stdGen :: (Int, StdGen)
-            randomStr = show $ fst $ randomNum
-            manifestStart = unlines [ "CACHE MANIFEST"
-                                    , "# " ++ randomStr
-                                    , "" ]
-            manifestCacheSingles = unlines [ "/index.html"
-                                           , "/default.css" ]
-            tagsCache = unlines $ map (\(t,_) -> "/tags/" ++ t ++ ".html") $ tagsMap tags
-            manifestCacheFromIds = unlines $ filter (not . null) $ fmap (maybe "" ("/"++)) manifestCacheRoutesMaybe
-            manifestCache = manifestCacheFromIds ++ tagsCache
-            manifestFallback = unlines [""
-                                       , "FALLBACK:"
-                                       , "/posts/ /post-offline.html"
-                                       , "/tags/ /tags-offline.html"
-                                       , "" ]
-            manifestNetwork = unlines [ "NETWORK:"
-                                      , "*"
-                                      , "http://*"
-                                      , "https://*"
-                                      , "" ]
-        makeItem $ manifestStart ++ manifestCacheSingles ++ manifestCache ++ manifestFallback ++ manifestNetwork
+            randomStr = show . abs . fst $ randomNum
+            manifestStart = [ "CACHE MANIFEST"
+                            , "# " ++ randomStr
+                            , "" ]
+            manifestCacheSingles = [ "/index.html"
+                                   , "/default.css" ]
+            paginatedPostsCache = take 2 $ map (\(n,_) -> "/pages/blog" ++ (show n) ++ ".html") $ toList $ paginateMap paginatedPosts
+            tagsCache = map (\(t,_) -> "/tags/" ++ t ++ ".html") $ tagsMap tags
+            manifestCacheFromIds = filter (not . null) $ fmap (maybe "" ("/"++)) manifestCacheRoutesMaybe
+            manifestCache = manifestCacheFromIds ++ tagsCache ++ paginatedPostsCache
+            manifestFallback = [""
+                               , "FALLBACK:"
+                               , "/posts/ /post-offline.html"
+                               , "/tags/ /tags-offline.html"
+                               , "" ]
+            manifestNetwork = [ "NETWORK:"
+                              , "*"
+                              , "http://*"
+                              , "https://*"
+                              , "" ]
+        makeItem . unlines $ manifestStart ++ manifestCacheSingles ++ manifestCache ++ manifestFallback ++ manifestNetwork
 
     match "*-offline.haml" $ do
       route $ setExtension "html"
@@ -183,17 +187,13 @@ main = do
     -- Generate tag pages
     tagsRules tags $ genTagRules tags
 
-    paginatedPosts <- buildPaginateWith
-                      (fmap (paginateEvery 8) . sortRecentFirst)
-                      ("posts/**" .&&. hasNoVersion)
-                      (\n -> fromCapture "pages/blog*.html" (show n))
-
     paginateRules paginatedPosts $ \pageNum pattern -> do
-      route $ idRoute
+      route idRoute
       compile $ do
         posts <- recentFirst =<< loadAllSnapshots pattern "content"
         let ctx = taggedPostCtx tags <>
                   paginateContext paginatedPosts pageNum <>
+                  virtualPaginateContext paginatedPosts pageNum <>
                   constField "weight" "0" <>
                   listField "posts" (taggedPostCtx tags) (return posts)
         makeItem ""
@@ -218,7 +218,10 @@ main = do
         pg <- loadSnapshot (fromFilePath pageTemplate) "original"
           >>= withItemBody (unixFilter "haml" [])
           >>= applyAsTemplate (sectionCtx <> masterCtx)
-        makeItem . itemBody $ pg
+
+        if pageName == "blog"
+          then makeItem ""
+          else makeItem . itemBody $ pg
         
     -- TODO: add "next" and "previous" while processing templates/partials/post.haml
     match "posts/**" $ do
@@ -356,6 +359,13 @@ main = do
     --       >>= loadAndApplyTemplate "templates/default-nojs.haml" pagesNojsCtx
     --       >>= relativizeUrls
 ---------------------------------------------------------------------------------------------------------
+-- Functions only used by nojs version of site
+-- 
+-- loadVersion :: String -> Identifier -> Compiler (Item String)
+-- loadVersion v i = load (setVersion (listAsMaybe v) i) >>= makeItem . itemBody
+--   where listAsMaybe [] = Nothing
+--         listAsMaybe xs = Just xs
+---------------------------------------------------------------------------------------------------------
 -- Functions & Constants --------------------------------------------------------------------------------
 feedConfiguration :: Maybe String -> FeedConfiguration
 feedConfiguration title = FeedConfiguration
@@ -373,7 +383,6 @@ genTagRules tags tag pattern = do
   compile $ do
     posts <- recentFirst =<< loadAllSnapshots pattern "content"
     let tagPageCtx = listField "posts" (taggedPostCtx tags) (return posts) <>
-                     tagCloudField "tagCloud" 65 135 tags <>
                      constField "tag" tag
 
     makeItem ""
@@ -385,50 +394,10 @@ genTagRules tags tag pattern = do
       >>= fmap (take 10) . recentFirst
       >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
 
--- genPaginateRules :: Tags -> Paginate -> PageNumber -> Pattern -> Rules ()
--- genPaginateRules tags paginate n pattern = do
---   route     idRoute
---   compile $ pandocCompiler
---     >>= loadAndApplyTemplate "templates/partials/post.haml" (taggedPostCtx tags <> paginateContext paginate)
---    >>= loadAndApplyTemplate "templates/page.haml" defaultContext
---    >>= relativizeUrls
-
--- | Split list into equal sized sublists.
--- https://github.com/ian-ross/blog
-chunk :: Int -> [a] -> [[a]]
-chunk n [] = []
-chunk n xs = ys : chunk n zs
-  where (ys,zs) = splitAt n xs
-
-paginate:: Int -> (Int -> Int -> [Identifier] -> Rules ()) -> Rules ()
-paginate itemsPerPage rules = do
-    identifiers <- getMatches "posts/*"
-
-    let sorted = sortBy (flip byDate) identifiers
-        chunks = chunk itemsPerPage sorted
-        maxIndex = length chunks
-        pageNumbers = take maxIndex [1..]
-        process i is = rules i maxIndex is
-    zipWithM_ process pageNumbers chunks
-        where
-            byDate id1 id2 =
-                let fn1 = takeFileName $ toFilePath id1
-                    fn2 = takeFileName $ toFilePath id2
-                    parseTime' fn = parseTime defaultTimeLocale "%Y-%m-%d" $ intercalate "-" $ take 3 $ splitAll "-" fn
-                in compare (parseTime' fn1 :: Maybe UTCTime) (parseTime' fn2 :: Maybe UTCTime)
-
-
-
-
-loadVersion :: String -> Identifier -> Compiler (Item String)
-loadVersion v i = load (setVersion (listAsMaybe v) i) >>= makeItem . itemBody
-  where listAsMaybe [] = Nothing
-        listAsMaybe xs = Just xs
-
 postCtx :: Context String
 postCtx = dateField "date" "%B %e, %Y"   <>
           teaserField "teaser" "content" <>
-          field "virtualpath" (fmap (maybe "" toUrl) . getRoute . itemIdentifier) <>
+          field "virtualpath" (fmap (drop 6 . maybe "" toUrl) . getRoute . itemIdentifier) <>
           defaultContext
 
 taggedPostCtx :: Tags -> Context String
@@ -444,14 +413,49 @@ pageWeight i = fmap (maybe 0 read) $ getMetadataField (itemIdentifier i) "weight
 sortByM :: (Monad m, Ord k) => (a -> m k) -> [a] -> m [a]
 sortByM f xs = liftM (map fst . sortBy (comparing snd)) $
                  mapM (\x -> liftM (x,) (f x)) xs
+
+-- This is copied verbatim from Web/Paginate.hs as it isn't exported
+-- Get the identifier for a certain page by passing in the page number.
+paginatePage :: Paginate -> PageNumber -> Maybe Identifier
+paginatePage pag pageNumber
+    | pageNumber < 1                      = Nothing
+    | pageNumber > (paginateNumPages pag) = Nothing
+    | otherwise                           = Just $ paginateMakeId pag pageNumber
+
+-- This is copied verbatim from Web/Paginate.hs as it isn't exported
+paginateNumPages :: Paginate -> Int
+paginateNumPages = size . paginateMap
+
+virtualPaginateContext :: Paginate -> PageNumber -> Context a
+virtualPaginateContext pag currentPage = mconcat
+    [ field "firstPageUrlVirtualPath"    $ \_ -> otherPage 1                 >>= url
+    , field "previousPageUrlVirtualPath" $ \_ -> otherPage (currentPage - 1) >>= url
+    , field "nextPageUrlVirtualPath"     $ \_ -> otherPage (currentPage + 1) >>= url
+    , field "lastPageUrlVirtualPath"     $ \_ -> otherPage lastPage          >>= url
+    -- , field "currentPageUrl"  $ \i -> thisPage i                  >>= url
+    ]
+  where
+    lastPage = paginateNumPages pag
+
+    thisPage i = return (currentPage, itemIdentifier i)
+    otherPage n
+        | n == currentPage = fail $ "This is the current page: " ++ show n
+        | otherwise        = case paginatePage pag n of
+            Nothing -> fail $ "No such page: " ++ show n
+            Just i  -> return (n, i)
+
+    url :: (Int, Identifier) -> Compiler String
+    url (n, i) = getRoute i >>= \mbR -> case mbR of
+        Just r  -> return $ drop 6 . toUrl $ r
+        Nothing -> fail $ "No URL for page: " ++ show n
+
 ---------------------------------------------------------------------------------------------------------
--- WORKING PROGRESS
+-- Page section parser
 ---------------------------------------------------------------------------------------------------------
---genSectionContext :: Item String -> Compiler (Context String)
+genSectionContext :: Item String -> Compiler (Context a)
 genSectionContext = fmap mconcat . sequence . map makeField . unSections . readSections . itemBody
   where makeField (k, b) = constField k . itemBody <$> (makeItem b >>= return . writePandocWith pandocWriterOptions . readPandocWith pandocReaderOptions)
 
---readSections :: String -> Compiler (Context String)
 readSections :: String -> [Section String String]
 readSections s = case parse sections "" s of
   Left err -> error $ "Cannot parse sections: " ++ show err
@@ -486,7 +490,7 @@ applyGlobalSections xs = flip map xs $ fmap $ trim . (++globalSectionBody)
           | otherwise = b ++ "\n" ++ ys
         unGlobalSection _ ys = ys
 
--- **TODO** parser needs to be completed below
+-- **TODO** parser has error with escapes within pages; that is $$someExample$$ and $$section("example")$$
 sections :: Parsec String a [Section String String]
 sections = many (section <|> globalSection <|> nonSection)
 

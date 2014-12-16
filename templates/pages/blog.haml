@@ -1,2 +1,19 @@
 #blog-page
   $partial("templates/partials/post-teaser-list.haml")$
+  #pagination.container
+    .four.columns.alpha
+      $if(firstPageUrl)$
+      %a.firstPage(rel="address:$firstPageUrlVirtualPath$" href="$firstPageUrl$") First Page
+      $endif$
+    .four.columns
+      $if(previousPageUrl)$
+      %a.previousPage(rel="address:$previousPageUrlVirtualPath$" href="$previousPageUrl$") Previous Page
+      $endif$
+    .four.columns
+      $if(nextPageUrl)$
+      %a.nextPage(rel="address:$nextPageUrlVirtualPath$" href="$nextPageUrl$") Next Page
+      $endif$
+    .four.colums.omega
+      $if(lastPageUrl)$
+      %a.lastPage(rel="address:$lastPageUrlVirtualPath$" href="$lastPageUrl$") Last Page
+      $endif$

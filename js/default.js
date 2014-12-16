@@ -64,6 +64,10 @@
                     || mailto_regexp.test(page_href)
                     || files_regexp.test(page_href)) {
                     window.location.href = page_href;
+                } else if ($(this).attr("rel")) {
+                    var virtual_href = $(this).attr('rel').replace(/address:(.*)/, "$1");
+                    evt.preventDefault();
+                    $.address.value(virtual_href);
                 } else {
                     evt.preventDefault();
                     $.address.value(page_href);

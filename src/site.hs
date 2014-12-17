@@ -114,7 +114,7 @@ main = do
                       ("posts/**" .&&. hasNoVersion)
                       (\n -> fromCapture "pages/blog*.html" (show n))
     
-    pageIds <- getMatches "pages/**"
+    pageIds <- getMatches ("pages/**" .&&. complement "pages/blog.markdown")
     fontIds <- getMatches "fonts/**"
     imageIds <- getMatches "images/**"
     cssIds <- getMatches "css/**"

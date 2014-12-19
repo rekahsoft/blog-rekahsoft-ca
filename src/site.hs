@@ -7,12 +7,12 @@
 -- it under the terms of the GNU General Public License as published by
 -- the Free Software Foundation, either version 3 of the License, or
 -- (at your option) any later version.
--- 
+--
 -- This program is distributed in the hope that it will be useful,
 -- but WITHOUT ANY WARRANTY; without even the implied warranty of
 -- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 -- GNU General Public License for more details.
--- 
+--
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -85,7 +85,7 @@ pandocWriterOptions = defaultHakyllWriterOptions
                       , writerHTMLMathMethod = MathJax ""
                       , writerEmailObfuscation = NoObfuscation -- ReferenceObfuscation
                       }
-                  
+
 myConfig :: Configuration
 myConfig = defaultConfiguration
         { deployCommand = "rsync -rpogtzc --delete -e ssh _site/ collin@rekahsoft.ca:~/public_html/blog/"
@@ -96,7 +96,7 @@ main :: IO ()
 main = do
   -- Get a random number generator before going into Rules monad
   stdGen <- getStdGen
-  
+
   hakyllWith myConfig $ do
 -- All Versions ------------------------------------------------------------------------------------------
     match "action/**" $ do
@@ -113,14 +113,14 @@ main = do
                       (fmap (paginateEvery 6) . sortRecentFirst)
                       ("posts/**" .&&. hasNoVersion)
                       (\n -> fromCapture "pages/blog*.html" (show n))
-    
+
     pageIds <- getMatches ("pages/**" .&&. complement "pages/blog.markdown")
     fontIds <- getMatches "fonts/**"
     imageIds <- getMatches "images/**"
     cssIds <- getMatches "css/**"
     jsIds <- getMatches "js/**"
     libIds <- getMatches "lib/**"
-  
+
     allSassIds <- getMatches "sass/**"
     let sassIds = filter (`notElem` badIds) allSassIds
         badIds = filterMatches (fromRegex "^sass/bourbon/.*$|^sass/default.s[ac]ss$") allSassIds
@@ -128,7 +128,7 @@ main = do
 
     sassDeps <- makePatternDependency $ fromList sassIds
     manifestDeps <- makePatternDependency $ fromList manifestIds
-    
+
     rulesExtraDependencies [sassDeps] $ match (fromRegex "^sass/default.s[ac]ss$") $ do
       route   $ gsubRoute "sass/" (const "") `composeRoutes` setExtension "css"
       compile $ getResourceBody
@@ -169,7 +169,7 @@ main = do
     match "css/**" $ do
       route   idRoute
       compile compressCssCompiler
-    
+
     match "lib/Skeleton/*.css" $ do
       route   $ gsubRoute "Skeleton" (const "css")
       compile compressCssCompiler
@@ -198,7 +198,7 @@ main = do
                   listField "posts" (taggedPostCtx tags) (return posts)
         makeItem ""
           >>= loadAndApplyTemplate "templates/pages/blog.haml" ctx
-    
+
     match "pages/*" $ do
       route   $ setExtension "html"
       compile $ do
@@ -206,7 +206,7 @@ main = do
         pageName <- takeBaseName . toFilePath <$> getUnderlying
 
         posts <- recentFirst =<< loadAllSnapshots ("posts/**" .&&. hasNoVersion) "content"
-        
+
         let recentPosts = take 5 posts
             pageTemplate = "templates/pages/" ++ pageName ++ ".haml"
             masterCtx = listField "recentPosts" (taggedPostCtx tags) (return recentPosts) <>
@@ -222,7 +222,7 @@ main = do
         if pageName == "blog"
           then makeItem ""
           else makeItem . itemBody $ pg
-        
+
     -- TODO: add "next" and "previous" while processing templates/partials/post.haml
     match "posts/**" $ do
       route   $ setExtension "html"
@@ -252,9 +252,9 @@ main = do
       compile $ do
         -- Generate nav-bar from pages/* ordered by metadata 'weight'
         pages <- sortByM pageWeight =<< filterM (\i -> pageWeight i >>= return . (> 0)) =<< loadAll ("pages/*" .&&. hasNoVersion)
-            
+
         let indexCtx = listField "pages" pagesCtx (return pages) <> defaultContext
-        
+
         makeItem "loading"
           >>= applyAsTemplate indexCtx
           >>= loadAndApplyTemplate "templates/default.haml" indexCtx
@@ -264,7 +264,7 @@ main = do
 -- NOJS Version -----------------------------------------------------------------------------------------
     -- -- tagsNoJs <- buildTags ("posts/**" .&&. hasVersion "nojs") (fromCapture "nojs/tags/*.html")
     -- -- tagsRules tagsNoJs $ genTagRules tagsNoJs
-    
+
     -- create ["nojs/atom.xml"] $ do
     --   route   idRoute
     --   compile $ do
@@ -278,10 +278,10 @@ main = do
     --   compile $ do
     --     -- Load all blog posts for archive
     --     posts <- recentFirst =<< loadAllSnapshots ("posts/*" .&&. hasVersion "nojs") "content"
-        
+
     --     -- Generate nav-bar from pages/*
     --     pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
-        
+
     --     let archiveCtx =
     --           listField "posts" postCtx (return posts) <>
     --           constField "title" "Archives"            <>
@@ -290,12 +290,12 @@ main = do
     --           listField "pagesFirst" pagesCtx (return pages) <>
     --           listField "pagesLast" pagesCtx (return [])     <>
     --           defaultContext
-        
+
     --     makeItem ""
     --       >>= loadAndApplyTemplate "templates/archive.haml" archiveCtx
     --       >>= loadAndApplyTemplate "templates/default-nojs.haml" indexCtx
     --       >>= relativizeUrls
-    
+
     -- match "posts/**" $ version "nojs" $ do
     --   route   $ customRoute (\r -> "nojs" </> toFilePath r) `composeRoutes` setExtension "html"
     --   compile $ do
@@ -304,7 +304,7 @@ main = do
 
     --     -- Get the current Identifier
     --     curId <- getUnderlying
-        
+
     --     let (pagesFirst, pagesLast') = flip span pages $ \x ->
     --           toFilePath curId /= (toFilePath . itemIdentifier $ x)
     --         pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
@@ -312,7 +312,7 @@ main = do
     --           listField "pagesFirst" pagesCtx (return pagesFirst) <>
     --           listField "pagesLast" pagesCtx (return pagesLast)   <>
     --           defaultContext
-        
+
     --     pandocCompiler
     --       >>= saveSnapshot "content"
     --       >>= loadAndApplyTemplate "templates/partials/post-nojs.haml" postCtx
@@ -325,12 +325,12 @@ main = do
     --                                else toFilePath r) `composeRoutes`
     --             gsubRoute "pages" (const "nojs")      `composeRoutes`
     --             setExtension "html"
-    
+
     -- match "pages/*" $ version "nav-gen" $ do
     --   route   $ pagesNoJsRoute
     --   compile $ pandocCompiler
     --     >>= loadAndApplyTemplate "templates/page.haml" defaultContext
-    
+
     -- match "pages/*" $ version "nojs" $ do
     --   route   $ pagesNoJsRoute
     --   compile $ do
@@ -340,10 +340,10 @@ main = do
 
     --     -- Generate nav-bar from pages/*
     --     pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
-        
+
     --     -- Get the current Identifier
     --     curId <- getUnderlying
-        
+
     --     let (pagesFirst, pagesLast') = flip span pages $ \x ->
     --           toFilePath curId /= (toFilePath . itemIdentifier $ x)
     --         pageMid = head pagesLast'
@@ -360,7 +360,7 @@ main = do
     --       >>= relativizeUrls
 ---------------------------------------------------------------------------------------------------------
 -- Functions only used by nojs version of site
--- 
+--
 -- loadVersion :: String -> Identifier -> Compiler (Item String)
 -- loadVersion v i = load (setVersion (listAsMaybe v) i) >>= makeItem . itemBody
 --   where listAsMaybe [] = Nothing
@@ -387,7 +387,7 @@ genTagRules tags tag pattern = do
 
     makeItem ""
       >>= loadAndApplyTemplate "templates/tag-page.haml" tagPageCtx
-  
+
   version "rss" $ do
     route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "xml"
     compile $ loadAllSnapshots pattern "content"
@@ -402,7 +402,7 @@ postCtx = dateField "date" "%B %e, %Y"   <>
 
 taggedPostCtx :: Tags -> Context String
 taggedPostCtx tags = tagsField "tags" tags <> postCtx
-  
+
 pagesCtx :: Context String
 pagesCtx = field "virtualpath" (fmap (drop 6 . maybe "" toUrl) . getRoute . itemIdentifier) <>
            defaultContext
@@ -525,4 +525,3 @@ globalSection = GlobalSection <$> between (string "$section$") sectionEnd sectio
 
 nonSection :: Parsec String a (Section k String)
 nonSection = many1 (many1 (noneOf "$") <|> try escapedDollar) >>= return . NonSection . concat
-

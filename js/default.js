@@ -77,7 +77,7 @@
 
         function loadPageContent(page_href) {
             var post_regexp = /posts\/.*/;
-            var tag_regexp = /tags\/.*/;
+            var tag_regexp = /tags\/.*(\d*).html/;
             var blog_page_regexp = /blog\d*.html/;
 
             // Check whether the requested url is a post
@@ -89,6 +89,10 @@
                 // Handle tag pages
                 $('#nav-menu li.active').removeClass('active');
                 $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
+
+                var tag_not_regexp = /(tags\/.*[^\d]+)(.html)/;
+                if (tag_not_regexp.test(page_href))
+                    page_href = page_href.replace(tag_not_regexp, "$11$2" );
             } else { // otherwise assume its a page
                 // Check if the page_href is empty or / and if so goto home
                 if (page_href === '/') {

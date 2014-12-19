@@ -110,7 +110,7 @@ main = do
     tags <- buildTags ("posts/**" .&&. hasNoVersion) (fromCapture "tags/*.html")
 
     paginatedPosts <- buildPaginateWith
-                      (fmap (paginateEvery 6) . sortRecentFirst)
+                      (fmap (paginateEvery numPaginatePages) . sortRecentFirst)
                       ("posts/**" .&&. hasNoVersion)
                       (\n -> fromCapture "pages/blog*.html" (show n))
 
@@ -147,7 +147,7 @@ main = do
             manifestCacheSingles = [ "/index.html"
                                    , "/default.css" ]
             paginatedPostsCache = take 2 $ map (\(n,_) -> "/pages/blog" ++ (show n) ++ ".html") $ toList $ paginateMap paginatedPosts
-            tagsCache = map (\(t,_) -> "/tags/" ++ t ++ ".html") $ tagsMap tags
+            tagsCache = concatMap (\(t,ids) -> take 2 $ ["/tags/" ++ t ++ show n ++ ".html" | n <- [1..length $ paginateEvery numPaginatePages ids]]) $ tagsMap tags
             manifestCacheFromIds = filter (not . null) $ fmap (maybe "" ("/"++)) manifestCacheRoutesMaybe
             manifestCache = manifestCacheFromIds ++ tagsCache ++ paginatedPostsCache
             manifestFallback = [""
@@ -185,7 +185,7 @@ main = do
 ---------------------------------------------------------------------------------------------------------
 -- Default Version --------------------------------------------------------------------------------------
     -- Generate tag pages
-    tagsRules tags $ genTagRules tags
+    paginateTagsRules tags
 
     paginateRules paginatedPosts $ \pageNum pattern -> do
       route idRoute
@@ -376,6 +376,39 @@ feedConfiguration title = FeedConfiguration
     , feedRoot = "http://blog.rekahsoft.ca"
     } where title' = maybe defaultTitle ((defaultTitle ++ "; Specifically on the topic of ") ++) title
             defaultTitle = "Technical Musings of a Minimalist"
+
+numPaginatePages :: Int
+numPaginatePages = 6
+
+--paginateTagsRules :: Tags -> (String -> Pattern -> Rules ()) -> Rules ()
+paginateTagsRules tags =
+  forM_ (tagsMap tags) $ \(tag, identifiers) -> do
+    paginatedTaggedPosts <- buildPaginateWith
+                            (fmap (paginateEvery numPaginatePages) . sortRecentFirst)
+                            (fromList identifiers)
+                            (\n -> fromCapture (fromGlob $ "tags/" ++ tag ++ "*.html") (show n))
+
+    paginateRules paginatedTaggedPosts $ \pageNum pattern -> do
+      route idRoute
+      compile $ do
+        posts <- recentFirst =<< loadAllSnapshots pattern "content"
+        let ctx = taggedPostCtx tags                                    <>
+                  paginateContext paginatedTaggedPosts pageNum          <>
+                  constField "tag" tag                                  <>
+                  listField "posts" (taggedPostCtx tags) (return posts)
+        makeItem ""
+          >>= loadAndApplyTemplate "templates/tag-page.haml" ctx
+
+    rulesExtraDependencies [tagsDependency tags] $ do
+      create [tagsMakeId tags tag] $ do
+        route   $ gsubRoute " " (const "-")
+        compile $ makeItem ("" :: String)
+
+        version "rss" $ do
+          route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "xml"
+          compile $ loadAllSnapshots (fromList identifiers) "content"
+            >>= fmap (take 10) . recentFirst
+            >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
 
 genTagRules :: Tags -> String -> Pattern -> Rules ()
 genTagRules tags tag pattern = do

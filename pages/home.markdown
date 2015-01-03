@@ -43,7 +43,7 @@ This site is _Copyright 2013 © - Collin Doering_ and is distributed under the f
 4. Any "_content_" "_delimited as source-code_" is licensed under the [GPLv3][] unless otherwise
    specified
 5. Not withstanding (1), (2), or (3), the [Hakyll][] configuration and all files required to
-   build this site are available under the [GPLv3][], [here](/)
+   build this site are available under the [GPLv3][], [here](http://git.rekahsoft.ca/blog-rekahsoft-ca)
 
 Definitions
 -----------

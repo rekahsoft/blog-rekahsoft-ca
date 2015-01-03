@@ -99,11 +99,7 @@ main = do
 
   hakyllWith myConfig $ do
 -- All Versions ------------------------------------------------------------------------------------------
-    match "action/**" $ do
-      route   idRoute
-      compile copyFileCompiler
-
-    match "files/**" $ do
+    match ("action/**" .||. "files/**" .||. "images/**" .||. "fonts/**") $ do
       route   idRoute
       compile copyFileCompiler
 
@@ -173,12 +169,6 @@ main = do
     match "lib/Skeleton/*.css" $ do
       route   $ gsubRoute "Skeleton" (const "css")
       compile compressCssCompiler
-
-    forM_ [ ("images/**", idRoute)
-          , ("fonts/**", idRoute) ] $ \(p, r) ->
-      match p $ do
-        route   r
-        compile copyFileCompiler
 
     match "templates/**.haml" $ compile $ getResourceBody >>= saveSnapshot "original"
       >>= withItemBody (fmap readTemplate . unixFilter "haml" [])

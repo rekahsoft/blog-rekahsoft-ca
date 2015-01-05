@@ -1,6 +1,7 @@
 #nav.loading
-  %ul#nav-menu
+  %ul#nav-menu.container
     $for(pages)$
     %li
       %a.menuitem(rel="address:$virtualpath$" href="$url$") $title$
     $endfor$
+    %a.rss-icon(href="atom.xml")

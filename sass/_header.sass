@@ -82,3 +82,20 @@
     .menuitem:active
       @include transition(none)
       @include transform(scale(1.1, 1.1))
+
+  a.rss-icon
+    display: inline-block
+    position: absolute
+    background: url('/images/rss-icon.png') 0 0 no-repeat
+    background-size: contain
+    border-radius: 5px
+    min-height: 25px
+    min-width: 25px
+    margin: 0
+    top: 7px
+    right: 10px
+
+  a.rss-icon:hover
+    @include transform(scale(1.1))
+  a.rss-icon:active
+    @include transform(scale(0.9))

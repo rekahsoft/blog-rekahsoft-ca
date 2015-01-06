@@ -45,9 +45,6 @@
 #nav.loading
   @include animation-play-state(running)
 
-#nav.loading-error
-  // do something
-
 #nav-menu
   text-align: center
   margin-bottom: 0
@@ -99,3 +96,31 @@
     @include transform(scale(1.1))
   a.rss-icon:active
     @include transform(scale(0.9))
+
+#status
+  display: none
+  border: 1px solid
+  border-top: none
+  border-bottom-right-radius: 5px
+  border-bottom-left-radius: 5px
+  background-color: rgb(146, 208, 240)
+  box-shadow: 2px 5px 5px 2px #888888
+  padding: 8px
+  margin-bottom: 1.25em
+
+  p.message
+    display: inline-block
+    text-align: center
+    margin-bottom: 0
+
+  a.close-button
+    display: inline-block
+    position: absolute
+    right: 10px
+    height: 25px
+
+#status.error
+  background-color: #FD6F6F
+
+#status.success
+  background-color: rgb(136, 211, 136)

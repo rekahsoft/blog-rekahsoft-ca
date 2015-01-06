@@ -92,17 +92,16 @@ sub
   @include transition(opacity 1s ease-in 0.5s)
   opacity: 1
 
-// TODO: this needs work
-#page-content.loading-error
-  //background: url('/images/error-loading.png') no-repeat 50%
-  //height: 200px
+#page-content.loading-error p
+  background: #fd6f6f url('/images/error-loading.png') no-repeat 50%
+  height: 200px
+  font-weight: bold
+  line-height: 200px
+  text-align: center
 
 #page-content.init.loading
   background: url('/images/init-loading.gif') no-repeat 50%
   height: 125px
-
-#page-content.init.loading-error
-  // do something
 
 #footer-left
   padding-left: 1em

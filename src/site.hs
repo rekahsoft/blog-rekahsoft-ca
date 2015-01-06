@@ -138,29 +138,20 @@ main = do
         let randomNum = random stdGen :: (Int, StdGen)
             randomStr = show . abs . fst $ randomNum
             manifestStart = [ "CACHE MANIFEST"
-                            , "# " ++ randomStr
-                            , "" ]
+                            , "# " ++ randomStr ]
             manifestCacheSingles = [ "/index.html"
                                    , "/default.css" ]
             paginatedPostsCache = take 2 $ map (\(n,_) -> "/pages/blog" ++ (show n) ++ ".html") $ toList $ paginateMap paginatedPosts
             tagsCache = concatMap (\(t,ids) -> take 2 $ ["/tags/" ++ t ++ show n ++ ".html" | n <- [1..length $ paginateEvery numPaginatePages ids]]) $ tagsMap tags
             manifestCacheFromIds = filter (not . null) $ fmap (maybe "" ("/"++)) manifestCacheRoutesMaybe
             manifestCache = manifestCacheFromIds ++ tagsCache ++ paginatedPostsCache
-            manifestFallback = [""
-                               , "FALLBACK:"
-                               , "/posts/ /post-offline.html"
-                               , "/tags/ /tags-offline.html"
-                               , "" ]
             manifestNetwork = [ "NETWORK:"
                               , "*"
                               , "http://*"
-                              , "https://*"
-                              , "" ]
-        makeItem . unlines $ manifestStart ++ manifestCacheSingles ++ manifestCache ++ manifestFallback ++ manifestNetwork
-
-    match "*-offline.haml" $ do
-      route $ setExtension "html"
-      compile $ getResourceBody >>= withItemBody (unixFilter "haml" [])
+                              , "https://*" ]
+        makeItem . unlines $ manifestStart ++ [""] ++
+                             manifestCacheSingles ++ manifestCache ++ [""] ++
+                             manifestNetwork ++ [""]
 
     match "css/**" $ do
       route   idRoute

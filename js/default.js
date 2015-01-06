@@ -43,6 +43,10 @@
                     //$('.navbar-collapse').collapse('hide');
                 });
 
+                $('#status a.close-button').click(function () {
+                    $(this).parent().slideUp();
+                });
+
                 // Callback for when the inital page has completely loaded (including images, etc..)
                 $(window).load(function () {
                     $.address.change(function(event) {
@@ -120,8 +124,14 @@
                 type: 'GET',
                 dataType: 'html',
                 beforeSend: function (xhr, settings) {
+                    // Remove loading error from page-content and any status message errors
+                    $('#page-content').removeClass('loading-error');
+                    $('#status').slideUp('normal', function () {
+                        $('#status').removeClass('error').removeClass('success');
+                    });
+
                     // Add .loading to #page-content and #nav to facilitate a loading animation
-                    $('#page-content, #nav').removeClass('loading-done').removeClass('loading-error').addClass('loading');
+                    $('#page-content, #nav').removeClass('loading-done').addClass('loading');
 
                     console.log('beforeSend a.menuitem');
                 },
@@ -153,12 +163,18 @@
                     }, 250);
                 },
                 error: function (xhr, status) {
-                    /* Remove .loading then add .loading-error to #page-content and #nav to
-                     * stop the loading animation and facilitate a loading error animation
+                    /* Remove .loading from #page-content and #nav to stop the loading
+                     * animation. Then add .loading-error to #page-content if its the sites
+                     * first load (#page-content has class .init). Finally, display an error
+                     * message in #status.
                      */
-                    $('#page-content, #nav').removeClass('loading').addClass('loading-error');
-
-                    console.log('error retrieving page "' + page_href +'": ' + status);
+                    $('#page-content, #nav').removeClass('loading');
+                    if ($('#page-content.init')[0]) {
+                        $('#page-content').addClass('loading-error').html('<p class="container border-box">Error initially loading blog.rekahsoft.ca. Check the url! Given "' + page_href + '"</p>');
+                    } else {
+                        $('#status > p.message').text('Error retrieving page "' + page_href +'": ' + status);
+                        $('#status').addClass('error').slideDown();
+                    }
                 }
             });
         }

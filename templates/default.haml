@@ -4,7 +4,6 @@
 /[if IE 8] <html class="ie ie8" lang="en">
 <!-- [if (gte IE 9)|!(IE)]><!-->
 %html.en(manifest='manifest.appcache')
-  // Work in progress on application cache;
   %head
     / Basic Page Needs
     %meta(charset="utf-8")
@@ -38,6 +37,10 @@
   %body
     $partial("templates/partials/logo-banner.haml")$
     $partial("templates/partials/nav.haml")$
+
+    #status.container
+      %p.message
+      %a.close-button Close
 
     #page-content.init.loading
       %noscript

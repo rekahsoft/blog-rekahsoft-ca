@@ -68,20 +68,20 @@
       @include transition-duration(20ms)
     .menuitem:hover
       color: #ddd
-      @include transform(scale(1.1, 1.1))
+      @include transform(scale(1.1))
     .menuitem:active
-      @include transform(scale(0.95, 0.95))
+      @include transform(scale(0.95))
 
   li.active
     .menuitem
       color: #fff
       text-shadow: 2px 2px black
-      @include transform(scale(1.2, 1.2))
+      @include transform(scale(1.2))
     .menuitem:hover
       @include transition(none)
     .menuitem:active
       @include transition(none)
-      @include transform(scale(1.1, 1.1))
+      @include transform(scale(1.1))
 
   a.rss-icon
     display: inline-block

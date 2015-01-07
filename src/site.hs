@@ -31,6 +31,9 @@ import qualified Data.Set as S
 import Data.Ord (comparing)
 import System.Random
 import System.FilePath (takeBaseName)
+import System.Process
+import System.Exit
+import System.IO (hGetContents)
 
 import Text.Parsec
 import Text.Pandoc.Options
@@ -117,19 +120,22 @@ main = do
     jsIds <- getMatches "js/**"
     libIds <- getMatches "lib/**"
 
-    allSassIds <- getMatches "sass/**"
-    let sassIds = filter (`notElem` badIds) allSassIds
-        badIds = filterMatches (fromRegex "^sass/bourbon/.*$|^sass/default.s[ac]ss$") allSassIds
-        manifestIds = sassIds ++ fontIds ++ imageIds ++ pageIds ++ cssIds ++ libIds ++ jsIds
+    clayIds <- getMatches "clay/**.hs"
+    let manifestIds = clayIds ++ fontIds ++ imageIds ++ pageIds ++ cssIds ++ libIds ++ jsIds
 
-    sassDeps <- makePatternDependency $ fromList sassIds
+    clayDeps <- makePatternDependency $ fromList clayIds
     manifestDeps <- makePatternDependency $ fromList manifestIds
 
-    rulesExtraDependencies [sassDeps] $ match (fromRegex "^sass/default.s[ac]ss$") $ do
-      route   $ gsubRoute "sass/" (const "") `composeRoutes` setExtension "css"
-      compile $ getResourceBody
-        >>= saveSnapshot "original"
-        >>= withItemBody (fmap compressCss . unixFilter "sass" [])
+    rulesExtraDependencies [clayDeps] $ create ["default.css"] $ do
+      route     idRoute
+      compile $ makeItem =<< (unsafeCompiler $ do
+        (_, hout, _, ph) <- createProcess $ shell "cabal build gencss"
+        exitCode <- waitForProcess ph
+        if exitCode == ExitSuccess
+           then readProcess "cabal" ["run", "gencss", "compact"] ""
+           else case hout of
+                 Nothing -> fail "Error running 'cabal build gencss'"
+                 Just hout' -> hGetContents hout' >>= fail)
 
     rulesExtraDependencies [manifestDeps] $ create ["manifest.appcache"] $ do
       route     idRoute

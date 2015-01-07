@@ -19,7 +19,7 @@
  * File:. default.js
  * Author: Collin J. Doering
  * Date: Sep  6, 2013
- * Description: Client-side logic for rekahsoft-ca
+ * Description: Client-side logic for blog-rekahsoft-ca
  */
 
 //------------------------
@@ -152,6 +152,7 @@
                             MathJax.Hub.Queue(["Typeset",MathJax.Hub,math_elem[0]]);
                         });
 
+                        // Scroll to top of the page
                         if ($('body').scrollTop() > $('#nav').offset().top - 15) {
                             $('html, body').animate({
                                 scrollTop: $('#nav').offset().top - 15

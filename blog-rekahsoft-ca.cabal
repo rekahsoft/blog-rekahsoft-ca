@@ -79,7 +79,7 @@ executable blog-rekahsoft-ca
 
 executable gencss
   -- .hs or .lhs file containing the Main module.
-  main-is:             clay/Main.hs
+  main-is:             Main.hs
   Ghc-options: -Wall -O2
 
   -- Modules included in this executable, other than Main.
@@ -94,7 +94,7 @@ executable gencss
                        text >=1.2 && <1.3
   
   -- Directories containing source files.
-  -- hs-source-dirs:      
+  hs-source-dirs:      clay
   
   -- Base language which the package is written in.
   default-language:    Haskell2010

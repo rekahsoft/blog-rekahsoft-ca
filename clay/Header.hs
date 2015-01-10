@@ -32,11 +32,13 @@ theHeader :: Css
 theHeader = do
   logoHeader
   navigation
+  statusMessage
 
 logoHeader :: Css
 logoHeader = do
   "#logo-background" ? do
-    -- @include background(linear-gradient(#cef, #cff), $fallback: #cef)
+    backgroundColor "#cef" -- fallback background color
+    backgroundImage $ vGradient "#cef" "#cff"
     sym2 padding (em 0.75) nil
 
   "#logo" ? do
@@ -48,16 +50,20 @@ logoHeader = do
 
 navigation :: Css
 navigation = do
+  keyframesFromTo "nav-slide"
+    (backgroundPosition $ positioned nil nil)
+    (backgroundPosition $ positioned (px 304) nil)
+
   "#nav" ? do
     border solid (px 2) black
     borderRightWidth 0
     borderLeftWidth 0
     backgroundImage $ url "/images/diagonal-stripes.png"
-    -- @include animation(nav-slide 5s linear infinite)
-    -- @include animation-play-state(paused)
+    animation "nav-slide" (sec 5) linear (sec 0) infinite normal none
+    animationPlayState paused
 
-  -- "#nav" # ".loading" ?
-  --   -- @include animation-play-state(running)
+  "#nav" # ".loading" ?
+    animationPlayState running
 
   "#nav-menu" ? do
     textAlign $ alignSide sideCenter
@@ -75,28 +81,28 @@ navigation = do
         fontWeight bold
         textDecoration none
         textShadow (px 1) (px 1) nil black
-        -- @include transition-property(transform)
-        -- @include transition-duration(20ms)
+        transitionProperty "transform"
+        transitionDuration (ms 20)
 
       ".menuitem" # ":hover" ? do
         color "#ddd"
-        -- @include transform(scale(1.1))
+        transform $ scale 1.1 1.1
 
-      -- ".menuitem" # ":active" ? do
-      --   -- @include transform(scale(0.95))
+      ".menuitem" # ":active" ? do
+        transform $ scale 0.95 0.95
 
     li # ".active" ? do
       ".menuitem" ? do
         color "#fff"
         textShadow (px 2) (px 2) nil black
-        -- @include transform(scale(1.2))
+        transform $ scale 1.2 1.2
 
       -- ".menuitem" # ":hover" ? do
-      --   -- @include transition(none)
+        -- transitionProperty "none" -- WHY? this doesn't seem to be needed.
 
-      -- ".menuitem" # ":active" ? do
-      --   -- @include transition(none)
-      --   -- @include transform(scale(1.1))
+      ".menuitem" # ":active" ? do
+        -- transitionProperty "none" -- WHY? this doesn't seem to be needed.
+        transform $ scale 1.1 1.1
 
     a # ".rss-icon" ? do
       display inlineBlock
@@ -110,14 +116,14 @@ navigation = do
       top (px 7)
       right (px 10)
 
-    -- a # ".rss-icon" # ":hover" ?
-    --   -- @include transform(scale(1.1))
+    a # ".rss-icon" # ":hover" ? do
+      transform $ scale 1.1 1.1
 
-    -- a # ".rss-icon" # ":active" ?
-    --   -- @include transform(scale(0.9))
+    a # ".rss-icon" # ":active" ? do
+      transform $ scale 0.9 0.9
 
-statusMessages :: Css
-statusMessages = do
+statusMessage :: Css
+statusMessage = do
   "#status" ? do
     display none
     border solid (px 1) black

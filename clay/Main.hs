@@ -30,6 +30,7 @@ import qualified Data.Text.Lazy.IO as Text
 
 import Util
 import Header
+import PageComponents
 
 -- When running the stylesheet we allow the generation of compacted CSS by
 -- using 'compact' as the first argument. Otherwise we dump the default
@@ -50,77 +51,28 @@ theStylesheet =
   do -- Overall site-wide styling rules.
     freeMonoFontFace
 
-    body ? do
-      backgroundColor "#efe"
-      textFont
+    -- Styles for miscellaneous elements (h1, ..., h6, body, ul, ol, li, etc..)
+    theElements
 
-    headings
-
-    ul <> ol ?
-      paddingLeft (em 1)
-    hr ? marginBottom (em 0.5)
-
-    --sup ? verticalAlign (VerticalAlignValue "super")
-    sup ? do
-      "vertical-align" -: "super"
-    sub ? verticalAlign vAlignSub
-
+    -- Style noscipt error message
     "#noscript-alert" ? do
       -- @include border-box(0, #FCD4D4)
-      textAlign $ alignSide sideCenter
-      "text-align" -: "center"
-
-    "#page-content" ? do
-      opacity 1
-      -- @include transition(opacity 250ms ease-out)
-      marginTop (em 1)
-      overflow hidden
-
-      (ul <> ol) |> li ? do
-        marginBottom (em 0.02)
-
-    "#page-content" # ".loading" ?
-      opacity 0.35
-
-    "#page-content" # ".lading-done" ? do
-      -- @include transition(opacity 1s ease-in 0.5s)
-      opacity 1
-
-    "#page-content" # ".loading-error" ** p ? do
-      backgroundColor "#fd6f6f"
-      backgroundImage $ url "/images/error-loading.png"
-      backgroundRepeat noRepeat
-      backgroundPosition $ positioned (pct 50) (pct 50)
-      height (px 200)
-      fontWeight bold
-      lineHeight (px 200)
+      makeBorderBox (Just nil) (Just "#FCD4D4")
       textAlign $ alignSide sideCenter
 
-    "#page-content" # ".init" # ".loading" ? do
-      backgroundImage $ url "/images/init-loading.gif"
-      backgroundRepeat noRepeat
-      backgroundPosition $ positioned (pct 50) (pct 50)
-      height (px 125)
-
-    "#footer-left" ? paddingLeft (em 1)
-
-    "#footer-right" ? do
-      textAlign $ alignSide sideRight
-
-    ".border-box" ? makeBorderBox Nothing Nothing
-
+    -- Site broken into three parts
     theHeader
+    pageContent
+    theFooter
 
-headings :: Css
-headings = do
-  h1 <> h2 <> h3 <> h4 <> h5 <> h6 ?
-    fontFamily ["FreeMono"] [monospace]
-  h1 ? fontSize (em 2.5)
-  h2 ? fontSize (em 2)
-  h3 ? fontSize (em 1.75)
-  h4 ? fontSize (em 1.5)
-  h5 ? fontSize (em 1.25)
-  h6 ? fontSize (em 1)
+    ".border-box" ?
+      makeBorderBox Nothing Nothing
+
+    -- Style page components (business card, posts, etc..)
+    pageComponents
+
+    -- Styles to make site reactive (@media queries)
+    reactiveStyles
 
 freeMonoFontFace :: Css
 freeMonoFontFace = do
@@ -145,9 +97,106 @@ freeMonoFontFace = do
     fontWeight  bold
     fontStyle   oblique
 
-textFont :: Css
-textFont = do
-  fontSize      (px 14)
-  lineHeight    (px 21)
-  fontFamily    ["FreeMono"] [monospace]
-  textRendering optimizeLegibility
+theElements :: Css
+theElements = do
+  body ? do
+    backgroundColor "#efe"
+    fontSize      (px 14)
+    lineHeight    (px 21)
+    fontFamily    ["FreeMono"] [monospace]
+    textRendering optimizeLegibility
+
+  h1 <> h2 <> h3 <> h4 <> h5 <> h6 ?
+    fontFamily ["FreeMono"] [monospace]
+  h1 ? fontSize (em 2.5)
+  h2 ? fontSize (em 2)
+  h3 ? fontSize (em 1.75)
+  h4 ? fontSize (em 1.5)
+  h5 ? fontSize (em 1.25)
+  h6 ? fontSize (em 1)
+
+  ul <> ol ?
+    paddingLeft (em 1)
+  hr ? marginBottom (em 0.5)
+
+  --sup ? verticalAlign (VerticalAlignValue "super")
+  sup ? do
+    "vertical-align" -: "super"
+  sub ? verticalAlign vAlignSub
+
+pageContent :: Css
+pageContent = do
+  "#page-content" ? do
+    opacity 1
+    transition "opacity" (ms 250) easeOut (sec 0)
+    marginTop (em 1)
+    overflow hidden
+
+    (ul <> ol) |> li ? do
+      marginBottom (em 0.02)
+
+  "#page-content" # ".loading" ?
+    opacity 0.35
+
+  "#page-content" # ".lading-done" ? do
+    transition "opacity" (sec 1) easeIn (sec 0.5)
+    opacity 1
+
+  "#page-content" # ".loading-error" ** p ? do
+    backgroundColor "#fd6f6f"
+    backgroundImage $ url "/images/error-loading.png"
+    backgroundRepeat noRepeat
+    backgroundPosition $ positioned (pct 50) (pct 50)
+    height (px 200)
+    fontWeight bold
+    lineHeight (px 200)
+    textAlign $ alignSide sideCenter
+
+  "#page-content" # ".init" # ".loading" ? do
+    backgroundImage $ url "/images/init-loading.gif"
+    backgroundRepeat noRepeat
+    backgroundPosition $ positioned (pct 50) (pct 50)
+    height (px 125)
+
+theFooter :: Css
+theFooter = do
+  "#footer-left" ?
+    paddingLeft (em 1)
+
+  "#footer-right" ? do
+    textAlign $ alignSide sideRight
+
+reactiveStyles :: Css
+reactiveStyles = do
+  -- Smaller than standard 960 (devices and browsers)
+  -- queryOnly Media.screen [Media.maxWidth (px 959) $ do { ... }
+
+  -- Tablet Portrait size to standard 960 (devices and browsers)
+  -- queryOnly Media.screen [Media.minWidth (px 768), Media.maxWidth (px 959)] $ do { ... }
+
+  -- All Mobile Sizes (devices and browser)
+  queryOnly Media.screen [Media.maxWidth (px 767)] $ do
+    "#footer-left" <> "#footer-right" ? do
+      textAlign $ alignSide sideCenter
+
+    "#logo" ?
+      height (px 130)
+
+  -- Mobile Landscape Size to Tablet Portrait (devices and browsers)
+  queryOnly Media.screen [Media.minWidth (px 480), Media.maxWidth (px 767)] $ do
+    "#logo-background" ?
+      sym2 padding (em 0.5) nil
+
+    "#nav-menu" ** li ?
+      sym2 padding (px 10) (em 1.5)
+
+    "#footer-left" ?
+      paddingLeft nil
+
+  -- Mobile Portrait Size to Mobile Landscape Size (devices and browsers)
+  queryOnly Media.screen [Media.maxWidth (px 476)] $ do
+    "#logo-background" ?
+      sym padding nil
+
+    "#nav-menu" ** li ?
+      sym2 padding (px 10) (px 5)

@@ -132,7 +132,7 @@ main = do
         (_, hout, _, ph) <- createProcess $ shell "cabal build gencss"
         exitCode <- waitForProcess ph
         if exitCode == ExitSuccess
-           then readProcess "cabal" ["run", "gencss", "compact"] ""
+           then readProcess "cabal" ["run", "--verbose=0", "gencss", "compact"] ""
            else case hout of
                  Nothing -> fail "Error running 'cabal build gencss'"
                  Just hout' -> hGetContents hout' >>= fail)

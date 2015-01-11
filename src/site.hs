@@ -367,7 +367,7 @@ feedConfiguration title = FeedConfiguration
 numPaginatePages :: Int
 numPaginatePages = 6
 
---paginateTagsRules :: Tags -> (String -> Pattern -> Rules ()) -> Rules ()
+paginateTagsRules :: Tags -> Rules ()
 paginateTagsRules tags =
   forM_ (tagsMap tags) $ \(tag, identifiers) -> do
     paginatedTaggedPosts <- buildPaginateWith
@@ -396,23 +396,6 @@ paginateTagsRules tags =
           compile $ loadAllSnapshots (fromList identifiers) "content"
             >>= fmap (take 10) . recentFirst
             >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
-
-genTagRules :: Tags -> String -> Pattern -> Rules ()
-genTagRules tags tag pattern = do
-  route   $ gsubRoute " " (const "-")
-  compile $ do
-    posts <- recentFirst =<< loadAllSnapshots pattern "content"
-    let tagPageCtx = listField "posts" (taggedPostCtx tags) (return posts) <>
-                     constField "tag" tag
-
-    makeItem ""
-      >>= loadAndApplyTemplate "templates/tag-page.haml" tagPageCtx
-
-  version "rss" $ do
-    route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "xml"
-    compile $ loadAllSnapshots pattern "content"
-      >>= fmap (take 10) . recentFirst
-      >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
 
 postCtx :: Context String
 postCtx = dateField "date" "%B %e, %Y"   <>
@@ -452,12 +435,10 @@ virtualPaginateContext pag currentPage = mconcat
     , field "previousPageUrlVirtualPath" $ \_ -> otherPage (currentPage - 1) >>= url
     , field "nextPageUrlVirtualPath"     $ \_ -> otherPage (currentPage + 1) >>= url
     , field "lastPageUrlVirtualPath"     $ \_ -> otherPage lastPage          >>= url
-    -- , field "currentPageUrl"  $ \i -> thisPage i                  >>= url
     ]
   where
     lastPage = paginateNumPages pag
 
-    thisPage i = return (currentPage, itemIdentifier i)
     otherPage n
         | n == currentPage = fail $ "This is the current page: " ++ show n
         | otherwise        = case paginatePage pag n of

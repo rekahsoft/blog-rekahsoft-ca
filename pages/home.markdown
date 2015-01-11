@@ -12,12 +12,11 @@ Tools
 This website was proudly made with open source software! Specifically:
 
 - [Hakyll][]
+- [Clay][]
 - [Skeleton][]
 - [JQuery][]
 - [JQuery-address][]
-- [Sass][]
 - [Haml][]
-- [Bourbon][]
 - [MathJax][]
 - [Inkscape][]
 - [Gimp][]
@@ -34,7 +33,7 @@ This site is _Copyright 2013 © - Collin Doering_ and is distributed under the f
 
 1. All rights reserved on the "#! λ Slang" name, as well as on the
    [banner image](/images/logo-banner.svg), favicons([1](/images/favicon.ico),
-   [2](/images/favicon.png)) and any other image/artwork that embodies the likeness of "#! λ
+   [2](/images/favicon.ico.png)) and any other image/artwork that embodies the likeness of "#! λ
    Slang"
 2. Not withstanding (1), all images and artwork are licensed under the
    [Creative Commons BY-NC-ND License][]
@@ -68,12 +67,11 @@ $endsection$
 
 $section$
 [Hakyll]: http://jaspervdj.be/hakyll/
+[Clay]: http://fvisser.nl/clay/
 [Skeleton]: http://www.getskeleton.com/
 [JQuery]: http://jquery.com
 [JQuery-address]: https://github.com/asual/jquery-address
-[Sass]: http://sass-lang.com/
 [Haml]: http://haml.info/
-[Bourbon]: http://bourbon.io/
 [MathJax]: http://www.mathjax.org/
 [Inkscape]: http://inkscape.org/
 [Gimp]: http://www.gimp.org/

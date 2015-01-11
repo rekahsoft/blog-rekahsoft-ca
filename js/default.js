@@ -63,10 +63,12 @@
                 var external_url_regexp = /https?:\/\/.*/;
                 var mailto_regexp = /mailto:.*/;
                 var files_regexp = /files\/.*/;
+                var images_regexp = /images\/.*/;
 
                 if (external_url_regexp.test(page_href)
                     || mailto_regexp.test(page_href)
-                    || files_regexp.test(page_href)) {
+                    || files_regexp.test(page_href)
+                    || images_regexp.test(page_href)) {
                     window.location.href = page_href;
                 } else if ($(this).attr("rel")) {
                     var virtual_href = $(this).attr('rel').replace(/address:(.*)/, "$1");

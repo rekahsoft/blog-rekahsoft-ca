@@ -19,7 +19,7 @@
 -- File: site.hs
 -- Author: Collin J. Doering <rekahsoft@gmail.com>
 -- Date: Oct 11, 2013
--- Description: The website for RekahSoft
+-- Description: The static site generator for my personal technical blog
 ---------------------------------------------------------------------------------------------------------
 
 import Hakyll

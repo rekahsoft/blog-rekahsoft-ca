@@ -9,7 +9,6 @@ built using software that [respects our freedoms](https://www.gnu.org/philosophy
 
 * [Hakyll][] generated static site
 * [Clay][] used for css pre-processing
-* [Hamlet][] used as a haml like html template language
 
 ### License
 

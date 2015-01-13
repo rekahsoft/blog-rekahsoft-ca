@@ -1,5 +1,5 @@
 #pagination.container
-  .four.columns.alpha
+  .eight.columns.alpha
     $if(firstPageUrl)$
     $if(firstPageUrlVirtualPath)$
     %a.firstPage(rel="address:$firstPageUrlVirtualPath$" href="$firstPageUrl$") First Page
@@ -7,7 +7,7 @@
     %a.firstPage(href="$firstPageUrl$") First Page
     $endif$
     $endif$
-  .four.columns
+
     $if(previousPageUrl)$
     $if(previousPageUrlVirtualPath)$
     %a.previousPage(rel="address:$previousPageUrlVirtualPath$" href="$previousPageUrl$") Previous Page
@@ -15,7 +15,7 @@
     %a.previousPage(href="$previousPageUrl$") Previous Page
     $endif$
     $endif$
-  .four.columns
+  .eight.columns
     $if(nextPageUrl)$
     $if(nextPageUrlVirtualPath)$
     %a.nextPage(rel="address:$nextPageUrlVirtualPath$" href="$nextPageUrl$") Next Page
@@ -23,7 +23,7 @@
     %a.nextPage(href="$nextPageUrl$") Next Page
     $endif$
     $endif$
-  .four.colums.omega
+
     $if(lastPageUrl)$
     $if(lastPageUrlVirtualPath)$
     %a.lastPage(rel="address:$lastPageUrlVirtualPath$" href="$lastPageUrl$") Last Page

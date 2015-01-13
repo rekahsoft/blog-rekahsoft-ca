@@ -1,0 +1,27 @@
+<div class='container border-box' id='home-page'>
+  <div class='row'>
+    <div class='eight columns alpha'>
+      $partial("templates/partials/business-card.html")$
+    </div>
+    <div class='seven columns offset-by-one omega'>
+      <div id='recent-posts'>
+        <h1>Recent Posts</h1>
+        <hr>
+        $partial("templates/partials/recent-posts-list.html")$
+      </div>
+      <div id='tag-cloud'>
+        <h1>Tag Cloud</h1>
+        <hr>
+        $tagCloud$
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='eight columns alpha' id='license'>
+      $license$
+    </div>
+    <div class='seven columns offset-by-one omega' id='tools'>
+      $tools$
+    </div>
+  </div>
+</div>

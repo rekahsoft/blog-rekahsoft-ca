@@ -1,0 +1,34 @@
+<div class='container' id='pagination'>
+  <div class='eight columns alpha'>
+    $if(firstPageUrl)$
+    $if(firstPageUrlVirtualPath)$
+    <a class='firstPage' href='$firstPageUrl$' rel='address:$firstPageUrlVirtualPath$'>First Page</a>
+    $else$
+    <a class='firstPage' href='$firstPageUrl$'>First Page</a>
+    $endif$
+    $endif$
+    $if(previousPageUrl)$
+    $if(previousPageUrlVirtualPath)$
+    <a class='previousPage' href='$previousPageUrl$' rel='address:$previousPageUrlVirtualPath$'>Previous Page</a>
+    $else$
+    <a class='previousPage' href='$previousPageUrl$'>Previous Page</a>
+    $endif$
+    $endif$
+  </div>
+  <div class='eight columns'>
+    $if(nextPageUrl)$
+    $if(nextPageUrlVirtualPath)$
+    <a class='nextPage' href='$nextPageUrl$' rel='address:$nextPageUrlVirtualPath$'>Next Page</a>
+    $else$
+    <a class='nextPage' href='$nextPageUrl$'>Next Page</a>
+    $endif$
+    $endif$
+    $if(lastPageUrl)$
+    $if(lastPageUrlVirtualPath)$
+    <a class='lastPage' href='$lastPageUrl$' rel='address:$lastPageUrlVirtualPath$'>Last Page</a>
+    $else$
+    <a class='lastPage' href='$lastPageUrl$'>Last Page</a>
+    $endif$
+    $endif$
+  </div>
+</div>

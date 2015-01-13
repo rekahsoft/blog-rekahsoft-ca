@@ -1,9 +1,0 @@
-#recent-posts-nojs
-  %strong Recent Posts
-  %ul
-    $for(recentPosts)$
-    %li.recent-post-item-nojs
-      %a(href="$url$")
-        %strong $title$
-      $if(teaser)$ $teaser$ $else$ $body$ $endif$
-    $endfor$

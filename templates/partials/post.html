@@ -1,0 +1,26 @@
+<div class='container' id='post-page'>
+  <article class='post'>
+    <header>
+      <h1 class='title'>$title$</h1>
+      <p class='info'>
+        Posted on
+        <span class='date'>$date$</span>
+        $if(author)$ by
+        <span class='author'>$author$</span>
+        $endif$
+      </p>
+    </header>
+    $body$
+    <footer>
+      <hr>
+      <div class='container'>
+        <div class='eight columns alpha'>
+          <a class='read-more' href='$url$'>See Comments</a>
+        </div>
+        <div class='eight columns omega'>
+          <p class='tags'>$tags$</p>
+        </div>
+      </div>
+    </footer>
+  </article>
+</div>

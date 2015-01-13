@@ -1,0 +1,33 @@
+<article class='post container'>
+  <header>
+    <h1 class='title'>
+      <a href='$url$'>$title$</a>
+    </h1>
+    <p class='info'>
+      Posted on
+      <span class='date'>$date$</span>
+      $if(author)$ by
+      <span class='author'>$author$</span>
+      $endif$
+    </p>
+  </header>
+  $if(teaser)$
+  $teaser$
+  $else$
+  $body$
+  $endif$
+  <footer>
+    <div class='container'>
+      <div class='eight columns alpha'>
+        $if(teaser)$
+        <a class='read-more' href='$url$'>Read More</a>
+        $else$
+        <span class='no-teaser'></span>
+        $endif$
+      </div>
+      <div class='eight columns omega'>
+        <p class='tags'>$tags$</p>
+      </div>
+    </div>
+  </footer>
+</article>

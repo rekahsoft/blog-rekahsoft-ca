@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7]> <html class="ie ie7" lang="en" <![endif]-->
+<!--[if IE 8]> <html class="ie ie8" lang="en"> <![endif]-->
+<!-- [if (gte IE 9)|!(IE)]><!-->
+<html class='en'>
+  <head>
+    <!-- Basic Page Needs -->
+    <meta charset='utf-8'>
+    <link href='lib/images/favicon.png' rel='shortcut icon'>
+    <title>RekahSoft</title>
+    <meta content='Custom soltuions to unique problems' name='description'>
+    <meta content='Collin Doering' name='author'>
+    <!-- Mobile Specific Metas -->
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport'>
+    <!-- CSS -->
+    <link href='lib/css/base.css' rel='stylesheet'>
+    <link href='lib/css/skeleton.css' rel='stylesheet'>
+    <link href='lib/css/layout.css' rel='stylesheet'>
+    <!-- Custom styles for this template -->
+    <link href='default.css' rel='stylesheet'>
+    <!--[if lt IE 9]>
+      <script src='http://html5shim.googlecode.com/svn/trunk/html5.js'></script>
+    <![endif]-->
+    <!-- Favicons -->
+    <link href='lib/images/favicon.ico' rel='shortcut icon'>
+    <link href='lib/images/apple-touch-icon.png' rel='apple-touch-icon'>
+    <link href='lib/images/apple-touch-icon-72x72.png' rel='apple-touch-icon' sizes='72x72'>
+    <link href='lib/images/apple-touch-icon-114x114.png' rel='apple-touch-icon' sizes='114x114'>
+  </head>
+  <body>
+    <div class='container'>
+      $partial("templates/partials/logo-banner.html")$
+      $partial("templates/partials/nav-nojs.html")$
+      $if(recentPosts)$
+      $partial("templates/partials/recent-posts-nojs.html")$
+      $endif$
+      $body$
+      $partial("templates/partials/footer.html")$
+    </div>
+  </body>
+</html>

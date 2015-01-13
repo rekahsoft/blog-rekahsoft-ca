@@ -1,0 +1,19 @@
+<div id='nav'>
+  <ul id='nav-menu'>
+    $for(pagesFirst)$
+    <li>
+      <a class='menuitem' href='$url$'>$title$</a>
+    </li>
+    $endfor$
+    $if(pageMid)$
+    <li class='active'>
+      <a class='menuitem' href='$url$'>$title$</a>
+    </li>
+    $endif$
+    $for(pagesLast)$
+    <li>
+      <a class='menuitem' href='$url$'>$title$</a>
+    </li>
+    $endfor$
+  </ul>
+</div>

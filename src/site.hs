@@ -167,8 +167,8 @@ main = do
       route   $ gsubRoute "Skeleton" (const "css")
       compile compressCssCompiler
 
-    match "templates/**.haml" $ compile $ getResourceBody >>= saveSnapshot "original"
-      >>= withItemBody (fmap readTemplate . unixFilter "haml" [])
+    match "templates/**" $ compile $ getResourceBody >>= saveSnapshot "original"
+      >> templateCompiler
 ---------------------------------------------------------------------------------------------------------
 -- Default Version --------------------------------------------------------------------------------------
     -- Generate tag pages
@@ -184,7 +184,7 @@ main = do
                   constField "weight" "0" <>
                   listField "posts" (taggedPostCtx tags) (return posts)
         makeItem ""
-          >>= loadAndApplyTemplate "templates/pages/blog.haml" ctx
+          >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
 
     match "pages/*" $ do
       route   $ setExtension "html"
@@ -195,7 +195,7 @@ main = do
         posts <- recentFirst =<< loadAllSnapshots ("posts/**" .&&. hasNoVersion) "content"
 
         let recentPosts = take 5 posts
-            pageTemplate = "templates/pages/" ++ pageName ++ ".haml"
+            pageTemplate = "templates/pages/" ++ pageName ++ ".html"
             masterCtx = listField "recentPosts" (taggedPostCtx tags) (return recentPosts) <>
                         listField "posts" (taggedPostCtx tags) (return posts)             <>
                         tagCloudField "tagCloud" 65 135 tags                              <>
@@ -203,19 +203,17 @@ main = do
 
         sectionCtx <- getResourceBody >>= genSectionContext
         pg <- loadSnapshot (fromFilePath pageTemplate) "original"
-          >>= withItemBody (unixFilter "haml" [])
           >>= applyAsTemplate (sectionCtx <> masterCtx)
 
         if pageName == "blog"
           then makeItem ""
           else makeItem . itemBody $ pg
 
-    -- TODO: add "next" and "previous" while processing templates/partials/post.haml
     match "posts/**" $ do
       route   $ setExtension "html"
       compile $ pandocCompilerWith pandocReaderOptions pandocWriterOptions
         >>= saveSnapshot "content"
-        >>= loadAndApplyTemplate "templates/partials/post.haml" (taggedPostCtx tags)
+        >>= loadAndApplyTemplate "templates/partials/post.html" (taggedPostCtx tags)
 --        >>= relativizeUrls
 
     create ["atom.xml"] $ do
@@ -244,7 +242,7 @@ main = do
 
         makeItem "loading"
           >>= applyAsTemplate indexCtx
-          >>= loadAndApplyTemplate "templates/default.haml" indexCtx
+          >>= loadAndApplyTemplate "templates/default.html" indexCtx
           >>= relativizeUrls
 
 ---------------------------------------------------------------------------------------------------------
@@ -384,7 +382,7 @@ paginateTagsRules tags =
                   constField "tag" tag                                  <>
                   listField "posts" (taggedPostCtx tags) (return posts)
         makeItem ""
-          >>= loadAndApplyTemplate "templates/tag-page.haml" ctx
+          >>= loadAndApplyTemplate "templates/tag-page.html" ctx
 
     rulesExtraDependencies [tagsDependency tags] $ do
       create [tagsMakeId tags tag] $ do

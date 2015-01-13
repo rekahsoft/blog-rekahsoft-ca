@@ -16,7 +16,6 @@ This website was proudly made with open source software! Specifically:
 - [Skeleton][]
 - [JQuery][]
 - [JQuery-address][]
-- [Haml][]
 - [MathJax][]
 - [Inkscape][]
 - [Gimp][]
@@ -71,7 +70,6 @@ $section$
 [Skeleton]: http://www.getskeleton.com/
 [JQuery]: http://jquery.com
 [JQuery-address]: https://github.com/asual/jquery-address
-[Haml]: http://haml.info/
 [MathJax]: http://www.mathjax.org/
 [Inkscape]: http://inkscape.org/
 [Gimp]: http://www.gimp.org/

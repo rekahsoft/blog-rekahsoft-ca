@@ -1,4 +1,4 @@
-# Source Code for [#! λ Slang](http://blog.rekahsoft.ca)
+# Source Code for **[#! λ Slang](http://blog.rekahsoft.ca)**
 
 ## About
 
@@ -25,9 +25,12 @@ Please see the LICENSE file for full details.
 All that is needed to build this site is cabal and a way to fetch required packages (whether
 directly via the internet or by using the ```fetch``` argument to cabal).
 
-    % cabal configure
-    % cabal build
-    % ./site build
+    $ cabal sandbox init # optional but recommended
+    $ cabal configure
+    $ cabal install --only-dependencies
+    $ cabal build
+    $ ./site build  # build site
+    $ ./site server # view site at http://localhost:3000
 
 [Hakyll]: http://jaspervdj.be/hakyll/
 [Clay]: http://fvisser.nl/clay/

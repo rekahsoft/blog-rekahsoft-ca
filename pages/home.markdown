@@ -60,7 +60,7 @@ See More
 For more information see:
 
 - [GPLv3][]
-- [Creative Commons Licence BY-NS-SA][]
+- [Creative Commons BY-NC-SA License][]
 - [Creative Commons BY-NC-ND License][]
 $endsection$
 
@@ -77,6 +77,6 @@ $section$
 [Gnu Free Fonts]: http://www.gnu.org/software/freefont/
 
 [GPLv3]: https://www.gnu.org/licenses/gpl.html
-[Creative Commons Licence BY-NS-SA]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+[Creative Commons BY-NC-SA License]: http://creativecommons.org/licenses/by-nc-sa/4.0/
 [Creative Commons BY-NC-ND License]: http://creativecommons.org/licenses/by-nc-nd/4.0/
 $endsection$

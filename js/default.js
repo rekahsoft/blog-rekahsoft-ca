@@ -23,57 +23,26 @@
  */
 
 //------------------------
+/*jslint browser: true*/
+/*global jQuery, MathJax*/
+//------------------------
 
-(function () {
+(function ($, mj) {
+    "use strict";
+
     var page = (function () {
-        var pageId = '#page-content', navId = '#nav';
-
-        function init() {
-            $(document).ready(function () {
-                $.address.init(function(event) {
-                    console.log("init:" + event.value);
-                    $(window).load(function () {
-                        loadPageContent(event.value);
-                    });
-                });
-
-                $('#nav-menu a.menuitem').click(function() {
-                    $(this).closest('ul').find('li.active').removeClass('active');
-                    $(this).closest('li').addClass('active');
-                    //$('.navbar-collapse').collapse('hide');
-                });
-
-                $('#status a.close-button').click(function () {
-                    $(this).parent().slideUp();
-                });
-
-                // Callback for when the inital page has completely loaded (including images, etc..)
-                $(window).load(function () {
-                    $.address.change(function(event) {
-                        console.log("change " + event.value);
-                        loadPageContent(event.value);
-                    });
-                });
-            });
-        }
+        // var pageId = '#page-content', navId = '#nav';
 
         function newContentCallback() {
             $('#page-content a').click(function (evt) {
-                var page_href = $(this).attr('href');
-                var external_url_regexp = /https?:\/\/.*/;
-                var mailto_regexp = /mailto:.*/;
-                var files_regexp = /files\/.*/;
-                var images_regexp = /images\/.*/;
+                var page_href = $(this).attr('href'),
+                    external_url_regexp = /https?:\/\/.*/,
+                    mailto_regexp = /mailto:.*/,
+                    files_regexp = /files\/.*/,
+                    images_regexp = /images\/.*/;
 
-                if (external_url_regexp.test(page_href)
-                    || mailto_regexp.test(page_href)
-                    || files_regexp.test(page_href)
-                    || images_regexp.test(page_href)) {
+                if (external_url_regexp.test(page_href) || mailto_regexp.test(page_href) || files_regexp.test(page_href) || images_regexp.test(page_href)) {
                     window.location.href = page_href;
-                } else if ($(this).attr("rel")) {
-                    var virtual_href = $(this).attr('rel').replace(/address:(.*)/, "$1");
-                    evt.preventDefault();
-                    $.address.value(virtual_href);
                 } else {
                     evt.preventDefault();
                     $.address.value(page_href);
@@ -82,9 +51,10 @@
         }
 
         function loadPageContent(page_href) {
-            var post_regexp = /posts\/.*/;
-            var tag_regexp = /tags\/.*(\d*).html/;
-            var blog_page_regexp = /blog\d*.html/;
+            var post_regexp = /posts\/.*\.html/,
+                tag_regexp = /tags\/.*(\d*)\.html/,
+                blog_page_regexp = /blog\d*\.html/,
+                tag_not_regexp = /(tags\/.*[^\d]+)(\.html)/;
 
             // Check whether the requested url is a post
             if (post_regexp.test(page_href)) {
@@ -96,16 +66,17 @@
                 $('#nav-menu li.active').removeClass('active');
                 $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
 
-                var tag_not_regexp = /(tags\/.*[^\d]+)(.html)/;
-                if (tag_not_regexp.test(page_href))
-                    page_href = page_href.replace(tag_not_regexp, "$11$2" );
+                if (tag_not_regexp.test(page_href)) {
+                    page_href = page_href.replace(tag_not_regexp, "$11$2");
+                }
             } else { // otherwise assume its a page
-                // Check if the page_href is empty or / and if so goto home
+                // Check if the page_href is / and if so goto home
                 if (page_href === '/') {
                     page_href = '/home.html';
                 } else if (blog_page_regexp.test(page_href)) {
-                    if (page_href === "/blog.html")
+                    if (page_href === "/blog.html") {
                         page_href = "/blog1.html";
+                    }
 
                     // If page_href refers to a blog page set Blog to be the active menu item
                     $('a.menuitem[rel="address:/blog.html"]').closest('ul').find('li.active').removeClass('active');
@@ -151,7 +122,7 @@
 
                         // Reload any new maths using MathJax
                         $('#page-content .math').each(function (math_elem) {
-                            MathJax.Hub.Queue(["Typeset",MathJax.Hub,math_elem[0]]);
+                            mj.Hub.Queue(["Typeset", mj.Hub, math_elem[0]]);
                         });
 
                         // Scroll to top of the page
@@ -175,19 +146,46 @@
                     if ($('#page-content.init')[0]) {
                         $('#page-content').addClass('loading-error').html('<p class="container border-box">Error initially loading blog.rekahsoft.ca. Check the url! Given "' + page_href + '"</p>');
                     } else {
-                        $('#status > p.message').text('Error retrieving page "' + page_href +'": ' + status);
+                        $('#status > p.message').text('Error retrieving page "' + page_href + '": ' + status);
                         $('#status').addClass('error').slideDown();
                     }
                 }
             });
         }
 
+        function init() {
+            $(document).ready(function () {
+                $.address.init(function (event) {
+                    console.log("init:" + event.value);
+                    $(window).load(function () {
+                        loadPageContent(event.value);
+                    });
+                });
+
+                $('#nav-menu a.menuitem').click(function () {
+                    $(this).closest('ul').find('li.active').removeClass('active');
+                    $(this).closest('li').addClass('active');
+                    //$('.navbar-collapse').collapse('hide');
+                });
+
+                $('#status a.close-button').click(function () {
+                    $(this).parent().slideUp();
+                });
+
+                // Callback for when the inital page has completely loaded (including images, etc..)
+                $(window).load(function () {
+                    $.address.change(function (event) {
+                        console.log("change " + event.value);
+                        loadPageContent(event.value);
+                    });
+                });
+            });
+        }
+
         return {
-            init: init,
-            newContentCallback: newContentCallback,
-            loadPageContent: loadPageContent
+            init: init
         };
     }());
 
     page.init();
-}());
+}(jQuery, MathJax));

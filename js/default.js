@@ -34,18 +34,15 @@
         // var pageId = '#page-content', navId = '#nav';
 
         function newContentCallback() {
-            $('#page-content a').click(function (evt) {
+            $('#page-content a').each(function (i) {
                 var page_href = $(this).attr('href'),
                     external_url_regexp = /https?:\/\/.*/,
                     mailto_regexp = /mailto:.*/,
                     files_regexp = /files\/.*/,
                     images_regexp = /images\/.*/;
 
-                if (external_url_regexp.test(page_href) || mailto_regexp.test(page_href) || files_regexp.test(page_href) || images_regexp.test(page_href)) {
-                    window.location.href = page_href;
-                } else {
-                    evt.preventDefault();
-                    $.address.value(page_href);
+                if (!(external_url_regexp.test(page_href) || mailto_regexp.test(page_href) || files_regexp.test(page_href) || images_regexp.test(page_href))) {
+                    $(this).attr('href', "/#" + page_href);
                 }
             });
         }

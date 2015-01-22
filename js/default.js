@@ -71,7 +71,7 @@
                 if (page_href === '/') {
                     page_href = '/home.html';
                 } else if (blog_page_regexp.test(page_href)) {
-                    if (page_href === "/blog.html") {
+                    if (page_href === "/blog.html" || page_href === "/pages/blog.html") {
                         page_href = "/blog1.html";
                     }
 
@@ -84,8 +84,10 @@
                 $('a.menuitem[rel="address:' + page_href + '"]').closest('ul').find('li.active').removeClass('active');
                 $('a.menuitem[rel="address:' + page_href + '"]').closest('li').addClass('active');
 
-                // set page_href of full url for ajax call
-                page_href = "pages" + page_href;
+                // set page_href of full url for ajax call when pages/ isn't specified
+                if (! /\/?pages\/.*/.test(page_href)) {
+                    page_href = "pages" + page_href;
+                }
             }
 
             // Make the ajax request for the new page-content (whether it be a page or a post) *could change*

@@ -243,7 +243,7 @@ main = do
         makeItem "loading"
           >>= applyAsTemplate indexCtx
           >>= loadAndApplyTemplate "templates/default.html" indexCtx
-          >>= relativizeUrls
+--          >>= relativizeUrls
 
 ---------------------------------------------------------------------------------------------------------
 -- NOJS Version -----------------------------------------------------------------------------------------

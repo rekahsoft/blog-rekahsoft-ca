@@ -49,19 +49,20 @@
 
         function loadPageContent(page_href) {
             var post_regexp = /posts\/.*\.html/,
+                page_regexp = /pages\/(.*\.html)/,
                 tag_regexp = /tags\/.*(\d*)\.html/,
-                blog_page_regexp = /blog\d*\.html/,
-                tag_not_regexp = /(tags\/.*[^\d]+)(\.html)/;
+                tag_not_regexp = /(tags\/.*[^\d]+)(\.html)/,
+                blog_page_regexp = /(pages\/)?(blog\d*\.html)/;
 
             // Check whether the requested url is a post
             if (post_regexp.test(page_href)) {
                 // Handle post urls (no change required to page_href)
                 $('#nav-menu li.active').removeClass('active');
-                $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
+                $('#nav-menu li a[href="/#/pages/blog.html"]').parent('li').addClass('active');
             } else if (tag_regexp.test(page_href)) {
                 // Handle tag pages
                 $('#nav-menu li.active').removeClass('active');
-                $('#nav-menu li a[href="./pages/blog.html"]').parent('li').addClass('active');
+                $('#nav-menu li a[href="/#/pages/blog.html"]').parent('li').addClass('active');
 
                 if (tag_not_regexp.test(page_href)) {
                     page_href = page_href.replace(tag_not_regexp, "$11$2");
@@ -71,8 +72,11 @@
                 if (page_href === '/') {
                     page_href = '/home.html';
                 } else if (blog_page_regexp.test(page_href)) {
-                    if (page_href === "/blog.html" || page_href === "/pages/blog.html") {
+                    if (page_href === "/blog.html") {
                         page_href = "/blog1.html";
+                    } else if (/pages\/.*/.test(page_href)) {
+                        $.address.value(page_href.replace(blog_page_regexp, "$2"));
+                        return;
                     }
 
                     // If page_href refers to a blog page set Blog to be the active menu item
@@ -84,8 +88,12 @@
                 $('a.menuitem[rel="address:' + page_href + '"]').closest('ul').find('li.active').removeClass('active');
                 $('a.menuitem[rel="address:' + page_href + '"]').closest('li').addClass('active');
 
-                // set page_href of full url for ajax call when pages/ isn't specified
-                if (! /\/?pages\/.*/.test(page_href)) {
+                // Rewrite page url if it specifies pages/ prefix; otherwise set page_href to
+                // full url (including pages/ prefix) for ajax call
+                if (page_regexp.test(page_href)) {
+                    $.address.value(page_href.replace(page_regexp, "$1"));
+                    return;
+                } else {
                     page_href = "pages" + page_href;
                 }
             }

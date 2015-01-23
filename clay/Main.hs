@@ -137,7 +137,7 @@ pageContent = do
   "#page-content" # ".loading" ?
     opacity 0.35
 
-  "#page-content" # ".lading-done" ? do
+  "#page-content" # ".loading-done" ? do
     transition "opacity" (sec 1) easeIn (sec 0.5)
     opacity 1
 
@@ -156,6 +156,11 @@ pageContent = do
     backgroundRepeat noRepeat
     backgroundPosition $ positioned (pct 50) (pct 50)
     height (px 125)
+
+  "#page-content" ** ul |> (li # ":before") ? do
+    content $ stringContent "\\2192"
+    paddingRight (em 0.5)
+    fontSize (em 1.5)
 
 theFooter :: Css
 theFooter = do

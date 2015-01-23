@@ -33,72 +33,7 @@
     var page = (function () {
         // var pageId = '#page-content', navId = '#nav';
 
-        function newContentCallback() {
-            $('#page-content a').each(function (i) {
-                var page_href = $(this).attr('href'),
-                    external_url_regexp = /https?:\/\/.*/,
-                    mailto_regexp = /mailto:.*/,
-                    files_regexp = /files\/.*/,
-                    images_regexp = /images\/.*/;
-
-                if (!(external_url_regexp.test(page_href) || mailto_regexp.test(page_href) || files_regexp.test(page_href) || images_regexp.test(page_href))) {
-                    $(this).attr('href', "/#" + page_href);
-                }
-            });
-        }
-
-        function loadPageContent(page_href) {
-            var post_regexp = /posts\/.*\.html/,
-                page_regexp = /pages\/(.*\.html)/,
-                tag_regexp = /tags\/.*(\d*)\.html/,
-                tag_not_regexp = /(tags\/.*[^\d]+)(\.html)/,
-                blog_page_regexp = /(pages\/)?(blog\d*\.html)/;
-
-            // Check whether the requested url is a post
-            if (post_regexp.test(page_href)) {
-                // Handle post urls (no change required to page_href)
-                $('#nav-menu li.active').removeClass('active');
-                $('#nav-menu li a[href="/#/pages/blog.html"]').parent('li').addClass('active');
-            } else if (tag_regexp.test(page_href)) {
-                // Handle tag pages
-                $('#nav-menu li.active').removeClass('active');
-                $('#nav-menu li a[href="/#/pages/blog.html"]').parent('li').addClass('active');
-
-                if (tag_not_regexp.test(page_href)) {
-                    page_href = page_href.replace(tag_not_regexp, "$11$2");
-                }
-            } else { // otherwise assume its a page
-                // Check if the page_href is / and if so goto home
-                if (page_href === '/') {
-                    page_href = '/home.html';
-                } else if (blog_page_regexp.test(page_href)) {
-                    if (page_href === "/blog.html") {
-                        page_href = "/blog1.html";
-                    } else if (/pages\/.*/.test(page_href)) {
-                        $.address.value(page_href.replace(blog_page_regexp, "$2"));
-                        return;
-                    }
-
-                    // If page_href refers to a blog page set Blog to be the active menu item
-                    $('a.menuitem[rel="address:/blog.html"]').closest('ul').find('li.active').removeClass('active');
-                    $('a.menuitem[rel="address:/blog.html"]').closest('li').addClass('active');
-                }
-
-                // Initially set the active menuitem in the nav
-                $('a.menuitem[rel="address:' + page_href + '"]').closest('ul').find('li.active').removeClass('active');
-                $('a.menuitem[rel="address:' + page_href + '"]').closest('li').addClass('active');
-
-                // Rewrite page url if it specifies pages/ prefix; otherwise set page_href to
-                // full url (including pages/ prefix) for ajax call
-                if (page_regexp.test(page_href)) {
-                    $.address.value(page_href.replace(page_regexp, "$1"));
-                    return;
-                } else {
-                    page_href = "pages" + page_href;
-                }
-            }
-
-            // Make the ajax request for the new page-content (whether it be a page or a post) *could change*
+        function loadPageContent(page_href, virt_href, handlerCallback) {
             $.ajax({
                 url: page_href,
                 type: 'GET',
@@ -112,6 +47,11 @@
 
                     // Add .loading to #page-content and #nav to facilitate a loading animation
                     $('#page-content, #nav').removeClass('loading-done').addClass('loading');
+
+                    // Run current handlers onSuccess callback (if it exists)
+                    if (handlerCallback.hasOwnProperty('beforeSend') && typeof handlerCallback.beforeSend === 'function') {
+                        handlerCallback.beforeSend(page_href, virt_href);
+                    }
 
                     console.log('beforeSend a.menuitem');
                 },
@@ -132,15 +72,29 @@
                             mj.Hub.Queue(["Typeset", mj.Hub, math_elem[0]]);
                         });
 
+                        $('#page-content a').each(function (i) {
+                            var page_href = $(this).attr('href'),
+                                external_url_regexp = /https?:\/\/.*/,
+                                mailto_regexp = /mailto:.*/,
+                                files_regexp = /files\/.*/,
+                                images_regexp = /images\/.*/;
+
+                            if (!(external_url_regexp.test(page_href) || mailto_regexp.test(page_href) || files_regexp.test(page_href) || images_regexp.test(page_href))) {
+                                $(this).attr('href', "/#" + page_href);
+                            }
+                        });
+
+                        // Run current handles onSuccess callback (if it exists)
+                        if (handlerCallback.hasOwnProperty('onSuccess') && typeof handlerCallback.onSuccess === 'function') {
+                            handlerCallback.onSuccess();
+                        }
+                        
                         // Scroll to top of the page
                         if ($('body').scrollTop() > $('#nav').offset().top - 15) {
                             $('html, body').animate({
                                 scrollTop: $('#nav').offset().top - 15
                             }, 'fast');
                         }
-
-                        // Add new content callbacks
-                        newContentCallback();
                     }, 250);
                 },
                 error: function (xhr, status) {
@@ -156,19 +110,31 @@
                         $('#status > p.message').text('Error retrieving page "' + page_href + '": ' + status);
                         $('#status').addClass('error').slideDown();
                     }
+
+                    // Run current handles onError callback (if it exists)
+                    if (handlerCallback.hasOwnProperty('onError') && typeof handlerCallback.onError === 'function') {
+                        handlerCallback.onError();
+                    }
                 }
             });
         }
 
-        function init() {
+        function runHandlers (url, handlers) {
+            for (var i = 0; i < handlers.length; i++) {
+                if (handlers[i].acceptUrls.test(url)) {
+                    var new_virt_url = handlers[i].rewriteVirtualUrl(url);
+                    if (new_virt_url === url) {
+                        loadPageContent(handlers[i].rewriteGetUrl(url), url, handlers[i].ajaxCallbacks);
+                    } else {
+                        $.address.value(new_virt_url);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        function init (handlers) {
             $(document).ready(function () {
-                $.address.init(function (event) {
-                    console.log("init:" + event.value);
-                    $(window).load(function () {
-                        loadPageContent(event.value);
-                    });
-                });
-
                 $('#nav-menu a.menuitem').click(function () {
                     $(this).closest('ul').find('li.active').removeClass('active');
                     $(this).closest('li').addClass('active');
@@ -180,11 +146,9 @@
                 });
 
                 // Callback for when the inital page has completely loaded (including images, etc..)
-                $(window).load(function () {
-                    $.address.change(function (event) {
-                        console.log("change " + event.value);
-                        loadPageContent(event.value);
-                    });
+                $.address.change(function (event) {
+                    console.log("Change " + event.value);
+                    runHandlers(event.value, handlers);
                 });
             });
         }
@@ -194,5 +158,89 @@
         };
     }());
 
-    page.init();
+    function idRewrite (url) {
+        return url;
+    }
+
+    var handlers = [
+        { // Post pages handler
+            acceptUrls: /posts\/.*\.html/,
+            rewriteGetUrl: idRewrite,
+            rewriteVirtualUrl: idRewrite,
+            ajaxCallbacks: {
+                beforeSend: function () {
+                    $('#nav-menu li.active').removeClass('active');
+                    $('#nav-menu li a[rel="address:/blog.html"]').parent('li').addClass('active');
+                }
+            }
+        },
+        { // Tag pages handler
+            acceptUrls: /tags\/.*(\d*)\.html/,
+            rewriteGetUrl: function (url) {
+                var tag_not_regexp = /(tags\/.*[^\d]+)(\.html)/;
+                if (tag_not_regexp.test(url)) {
+                    return url.replace(tag_not_regexp, "$11$2");
+                } else {
+                    return url;
+                }
+            },
+            rewriteVirtualUrl: function (url) {
+                var tag_one_regexp = /(tags\/.*)1(\.html)/;
+                if (tag_one_regexp.test(url)) {
+                    return url.replace(tag_one_regexp, "$1$2");
+                } else {
+                    return url;
+                }
+            },
+            ajaxCallbacks: {
+                beforeSend: function () {
+                    $('#nav-menu li.active').removeClass('active');
+                    $('#nav-menu li a[rel="address:/blog.html"]').parent('li').addClass('active');
+                }
+            }
+        },
+        { // Blog pages handler
+            acceptUrls: /blog\d*\.html/,
+            rewriteGetUrl: function (url) {
+                if (url === "/blog.html") {
+                    url = "/blog1.html"
+                }
+                return "pages" + url;
+            },
+            rewriteVirtualUrl: function (url) {
+                if (url === "/blog1.html") {
+                    url = "/blog.html";
+                }
+                return url;
+            },
+            ajaxCallbacks: {
+                beforeSend: function () {
+                    // Set the blog menuitem as active
+                    $('a.menuitem[rel="address:/blog.html"]').closest('ul').find('li.active').removeClass('active');
+                    $('a.menuitem[rel="address:/blog.html"]').closest('li').addClass('active');
+                }
+            }
+        },
+        { // Default page handler
+            acceptUrls: /.*/,
+            rewriteGetUrl: function (url) {
+                if (url === "/") {
+                    url = "/home.html";
+                }
+                return "pages" + url;
+            },
+            rewriteVirtualUrl: idRewrite,
+            ajaxCallbacks: {
+                beforeSend: function (url, virt_url) {
+                    console.log('setting active menu item to ' + url);
+                    // Initially set the active menuitem in the nav
+                    $('a.menuitem[rel="address:' + virt_url + '"]').closest('ul').find('li.active').removeClass('active');
+                    $('a.menuitem[rel="address:' + virt_url + '"]').closest('li').addClass('active');
+                }
+            }
+        }
+    ];
+
+    // Initialize page with handlers
+    page.init(handlers);
 }(jQuery, MathJax));

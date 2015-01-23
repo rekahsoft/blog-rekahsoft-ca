@@ -118,22 +118,10 @@
                 }
             });
         }
-
-        function runHandlers (url, handlers) {
-            for (var i = 0; i < handlers.length; i++) {
-                if (handlers[i].acceptUrls.test(url)) {
-                    var new_virt_url = handlers[i].rewriteVirtualUrl(url);
-                    if (new_virt_url === url) {
-                        loadPageContent(handlers[i].rewriteGetUrl(url), url, handlers[i].ajaxCallbacks);
-                    } else {
-                        $.address.value(new_virt_url);
-                    }
-                    break;
-                }
-            }
-        }
         
-        function init (handlers) {
+        function init (router) {
+            router.setCallback(loadPageContent);
+
             $(document).ready(function () {
                 $('#nav-menu a.menuitem').click(function () {
                     $(this).closest('ul').find('li.active').removeClass('active');
@@ -148,99 +136,147 @@
                 // Callback for when the inital page has completely loaded (including images, etc..)
                 $.address.change(function (event) {
                     console.log("Change " + event.value);
-                    runHandlers(event.value, handlers);
+                    router.runRouter(event.value);
                 });
             });
         }
 
-        return {
+        var spec = {
             init: init
         };
+        return spec;
     }());
 
-    function idRewrite (url) {
-        return url;
-    }
+    var router = (function () {
+        var routes = [
+            { // Post pages handler
+                acceptUrls: /posts\/.*\.html/,
+                rewriteGetUrl: idFun,
+                rewriteVirtualUrl: idFun,
+                ajaxCallbacks: {
+                    beforeSend: function () {
+                        $('#nav-menu li.active').removeClass('active');
+                        $('#nav-menu li a[rel="address:/blog.html"]').parent('li').addClass('active');
+                    }
+                }
+            },
+            { // Tag pages handler
+                acceptUrls: /tags\/.*(\d*)\.html/,
+                rewriteGetUrl: function (url) {
+                    var tag_not_regexp = /(tags\/.*[^\d]+)(\.html)/;
+                    if (tag_not_regexp.test(url)) {
+                        return url.replace(tag_not_regexp, "$11$2");
+                    } else {
+                        return url;
+                    }
+                },
+                rewriteVirtualUrl: function (url) {
+                    var tag_one_regexp = /(tags\/.*)1(\.html)/;
+                    if (tag_one_regexp.test(url)) {
+                        return url.replace(tag_one_regexp, "$1$2");
+                    } else {
+                        return url;
+                    }
+                },
+                ajaxCallbacks: {
+                    beforeSend: function () {
+                        $('#nav-menu li.active').removeClass('active');
+                        $('#nav-menu li a[rel="address:/blog.html"]').parent('li').addClass('active');
+                    }
+                }
+            },
+            { // Blog pages handler
+                acceptUrls: /blog\d*\.html/,
+                rewriteGetUrl: function (url) {
+                    if (url === "/blog.html") {
+                        url = "/blog1.html"
+                    }
+                    return "pages" + url;
+                },
+                rewriteVirtualUrl: function (url) {
+                    if (url === "/blog1.html") {
+                        url = "/blog.html";
+                    }
+                    return url;
+                },
+                ajaxCallbacks: {
+                    beforeSend: function () {
+                        // Set the blog menuitem as active
+                        $('a.menuitem[rel="address:/blog.html"]').closest('ul').find('li.active').removeClass('active');
+                        $('a.menuitem[rel="address:/blog.html"]').closest('li').addClass('active');
+                    }
+                }
+            },
+            { // Default page handler
+                acceptUrls: /.*/,
+                rewriteGetUrl: function (url) {
+                    if (url === "/") {
+                        url = "/home.html";
+                    }
+                    return "pages" + url;
+                },
+                rewriteVirtualUrl: function (url) {
+                    if (url === "/") {
+                        url = "/home.html";
+                    }
+                    return url;
+                },
+                ajaxCallbacks: {
+                    beforeSend: function (url, virt_url) {
+                        // Initially set the active menuitem in the nav
+                        $('a.menuitem[rel="address:' + virt_url + '"]').closest('ul').find('li.active').removeClass('active');
+                        $('a.menuitem[rel="address:' + virt_url + '"]').closest('li').addClass('active');
+                    }
+                }
+            }],
+            callback = idFun;
 
-    var handlers = [
-        { // Post pages handler
-            acceptUrls: /posts\/.*\.html/,
-            rewriteGetUrl: idRewrite,
-            rewriteVirtualUrl: idRewrite,
-            ajaxCallbacks: {
-                beforeSend: function () {
-                    $('#nav-menu li.active').removeClass('active');
-                    $('#nav-menu li a[rel="address:/blog.html"]').parent('li').addClass('active');
-                }
-            }
-        },
-        { // Tag pages handler
-            acceptUrls: /tags\/.*(\d*)\.html/,
-            rewriteGetUrl: function (url) {
-                var tag_not_regexp = /(tags\/.*[^\d]+)(\.html)/;
-                if (tag_not_regexp.test(url)) {
-                    return url.replace(tag_not_regexp, "$11$2");
-                } else {
-                    return url;
-                }
-            },
-            rewriteVirtualUrl: function (url) {
-                var tag_one_regexp = /(tags\/.*)1(\.html)/;
-                if (tag_one_regexp.test(url)) {
-                    return url.replace(tag_one_regexp, "$1$2");
-                } else {
-                    return url;
-                }
-            },
-            ajaxCallbacks: {
-                beforeSend: function () {
-                    $('#nav-menu li.active').removeClass('active');
-                    $('#nav-menu li a[rel="address:/blog.html"]').parent('li').addClass('active');
-                }
-            }
-        },
-        { // Blog pages handler
-            acceptUrls: /blog\d*\.html/,
-            rewriteGetUrl: function (url) {
-                if (url === "/blog.html") {
-                    url = "/blog1.html"
-                }
-                return "pages" + url;
-            },
-            rewriteVirtualUrl: function (url) {
-                if (url === "/blog1.html") {
-                    url = "/blog.html";
-                }
-                return url;
-            },
-            ajaxCallbacks: {
-                beforeSend: function () {
-                    // Set the blog menuitem as active
-                    $('a.menuitem[rel="address:/blog.html"]').closest('ul').find('li.active').removeClass('active');
-                    $('a.menuitem[rel="address:/blog.html"]').closest('li').addClass('active');
-                }
-            }
-        },
-        { // Default page handler
-            acceptUrls: /.*/,
-            rewriteGetUrl: function (url) {
-                if (url === "/") {
-                    url = "/home.html";
-                }
-                return "pages" + url;
-            },
-            rewriteVirtualUrl: idRewrite,
-            ajaxCallbacks: {
-                beforeSend: function (url, virt_url) {
-                    console.log('setting active menu item to ' + url);
-                    // Initially set the active menuitem in the nav
-                    $('a.menuitem[rel="address:' + virt_url + '"]').closest('ul').find('li.active').removeClass('active');
-                    $('a.menuitem[rel="address:' + virt_url + '"]').closest('li').addClass('active');
-                }
+        function setCallback (cb) {
+            if (typeof cb == 'function') {
+                callback = cb;
             }
         }
-    ];
 
-    // Initialize page with handlers
-    page.init(handlers);
+        function idFun (url) {
+            return url;
+        }
+
+        function runRouter (url) {
+            function runRouter_help (spec) {
+                for (var i = 0; i < routes.length; i++) {
+                    if (routes[i].acceptUrls.test(spec.url)) {
+                        var new_virt_url = routes[i].rewriteVirtualUrl(spec.url);
+                        if (new_virt_url === spec.url) {
+                            if (spec.hasRedirect) {
+                                $.address.value(new_virt_url);
+                            } else {
+                                callback(routes[i].rewriteGetUrl(spec.url), spec.url, routes[i].ajaxCallbacks);
+                            }
+                        } else if (spec.numRecur <= spec.recurDepth) {
+                            runRouter_help({ url: new_virt_url,
+                                             hasRedirect: true,
+                                             numRecur: spec.numRecur + 1,
+                                             recurDepth: spec.recurDepth });
+                        } else {
+                            callback(routes[i].rewriteGetUrl(spec.url), spec.url, routes[i].ajaxCallbacks);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            runRouter_help({ url: url,
+                             hasRedirect: false,
+                             numRecur: 1,
+                             recurDepth: 5 });
+        }
+
+        var spec = {
+            runRouter: runRouter,
+            setCallback: setCallback
+        };
+        return spec;
+    })();
+
+    page.init(router);
 }(jQuery, MathJax));

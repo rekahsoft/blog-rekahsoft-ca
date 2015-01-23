@@ -30,122 +30,10 @@
 (function ($, mj) {
     "use strict";
 
-    var page = (function () {
-        // var pageId = '#page-content', navId = '#nav';
-
-        function loadPageContent(page_href, virt_href, handlerCallback) {
-            $.ajax({
-                url: page_href,
-                type: 'GET',
-                dataType: 'html',
-                beforeSend: function (xhr, settings) {
-                    // Remove loading error from page-content and any status message errors
-                    $('#page-content').removeClass('loading-error');
-                    $('#status').slideUp('normal', function () {
-                        $('#status').removeClass('error').removeClass('success');
-                    });
-
-                    // Add .loading to #page-content and #nav to facilitate a loading animation
-                    $('#page-content, #nav').removeClass('loading-done').addClass('loading');
-
-                    // Run current handlers onSuccess callback (if it exists)
-                    if (handlerCallback.hasOwnProperty('beforeSend') && typeof handlerCallback.beforeSend === 'function') {
-                        handlerCallback.beforeSend(page_href, virt_href);
-                    }
-
-                    console.log('beforeSend a.menuitem');
-                },
-                success: function (dta) {
-                    // Remove the initial loading gif (if its there)
-                    $('#page-content').removeClass('init');
-
-                    // Stop animations in the nav and page-content and scroll to the top of the page in a set amount of time
-                    setTimeout(function () {
-                        // Replace old page-content with new page-content
-                        $('#page-content').html(dta);
-
-                        // Stop page loading
-                        $('#page-content, #nav').removeClass('loading');
-
-                        // Reload any new maths using MathJax
-                        $('#page-content .math').each(function (math_elem) {
-                            mj.Hub.Queue(["Typeset", mj.Hub, math_elem[0]]);
-                        });
-
-                        $('#page-content a').each(function (i) {
-                            var page_href = $(this).attr('href'),
-                                external_url_regexp = /https?:\/\/.*/,
-                                mailto_regexp = /mailto:.*/,
-                                files_regexp = /files\/.*/,
-                                images_regexp = /images\/.*/;
-
-                            if (!(external_url_regexp.test(page_href) || mailto_regexp.test(page_href) || files_regexp.test(page_href) || images_regexp.test(page_href))) {
-                                $(this).attr('href', "/#" + page_href);
-                            }
-                        });
-
-                        // Run current handles onSuccess callback (if it exists)
-                        if (handlerCallback.hasOwnProperty('onSuccess') && typeof handlerCallback.onSuccess === 'function') {
-                            handlerCallback.onSuccess();
-                        }
-                        
-                        // Scroll to top of the page
-                        if ($('body').scrollTop() > $('#nav').offset().top - 15) {
-                            $('html, body').animate({
-                                scrollTop: $('#nav').offset().top - 15
-                            }, 'fast');
-                        }
-                    }, 250);
-                },
-                error: function (xhr, status) {
-                    /* Remove .loading from #page-content and #nav to stop the loading
-                     * animation. Then add .loading-error to #page-content if its the sites
-                     * first load (#page-content has class .init). Finally, display an error
-                     * message in #status.
-                     */
-                    $('#page-content, #nav').removeClass('loading');
-                    if ($('#page-content.init')[0]) {
-                        $('#page-content').addClass('loading-error').html('<p class="container border-box">Error initially loading blog.rekahsoft.ca. Check the url! Given "' + page_href + '"</p>');
-                    } else {
-                        $('#status > p.message').text('Error retrieving page "' + page_href + '": ' + status);
-                        $('#status').addClass('error').slideDown();
-                    }
-
-                    // Run current handles onError callback (if it exists)
-                    if (handlerCallback.hasOwnProperty('onError') && typeof handlerCallback.onError === 'function') {
-                        handlerCallback.onError();
-                    }
-                }
-            });
-        }
-        
-        function init (router) {
-            router.setCallback(loadPageContent);
-
-            $(document).ready(function () {
-                $('#nav-menu a.menuitem').click(function () {
-                    $(this).closest('ul').find('li.active').removeClass('active');
-                    $(this).closest('li').addClass('active');
-                    //$('.navbar-collapse').collapse('hide');
-                });
-
-                $('#status a.close-button').click(function () {
-                    $(this).parent().slideUp();
-                });
-
-                // Callback for when the inital page has completely loaded (including images, etc..)
-                $.address.change(function (event) {
-                    console.log("Change " + event.value);
-                    router.runRouter(event.value);
-                });
-            });
-        }
-
-        var spec = {
-            init: init
-        };
-        return spec;
-    }());
+    // The identity function
+    function idFun(x) {
+        return x;
+    }
 
     var router = (function () {
         var routes = [
@@ -166,17 +54,15 @@
                     var tag_not_regexp = /(tags\/.*[^\d]+)(\.html)/;
                     if (tag_not_regexp.test(url)) {
                         return url.replace(tag_not_regexp, "$11$2");
-                    } else {
-                        return url;
                     }
+                    return url;
                 },
                 rewriteVirtualUrl: function (url) {
                     var tag_one_regexp = /(tags\/.*)1(\.html)/;
                     if (tag_one_regexp.test(url)) {
                         return url.replace(tag_one_regexp, "$1$2");
-                    } else {
-                        return url;
                     }
+                    return url;
                 },
                 ajaxCallbacks: {
                     beforeSend: function () {
@@ -189,7 +75,7 @@
                 acceptUrls: /blog\d*\.html/,
                 rewriteGetUrl: function (url) {
                     if (url === "/blog.html") {
-                        url = "/blog1.html"
+                        url = "/blog1.html";
                     }
                     return "pages" + url;
                 },
@@ -229,54 +115,165 @@
                     }
                 }
             }],
-            callback = idFun;
+            callback = idFun,
 
-        function setCallback (cb) {
-            if (typeof cb == 'function') {
-                callback = cb;
-            }
-        }
-
-        function idFun (url) {
-            return url;
-        }
-
-        function runRouter (url) {
-            function runRouter_help (spec) {
-                for (var i = 0; i < routes.length; i++) {
-                    if (routes[i].acceptUrls.test(spec.url)) {
-                        var new_virt_url = routes[i].rewriteVirtualUrl(spec.url);
-                        if (new_virt_url === spec.url) {
-                            if (spec.hasRedirect) {
-                                $.address.value(new_virt_url);
-                            } else {
-                                callback(routes[i].rewriteGetUrl(spec.url), spec.url, routes[i].ajaxCallbacks);
+            spec = {
+                runRouter: function runRouter(url) {
+                    function runRouter_help(spec) {
+                        var i, new_virt_url;
+                        for (i = 0; i < routes.length; i += 1) {
+                            if (routes[i].acceptUrls.test(spec.url)) {
+                                new_virt_url = routes[i].rewriteVirtualUrl(spec.url);
+                                if (new_virt_url === spec.url) {
+                                    if (spec.hasRedirect) {
+                                        $.address.value(new_virt_url);
+                                    } else {
+                                        callback(routes[i].rewriteGetUrl(spec.url), spec.url, routes[i].ajaxCallbacks);
+                                    }
+                                } else if (spec.numRecur <= spec.recurDepth) {
+                                    runRouter_help({ url: new_virt_url,
+                                                     hasRedirect: true,
+                                                     numRecur: spec.numRecur + 1,
+                                                     recurDepth: spec.recurDepth });
+                                } else {
+                                    callback(routes[i].rewriteGetUrl(spec.url), spec.url, routes[i].ajaxCallbacks);
+                                }
+                                break;
                             }
-                        } else if (spec.numRecur <= spec.recurDepth) {
-                            runRouter_help({ url: new_virt_url,
-                                             hasRedirect: true,
-                                             numRecur: spec.numRecur + 1,
-                                             recurDepth: spec.recurDepth });
-                        } else {
-                            callback(routes[i].rewriteGetUrl(spec.url), spec.url, routes[i].ajaxCallbacks);
                         }
-                        break;
+                    }
+
+                    runRouter_help({ url: url,
+                                     hasRedirect: false,
+                                     numRecur: 1,
+                                     recurDepth: 5 });
+                },
+                setCallback: function setCallback(cb) {
+                    if (typeof cb === 'function') {
+                        callback = cb;
                     }
                 }
+            };
+
+        return spec;
+    }()),
+
+        page = (function () {
+            // var pageId = '#page-content', navId = '#nav';
+
+            function loadPageContent(page_href, virt_href, handlerCallback) {
+                $.ajax({
+                    url: page_href,
+                    type: 'GET',
+                    dataType: 'html',
+                    beforeSend: function (xhr, settings) {
+                        // Remove loading error from page-content and any status message errors
+                        $('#page-content').removeClass('loading-error');
+                        $('#status').slideUp('normal', function () {
+                            $('#status').removeClass('error').removeClass('success');
+                        });
+
+                        // Add .loading to #page-content and #nav to facilitate a loading animation
+                        $('#page-content, #nav').removeClass('loading-done').addClass('loading');
+
+                        // Run current handlers onSuccess callback (if it exists)
+                        if (handlerCallback.hasOwnProperty('beforeSend') && typeof handlerCallback.beforeSend === 'function') {
+                            handlerCallback.beforeSend(page_href, virt_href);
+                        }
+
+                        console.log('beforeSend a.menuitem');
+                    },
+                    success: function (dta) {
+                        // Remove the initial loading gif (if its there)
+                        $('#page-content').removeClass('init');
+
+                        // Stop animations in the nav and page-content and scroll to the top of the page in a set amount of time
+                        setTimeout(function () {
+                            // Replace old page-content with new page-content
+                            $('#page-content').html(dta);
+
+                            // Stop page loading
+                            $('#page-content, #nav').removeClass('loading');
+
+                            // Reload any new maths using MathJax
+                            $('#page-content .math').each(function (math_elem) {
+                                mj.Hub.Queue(["Typeset", mj.Hub, math_elem[0]]);
+                            });
+
+                            $('#page-content a').each(function (i) {
+                                var href = $(this).attr('href'),
+                                    external_url_regexp = /https?:\/\/.*/,
+                                    mailto_regexp = /mailto:.*/,
+                                    files_regexp = /files\/.*/,
+                                    images_regexp = /images\/.*/;
+
+                                if (!(external_url_regexp.test(href) || mailto_regexp.test(href) || files_regexp.test(href) || images_regexp.test(href))) {
+                                    $(this).attr('href', "/#" + href);
+                                }
+                            });
+
+                            // Run current handles onSuccess callback (if it exists)
+                            if (handlerCallback.hasOwnProperty('onSuccess') && typeof handlerCallback.onSuccess === 'function') {
+                                handlerCallback.onSuccess();
+                            }
+
+                            // Scroll to top of the page
+                            if ($('body').scrollTop() > $('#nav').offset().top - 15) {
+                                $('html, body').animate({
+                                    scrollTop: $('#nav').offset().top - 15
+                                }, 'fast');
+                            }
+                        }, 250);
+                    },
+                    error: function (xhr, status) {
+                        /* Remove .loading from #page-content and #nav to stop the loading
+                         * animation. Then add .loading-error to #page-content if its the sites
+                         * first load (#page-content has class .init). Finally, display an error
+                         * message in #status.
+                         */
+                        $('#page-content, #nav').removeClass('loading');
+                        if ($('#page-content.init')[0]) {
+                            $('#page-content').addClass('loading-error').html('<p class="container border-box">Error initially loading blog.rekahsoft.ca. Check the url! Given "' + page_href + '"</p>');
+                        } else {
+                            $('#status > p.message').text('Error retrieving page "' + page_href + '": ' + status);
+                            $('#status').addClass('error').slideDown();
+                        }
+
+                        // Run current handles onError callback (if it exists)
+                        if (handlerCallback.hasOwnProperty('onError') && typeof handlerCallback.onError === 'function') {
+                            handlerCallback.onError();
+                        }
+                    }
+                });
             }
 
-            runRouter_help({ url: url,
-                             hasRedirect: false,
-                             numRecur: 1,
-                             recurDepth: 5 });
-        }
+            function init(router) {
+                router.setCallback(loadPageContent);
 
-        var spec = {
-            runRouter: runRouter,
-            setCallback: setCallback
-        };
-        return spec;
-    })();
+                $(document).ready(function () {
+                    $('#nav-menu a.menuitem').click(function () {
+                        $(this).closest('ul').find('li.active').removeClass('active');
+                        $(this).closest('li').addClass('active');
+                        //$('.navbar-collapse').collapse('hide');
+                    });
+
+                    $('#status a.close-button').click(function () {
+                        $(this).parent().slideUp();
+                    });
+
+                    // Callback for when the inital page has completely loaded (including images, etc..)
+                    $.address.change(function (event) {
+                        console.log("Change " + event.value);
+                        router.runRouter(event.value);
+                    });
+                });
+            }
+
+            var spec = {
+                init: init
+            };
+            return spec;
+        }());
 
     page.init(router);
 }(jQuery, MathJax));

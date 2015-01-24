@@ -105,7 +105,15 @@ aPost = do
     textIndent $ indent (em 1.5)
     textAlign justify
 
-  "#pagination" ? makeBorderBox Nothing Nothing
+  "#pagination" ? do
+    display flex
+    -- Unable to specify without falling back to plain css
+    -- justifyContent spaceBetween
+    "justify-content" -: "space-between"
+    makeBorderBox Nothing Nothing
+
+  "#pagination" # ":after" ? do
+    content none
 
 businessCard :: Css
 businessCard = do

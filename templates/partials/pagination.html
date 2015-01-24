@@ -1,34 +1,39 @@
 <div class='container' id='pagination'>
-  <div class='eight columns alpha'>
-    $if(firstPageUrl)$
+  $if(firstPageUrl)$
     $if(firstPageUrlVirtualPath)$
-    <a class='firstPage' href='$firstPageUrlVirtualPath$' rel='address:$firstPageUrlVirtualPath$'>First Page</a>
+      <a class='firstPage' href='$firstPageUrlVirtualPath$'>First Page</a>
     $else$
-    <a class='firstPage' href='$firstPageUrl$'>First Page</a>
+      <a class='firstPage' href='$firstPageUrl$'>First Page</a>
     $endif$
-    $endif$
-    $if(previousPageUrl)$
+  $else$
+    <span class="on-first-page">First Page</span>
+  $endif$
+  $if(previousPageUrl)$
     $if(previousPageUrlVirtualPath)$
-    <a class='previousPage' href='$previousPageUrlVirtualPath$' rel='address:$previousPageUrlVirtualPath$'>Previous Page</a>
+      <a class='previousPage' href='$previousPageUrlVirtualPath$'>Previous Page</a>
     $else$
-    <a class='previousPage' href='$previousPageUrl$'>Previous Page</a>
+      <a class='previousPage' href='$previousPageUrl$'>Previous Page</a>
     $endif$
-    $endif$
-  </div>
-  <div class='eight columns'>
-    $if(nextPageUrl)$
+  $else$
+    <span class="no-previous-page">Previous Page</span>
+  $endif$
+
+  $if(nextPageUrl)$
     $if(nextPageUrlVirtualPath)$
-    <a class='nextPage' href='$nextPageUrlVirtualPath$' rel='address:$nextPageUrlVirtualPath$'>Next Page</a>
+      <a class='nextPage' href='$nextPageUrlVirtualPath$'>Next Page</a>
     $else$
-    <a class='nextPage' href='$nextPageUrl$'>Next Page</a>
+      <a class='nextPage' href='$nextPageUrl$'>Next Page</a>
     $endif$
-    $endif$
-    $if(lastPageUrl)$
+  $else$
+    <span class="no-next-page">Next Page</span>
+  $endif$
+  $if(lastPageUrl)$
     $if(lastPageUrlVirtualPath)$
-    <a class='lastPage' href='$lastPageUrlVirtualPath$' rel='address:$lastPageUrlVirtualPath$'>Last Page</a>
+      <a class='lastPage' href='$lastPageUrlVirtualPath$'>Last Page</a>
     $else$
-    <a class='lastPage' href='$lastPageUrl$'>Last Page</a>
+      <a class='lastPage' href='$lastPageUrl$'>Last Page</a>
     $endif$
-    $endif$
-  </div>
+  $else$
+    <span class="on-last-page">Last Page</span>
+  $endif$
 </div>

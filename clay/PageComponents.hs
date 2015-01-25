@@ -154,7 +154,7 @@ tagPageHeading = do
     backgroundSize contain
     backgroundRepeat noRepeat
     backgroundPosition $ positioned (pct 50) (pct 50)
-    sym2 padding (px 24) (px 39)
+    sym padding (px 30)
     margin nil (em 0.35) nil (em 0.1)
 
 srcCodeBlock :: Css

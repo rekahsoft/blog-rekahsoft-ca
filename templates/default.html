@@ -1,8 +1,4 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]> <html class="ie ie6" lang="en"> <![endif]-->
-<!--[if IE 7]> <html class="ie ie7" lang="en" <![endif]-->
-<!--[if IE 8]> <html class="ie ie8" lang="en"> <![endif]-->
-<!-- [if (gte IE 9)|!(IE)]><!-->
 <html class='en' manifest='manifest.appcache'>
   <head>
     <!-- Basic Page Needs -->
@@ -10,17 +6,17 @@
     <title>RekahSoft</title>
     <meta content='The technical musings of a minimalist' name='description'>
     <meta content='Collin Doering' name='author'>
+
     <!-- Mobile Specific Metas -->
     <meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport'>
+
     <!-- CSS -->
-    <link href='lib/css/base.css' rel='stylesheet'>
-    <link href='lib/css/skeleton.css' rel='stylesheet'>
-    <link href='lib/css/layout.css' rel='stylesheet'>
+    <link rel="stylesheet" href="lib/css/normalize.css">
+    <link rel="stylesheet" href="lib/css/skeleton.css">
+
     <!-- Custom styles for this template -->
     <link href='default.css' rel='stylesheet'>
-    <!--[if lt IE 9]>
-      <script src='http://html5shim.googlecode.com/svn/trunk/html5.js'></script>
-    <![endif]-->
+
     <!-- Favicons -->
     <link href='/images/favicon.ico' rel='shortcut icon'>
     <!-- / %link(rel="icon" type="image/png" href="/images/favicon.ico.png") -->
@@ -29,13 +25,16 @@
     <!-- / %link(rel="apple-touch-icon" sizes="72x72" href="lib/images/apple-touch-icon-72x72.png") -->
     <!-- / %link(rel="apple-touch-icon" sizes="114x114" href="lib/images/apple-touch-icon-114x114.png") -->
   </head>
+
   <body>
     $partial("templates/partials/logo-banner.html")$
     $partial("templates/partials/nav.html")$
+
     <div class='container' id='status'>
       <p class='message'></p>
       <a class='close-button'>Close</a>
     </div>
+
     <div class='init loading' id='page-content'>
       <noscript>
         <div class='container' id='noscript-alert'>
@@ -48,6 +47,7 @@
       </noscript>
     </div>
     $partial("templates/partials/footer.html")$
+
     <!-- External javascript libraries: JQuery, and JQuery-Address -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src='lib/js/jquery-1.9.1.js' type='text/javascript'></script>

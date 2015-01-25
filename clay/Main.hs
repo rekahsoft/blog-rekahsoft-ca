@@ -133,6 +133,7 @@ pageContent = do
 
     (ul <> ol) |> li ? do
       marginBottom (em 0.02)
+      listStyleType none
 
   "#page-content" # ".loading" ?
     opacity 0.35

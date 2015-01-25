@@ -169,6 +169,10 @@ srcCodeBlock = do
     overflow auto
     maxHeight (em 50)
 
+  ".code-term" ** pre |> code # ".sourceCode" ? do
+    backgroundColor inherit
+    borderStyle none
+
   (table # ".sourceCode") <>
     (tr # ".sourceCode")  <>
     (td # ".lineNumbers") <>

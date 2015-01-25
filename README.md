@@ -1,16 +1,27 @@
 # Source Code for **[#! λ Slang](http://blog.rekahsoft.ca)**
 
-## About
-
 [#! λ Slang](http://blog.rekahsoft.ca) is the personal technical blog of *Collin Doering*,
 built using software that [respects our freedoms](https://www.gnu.org/philosophy/free-sw.html).
 
-### Features
+## Features
 
-* [Hakyll][] generated static site
-* [Clay][] used for css pre-processing
+* [Single Page Application (SPA)](http://en.wikipedia.org/wiki/Single-page_application)
+* Utilizes CSS 3
+* Uses HTML5 Application Cache for offline viewing of website
 
-### License
+## Tools
+
+The creation of this website was made possible by the following open source tools and libraries:
+
+* [Hakyll][] used to generate site from static files
+* [Clay][] used for CSS pre-processing
+* [Skeleton][] used for CSS boilerplate
+* [MathJax][] used for rendering mathematics
+* [Inkscape][] and the [Gimp][] were used to create various images/artwork
+* [Gnu Free Fonts][], specifically *FreeMono* is used as main font
+* [Gnu Emacs][], because there is no place like home; and no greater editor!
+
+## License
 
 Simply put, you're welcome to use the code used to generate this site though there are a few restrictions:
 
@@ -18,7 +29,9 @@ Simply put, you're welcome to use the code used to generate this site though the
   used and are strictly copyright
 * The content of pages and posts can be used with attribution, providing you aren't making money off of it
 
-Please see the LICENSE file for full details.
+Various licenses ([GPLv3][], [Creative Commons BY-NC-SA License][], and
+[Creative Commons BY-NC-ND License][]) are deployed dependent on which part of the site is in
+question. Please see the LICENSE file for full details.
 
 ## Building
 
@@ -44,5 +57,5 @@ directly via the internet or by using the ```fetch``` argument to cabal).
 [Gnu Free Fonts]: http://www.gnu.org/software/freefont/
 
 [GPLv3]: https://www.gnu.org/licenses/gpl.html
-[Creative Commons Licence BY-NS-SA]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+[Creative Commons BY-NC-SA License]: http://creativecommons.org/licenses/by-nc-sa/4.0/
 [Creative Commons BY-NC-ND License]: http://creativecommons.org/licenses/by-nc-nd/4.0/

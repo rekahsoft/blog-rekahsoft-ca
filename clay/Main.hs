@@ -22,7 +22,7 @@ module Main where
 
 import Clay hiding (i, s, id)
 import Data.Monoid
-import Prelude hiding (div, span, (**))
+import Prelude hiding (div, span, (**), rem)
 import System.Environment
 
 import qualified Clay.Media        as Media
@@ -134,8 +134,15 @@ pageContent = do
     ul |> li ? do
       listStyleType none
 
+    ol |> li ? do
+      listStylePosition outside
+      marginLeft (px 20)
+
     (ul <> ol) |> li ? do
       marginBottom (em 0.02)
+
+    (ul <> ol) ** (ul <> ol) ? do
+      sym margin (rem 1)
 
   "#page-content" # ".loading" ?
     opacity 0.35

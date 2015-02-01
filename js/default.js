@@ -102,13 +102,17 @@
                     return "pages" + url;
                 },
                 rewriteVirtualUrl: function (url) {
-                    if (url === "/") {
-                        url = "/home.html";
+                    if (url === "/home.html") {
+                        url = "/";
                     }
                     return url;
                 },
                 ajaxCallbacks: {
                     beforeSend: function (url, virt_url) {
+                        if (virt_url === "/") {
+                            virt_url = "/home.html";
+                        }
+
                         // Initially set the active menuitem in the nav
                         $('a.menuitem[rel="address:' + virt_url + '"]').closest('ul').find('li.active').removeClass('active');
                         $('a.menuitem[rel="address:' + virt_url + '"]').closest('li').addClass('active');

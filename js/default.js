@@ -140,7 +140,7 @@
                                                      numRecur: spec.numRecur + 1,
                                                      recurDepth: spec.recurDepth });
                                 } else {
-                                    callback(routes[i].rewriteGetUrl(spec.url), spec.url, routes[i].ajaxCallbacks);
+                                    console.log("Exceeded recursion depth for router");
                                 }
                                 break;
                             }

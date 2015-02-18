@@ -475,7 +475,8 @@ instance Functor (Section k) where
 
 unSections :: [Section String String] -> [(String, String)]
 unSections = snd . foldr unSection (0, []) . filter (not . isGlobalSection) . applyGlobalSections
-  where unSection (NonSection b) (n, ys) = (n + 1, ("body" ++ show n, b) : ys)
+  where unSection :: Section String String -> (Integer, [(String, String)]) -> (Integer, [(String, String)])
+        unSection (NonSection b) (n, ys) = (n + 1, ("body" ++ show n, b) : ys)
         unSection (Section k b) (n, ys) = (n, (k, b) : ys)
         unSection (GlobalSection _) _ = error "Internal error! This should never happen!"
 
@@ -500,7 +501,7 @@ section :: Parsec String a (Section String String)
 section = do
   key <- sectionStart
   body <- sectionBody
-  sectionEnd
+  void $ sectionEnd
   return $ Section key body
 
 sectionStart :: Parsec String a String

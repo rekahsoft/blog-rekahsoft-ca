@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------------
-{-# LANGUAGE OverloadedStrings, TupleSections #-}
+{-# LANGUAGE OverloadedStrings, TupleSections, FlexibleContexts #-}
 ---------------------------------------------------------------------------------------------------------
 -- (C) Copyright Collin Doering 2013
 --
@@ -456,7 +456,7 @@ virtualPaginateContext pag currentPage = mconcat
 ---------------------------------------------------------------------------------------------------------
 genSectionContext :: Item String -> Compiler (Context a)
 genSectionContext = fmap mconcat . sequence . map makeField . unSections . readSections . itemBody
-  where makeField (k, b) = constField k . itemBody <$> (makeItem b >>= return . writePandocWith pandocWriterOptions . readPandocWith pandocReaderOptions)
+  where makeField (k, b) = constField k . itemBody <$> (makeItem b >>= readPandocWith pandocReaderOptions >>= return . writePandocWith pandocWriterOptions)
 
 readSections :: String -> [Section String String]
 readSections s = case parse sections "" s of

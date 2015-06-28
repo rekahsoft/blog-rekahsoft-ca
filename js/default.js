@@ -171,11 +171,8 @@
                     type: 'GET',
                     dataType: 'html',
                     beforeSend: function (xhr, settings) {
-                        // Remove loading error from page-content and any status message errors
+                        // Remove loading error from page-content
                         $('#page-content').removeClass('loading-error');
-                        $('#status').slideUp('normal', function () {
-                            $('#status').removeClass('error').removeClass('success');
-                        });
 
                         // Add .loading to #page-content and #nav to facilitate a loading animation
                         $('#page-content, #nav').removeClass('loading-done').addClass('loading');
@@ -191,6 +188,11 @@
                         // Remove the initial loading gif (if its there)
                         $('#page-content').removeClass('init');
 
+                        // Remove any status message errors or successes
+                        $('#status').slideUp('normal', function () {
+                            $('#status').removeClass('error').removeClass('success').children('p.message').remove();
+                        });
+
                         // Stop animations in the nav and page-content and scroll to the top of the page in a set amount of time
                         setTimeout(function () {
                             // Replace old page-content with new page-content
@@ -204,6 +206,7 @@
                                 mj.Hub.Queue(["Typeset", mj.Hub, math_elem[0]]);
                             });
 
+                            // Rewrite new URLs within new content inserted into #page-content
                             $('#page-content a').each(function (i) {
                                 var href = $(this).attr('href'),
                                     external_url_regexp = /https?:\/\/.*/,
@@ -245,9 +248,12 @@
                          */
                         $('#page-content, #nav').removeClass('loading');
                         if ($('#page-content.init')[0]) {
+                            // TODO: instead of immediately displaying error, check if the content is stored in local storage
                             $('#page-content').addClass('loading-error').html('<p class="container border-box">Error initially loading blog.rekahsoft.ca. Check the url! Given "' + page_href + '"</p>');
+                        } else if ($('#status.error')[0]) {
+                            $('#status').prepend('<p class="message">Error retrieving page ' + page_href + '</p>');
                         } else {
-                            $('#status > p.message').text('Error retrieving page "' + page_href + '": ' + status);
+                            $('#status').prepend('<p class="message">Error retrieving page ' + page_href + '</p>');
                             $('#status').addClass('error').slideDown();
                         }
 
@@ -270,7 +276,10 @@
                     });
 
                     $('#status a.close-button').click(function () {
-                        $(this).parent().slideUp();
+                        $(this).parent().slideUp(function () {
+                            $(this).removeClass('error').removeClass('success');
+                            $(this).children('p.message').remove();
+                        });
                     });
 
                     // Callback for when the inital page has completely loaded (including images, etc..)

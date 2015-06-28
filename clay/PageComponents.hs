@@ -38,6 +38,10 @@ pageComponents = do
   businessCard
   tagPageHeading
   srcCodeBlock
+  postFigures
+  inlinePostImages
+  postTables
+  statusMessages
 
 aPost :: Css
 aPost = do
@@ -159,25 +163,24 @@ tagPageHeading = do
 
 srcCodeBlock :: Css
 srcCodeBlock = do
-  ".code-term" # ".sourceCode" ? do
+  div # ".sourceCode" |> (pre <> table) # ".sourceCode" # ".code-term" ? do
     display block
     backgroundColor "#111"
     color white
     sym borderRadius (px 3)
-    sym2 padding (em 0.5) nil
+    sym padding (em 0.5)
     marginBottom (em 0.75)
     overflow auto
     maxHeight (em 50)
 
-  ".code-term" ** pre |> code # ".sourceCode" ? do
+  div # ".sourceCode" ** pre # ".code-term" |> code <>
+   div # ".sourceCode" |> table # ".code-term" ** code ? do
     backgroundColor inherit
     borderStyle none
+    sym padding nil
 
-  (table # ".sourceCode") <>
-    (tr # ".sourceCode")  <>
-    (td # ".lineNumbers") <>
-    (td # ".sourceCode")  <>
-    (table # ".sourceCode" ** pre) ? do
+  (table <> tr <> td) # ".sourceCode"
+    <> table # ".sourceCode" ** pre ? do
       sym margin nil
       sym padding nil
       border none nil black
@@ -193,41 +196,86 @@ srcCodeBlock = do
   td # ".sourceCode" ?
     paddingLeft (px 5)
 
-  (pre <> code) # ".sourceCode" ** span # ".kw" ? do
-    color "#007020"
-    fontWeight bold
+  (pre <> code) # ".sourceCode" ? do
+    span # ".kw" ? do
+      color "#007020"
+      fontWeight bold
+    span # ".dt" ? color "#902000"
+    span # ".dv" ? color "#40a070"
+    span # ".bn" ? color "#40a070"
+    span # ".fl" ? color "#40a070"
+    span # ".ch" ? color "#4070a0"
+    span # ".st" ? color "#4070a0"
+    span # ".co" ? do
+      color "#60a0b0"
+      fontStyle italic
+    span # ".al" ? do
+      color red
+      fontWeight bold
+    span # ".fu" ? color "#06287e"
+    span # ".er" ? do
+      color red
+      fontWeight bold
 
-  (pre <> code) # ".sourceCode" ** span # ".dt" ?
-    color "#902000"
+postFigures :: Css
+postFigures = do
+  figure ? do
+    border solid (px 1) black
+    sym borderRadius (px 3)
+    clear both
 
-  (pre <> code) # ".sourceCode" ** span # ".dv" ?
-    color "#40a070"
+  figure ? do
+    img <? do
+      display block
+      width (pct 100)
+      borderBottom solid (px 1) black
+      cursor pointer
 
-  (pre <> code) # ".sourceCode" ** span # ".bn" ?
-    color "#40a070"
+    figcaption # ":before" <? do
+      display inlineBlock
+      content $ stringContent "Fig:"
+      paddingRight (em 1)
+      fontWeight bold
 
-  (pre <> code) # ".sourceCode" ** span # ".fl" ?
-    color "#40a070"
+    figcaption <? do
+      sym2 padding nil (em 1)
+      backgroundColor "#B4D1EF"
 
-  (pre <> code) # ".sourceCode" ** span # ".ch" ?
-    color "#4070a0"
+inlinePostImages :: Css
+inlinePostImages = article # ".post" ? do
+  p |> img <? do
+    clear clearRight
+    float floatRight
+    width (pct 30)
+    border solid (px 1) black
+    sym borderRadius (px 3)
+    sym margin (em 1)
+    cursor pointer
 
-  (pre <> code) # ".sourceCode" ** span # ".st" ?
-    color "#4070a0"
+  let fullCss = do
+        width (pct 100)
+        float none
+  p |> img # ":-webkit-full-screen" <? fullCss
+  p |> img # ":-moz-full-screen"    <? fullCss
+  p |> img # ":-ms-full-screen"     <? fullCss
+  p |> img # ":fullscreen"          <? fullCss
 
-  (pre <> code) # ".sourceCode" ** span # ".co" ? do
-    color "#60a0b0"
-    fontStyle italic
+postTables :: Css
+postTables = article # ".post" ? do
+  table <? do
+    margin nil auto (em 1) auto
+    thead ? do
+      backgroundColor "#ACBDEA"
+    tbody <? do
+      tr # ".odd" ? backgroundColor "#DFEAFF"
+      tr # ".even" ? backgroundColor "#E3E3F0"
+    caption ? backgroundColor "#f5f5f5"
 
-  (pre <> code) # ".sourceCode" ** span # ".al" ? do
-    color red
-    fontWeight bold
+  table <? do
+    (th <> td) # ":first-child" ? paddingLeft (px 14)
+    (th <> td) # ":last-child"  ? paddingRight (px 14)
 
-  (pre <> code) # ".sourceCode" ** span # ".fu" ?
-    color "#06287e"
-
-  -- (pre <> code) # ".sourceCode" ** span # ".re"
-
-  (pre <> code) # ".sourceCode" ** span # ".er" ? do
-    color red
-    fontWeight bold
+statusMessages :: Css
+statusMessages = "#status" ? do
+  ".close-button" <? float floatRight
+  ".message" <? marginBottom nil

@@ -107,7 +107,9 @@ theElements = do
 
   h1 <> h2 <> h3 <> h4 <> h5 <> h6 ?
     fontFamily ["FreeMono"] [monospace]
-  h1 ? fontSize (em 2.5)
+  h1 ? do
+    fontSize (em 2.5)
+    marginBottom nil
   h2 ? fontSize (em 2)
   h3 ? fontSize (em 1.75)
   h4 ? fontSize (em 1.5)
@@ -116,7 +118,9 @@ theElements = do
 
   ul <> ol ?
     paddingLeft (em 1)
-  hr ? marginBottom (em 0.5)
+  hr ? do
+    marginBottom (em 0.65)
+    marginTop (em 0.65)
 
   --sup ? verticalAlign (VerticalAlignValue "super")
   sup ? do

@@ -127,7 +127,7 @@ businessCard = do
     sym padding (px 10)
     minHeight (px 215)
     maxWidth (px 550)
-    sym2 margin nil auto
+    margin nil auto (em 1) auto
 
     ".photo" ? do
       backgroundImage $ url "/images/business-card.png"

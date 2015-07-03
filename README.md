@@ -6,6 +6,7 @@
 * [Building](#building)
 * [Running Tests](#running-tests)
 * [Issues](#issues)
+* [Road Map](#road-map)
 
 [#! λ Slang](http://blog.rekahsoft.ca) is the personal technical blog of *Collin Doering*,
 built using software that [respects our freedoms](https://www.gnu.org/philosophy/free-sw.html).
@@ -85,6 +86,25 @@ working sources for `webdriver-0.6.1` are in place, run the following:
 This will share the cabal sandbox which we used to build and install our fixed version of
 webdriver, with this project. Now the test-suite can be run once its dependencies are installed
 (see [Running Tests](#running-tests)).
+
+## Road Map <a name="road-map"></a>
+
+There are still a few remaining rough edges to be fixed up. The ones I'm aware of are listed
+below, if you find an issue please report it to me via email so I can make this site better.
+
+* Include source files using some special syntax to avoid having to copy-paste source code into
+articles. An example of what this could look like:
+
+    \`\`\` {.haskell .lineNumber include="files/source/SomeFile.hs"}
+    \`\`\`
+
+* Have a proper draft system instead of copying articles to and from `drafts` and `posts`.
+* Use LocalStorage API to save previously visited articles so they can be viewed offline (and
+  saves on bandwidth). Note, this is already somewhat handled by the browsers cache, but the
+  cache can be unreliable and also can't be controlled from javascript so a better solution is
+  to use LocalStorage as mentioned.
+* Make tag specific RSS feeds available via links (on individual tag pages and perhaps somewhere on the home page).
+* Re-enable simple nojs site as fallback when javascript is disabled by the client browser
 
 [Hakyll]: http://jaspervdj.be/hakyll/
 [Clay]: http://fvisser.nl/clay/

@@ -60,8 +60,11 @@ To the run the tests that accompany this site, one must have [Selenium][] instal
 instances running on port 4444. Then one must run the following:` 
 
     $ cabal configure --enable-tests
-    $ cabal install --only-dependencies
-    $ cabal test
+    $ cabal install --enable-tests --only-dependencies
+    $ ./site test -s
+
+The `-s` or `--run-selenium` option to `site test` starts a selenium server before running the
+tests. Another way to run the tests is using cabal directly by running `cabal test`.
 
 ## Issues <a name="issues"></a>
 

@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# Remove empty files under directory _site
-find _site -type f -empty -exec rm -v {} \;
-
-# Test site
-cabal test --show-details=always --test-option=--color

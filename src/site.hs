@@ -30,7 +30,7 @@ import Data.Map (toList, size)
 import qualified Data.Set as S
 import Data.Ord (comparing)
 import System.Random
-import System.FilePath (takeBaseName)
+import System.FilePath (takeBaseName, (</>))
 import System.Process
 import System.Exit
 import System.IO (hGetContents)
@@ -246,6 +246,113 @@ main = do
         makeItem "loading"
           >>= applyAsTemplate indexCtx
           >>= loadAndApplyTemplate "templates/default.html" indexCtx
+
+---------------------------------------------------------------------------------------------------------
+-- NOJS Version -----------------------------------------------------------------------------------------
+    -- tagsNoJs <- buildTags ("posts/**" .&&. hasVersion "nojs") (fromCapture "nojs/tags/*.html")
+    -- tagsRules tagsNoJs $ genTagRules tagsNoJs
+
+    create ["nojs/atom.xml"] $ do
+      route   idRoute
+      compile $ do
+        let feedCtx = postCtx <> bodyField "description"
+        blogPosts <- loadAllSnapshots ("posts/**" .&&. hasVersion "nojs") "content"
+                       >>= fmap (take 10) . recentFirst
+        renderAtom (feedConfiguration Nothing) feedCtx blogPosts
+
+    create ["nojs/archive.html"] $ do
+      route     idRoute
+      compile $ do
+        -- Load all blog posts for archive
+        posts <- recentFirst =<< loadAllSnapshots ("posts/*" .&&. hasVersion "nojs") "content"
+
+        -- Generate nav-bar from pages/*
+        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
+
+        let archiveCtx =
+              listField "posts" postCtx (return posts) <>
+              constField "title" "Archives"            <>
+              defaultContext
+            indexCtx =
+              listField "pagesFirst" pagesCtx (return pages) <>
+              listField "pagesLast" pagesCtx (return [])     <>
+              defaultContext
+
+        makeItem ""
+          >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
+          >>= loadAndApplyTemplate "templates/default-nojs.html" indexCtx
+          >>= relativizeUrls
+
+    match "posts/**" $ version "nojs" $ do
+      route   $ customRoute (\r -> "nojs" </> toFilePath r) `composeRoutes` setExtension "html"
+      compile $ do
+        -- Generate nav-bar from pages/*
+        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
+
+        -- Get the current Identifier
+        curId <- getUnderlying
+
+        let (pagesFirst, pagesLast') = flip span pages $ \x ->
+              toFilePath curId /= (toFilePath . itemIdentifier $ x)
+            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
+            postNojsCtx =
+              listField "pagesFirst" pagesCtx (return pagesFirst) <>
+              listField "pagesLast" pagesCtx (return pagesLast)   <>
+              defaultContext
+
+        pandocCompiler
+          >>= saveSnapshot "content"
+          >>= loadAndApplyTemplate "templates/partials/post-nojs.html" postCtx
+          >>= loadAndApplyTemplate "templates/default-nojs.html" postNojsCtx
+          >>= relativizeUrls
+
+    -- This route is used for the initial pass of the pages (nav-gen) and the final nojs page output
+    let pagesNoJsRoute = customRoute (\r -> if toFilePath r == "pages/home.markdown"
+                                   then "pages/index.markdown"
+                                   else toFilePath r) `composeRoutes`
+                gsubRoute "pages" (const "nojs")      `composeRoutes`
+                setExtension "html"
+
+    match "pages/*" $ version "nav-gen" $ do
+      route   $ pagesNoJsRoute
+      compile $ pandocCompiler
+        >>= loadAndApplyTemplate "templates/page.html" defaultContext
+
+    match "pages/*" $ version "nojs" $ do
+      route   $ pagesNoJsRoute
+      compile $ do
+        -- Show a slideshow of blog posts using js..limit to the 3 most recent posts
+        recentPosts <- loadAllSnapshots ("posts/**" .&&. hasVersion "nojs") "content"
+                        >>= fmap (take 3) . recentFirst
+
+        -- Generate nav-bar from pages/*
+        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
+
+        -- Get the current Identifier
+        curId <- getUnderlying
+
+        let (pagesFirst, pagesLast') = flip span pages $ \x ->
+              toFilePath curId /= (toFilePath . itemIdentifier $ x)
+            pageMid = head pagesLast'
+            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
+            pagesNojsCtx =
+              listField "recentPosts" postCtx (return recentPosts)       <>
+              listField "pagesFirst" pagesCtx (return pagesFirst)        <>
+              field "pageMid" (const $ return . itemBody $ pageMid)      <>
+              listField "pagesLast" pagesCtx (return pagesLast)          <>
+              defaultContext
+
+        loadVersion "nav-gen" curId
+          >>= loadAndApplyTemplate "templates/default-nojs.html" pagesNojsCtx
+          >>= relativizeUrls
+
+---------------------------------------------------------------------------------------------------------
+-- Functions only used by nojs version of site
+--
+loadVersion :: String -> Identifier -> Compiler (Item String)
+loadVersion v i = load (setVersion (listAsMaybe v) i) >>= makeItem . itemBody
+  where listAsMaybe [] = Nothing
+        listAsMaybe xs = Just xs
 
 ---------------------------------------------------------------------------------------------------------
 -- Functions & Constants --------------------------------------------------------------------------------

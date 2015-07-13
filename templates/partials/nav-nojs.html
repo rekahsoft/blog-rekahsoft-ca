@@ -1,19 +1,20 @@
 <div id='nav'>
-  <ul id='nav-menu'>
+  <ul class="container" id='nav-menu'>
     $for(pagesFirst)$
     <li>
       <a class='menuitem' href='$url$'>$title$</a>
     </li>
     $endfor$
-    $if(pageMid)$
+    $for(pageMid)$
     <li class='active'>
       <a class='menuitem' href='$url$'>$title$</a>
     </li>
-    $endif$
+    $endfor$
     $for(pagesLast)$
     <li>
       <a class='menuitem' href='$url$'>$title$</a>
     </li>
     $endfor$
+    <a class='rss-icon' href='atom.xml'></a>
   </ul>
 </div>

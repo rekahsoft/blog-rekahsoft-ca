@@ -187,7 +187,6 @@ main = do
 
 ---------------------------------------------------------------------------------------------------------
 -- Default Version --------------------------------------------------------------------------------------
-=======
     -- Generate tag pages
     paginateTagsRules tags
 
@@ -290,29 +289,6 @@ main = do
         blogPosts <- loadAllSnapshots ("posts/**" .&&. hasVersion "nojs") "content"
                        >>= fmap (take 10) . recentFirst
         renderAtom (feedConfiguration Nothing) feedCtx blogPosts
-
-    -- create ["nojs/archive.html"] $ do
-    --   route     idRoute
-    --   compile $ do
-    --     -- Load all blog posts for archive
-    --     posts <- recentFirst =<< loadAllSnapshots ("posts/*" .&&. hasVersion "nojs") "content"
-
-    --     -- Generate nav-bar from pages/*
-    --     pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
-
-    --     let archiveCtx =
-    --           listField "posts" postCtx (return posts) <>
-    --           constField "title" "Archives"            <>
-    --           defaultContext
-    --         indexCtx =
-    --           listField "pagesFirst" pagesCtx (return pages) <>
-    --           listField "pagesLast" pagesCtx (return [])     <>
-    --           defaultContext
-
-    --     makeItem ""
-    --       >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
-    --       >>= loadAndApplyTemplate "templates/default-nojs.html" indexCtx
-    --       >>= relativizeUrls
 
     match "posts/**" $ version "nojs" $ do
       route   $ customRoute (\r -> "nojs" </> toFilePath r) `composeRoutes` setExtension "html"

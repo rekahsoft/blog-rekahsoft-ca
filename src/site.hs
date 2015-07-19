@@ -188,7 +188,7 @@ main = do
 ---------------------------------------------------------------------------------------------------------
 -- Default Version --------------------------------------------------------------------------------------
     -- Generate tag pages
-    paginateTagsRules tags
+    paginateTagsRules "tags" tags
 
     paginateRules paginatedPosts $ \pageNum pattern -> do
       route idRoute
@@ -268,19 +268,31 @@ main = do
                           (\n -> fromCapture "nojs/blog*.html" (show n))
 
     -- Generate nojs tag pages
-    paginateTagsRules tagsNoJs
+    paginateTagsRules "nojs/tags" tagsNoJs
 
     paginateRules paginatedPostsNoJs $ \pageNum pattern -> do
       route idRoute
       compile $ do
+        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
+
         posts <- recentFirst =<< loadAllSnapshots pattern "content"
-        let ctx = taggedPostCtx tagsNoJs <>
+        let (pagesFirst, pagesLast') = flip span pages $ \x ->
+              (toFilePath . itemIdentifier $ x) /= "pages/blog.markdown"
+            pageMid = [head pagesLast']
+            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
+            ctx = taggedPostCtx tagsNoJs <>
                   paginateContext paginatedPostsNoJs pageNum <>
                   virtualPaginateContext paginatedPostsNoJs pageNum <>
                   constField "weight" "0" <>
                   listField "posts" (taggedPostCtx tagsNoJs) (return posts)
+            indexCtx = listField "pagesFirst" pagesCtx (return pagesFirst)   <>
+                       listField "pageMid" pagesCtx (return pageMid)         <>
+                       listField "pagesLast" pagesCtx (return pagesLast)     <>
+                       defaultContext
+
         makeItem ""
           >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
+          >>= loadAndApplyTemplate "templates/default-nojs.html" indexCtx
 
     create ["nojs/atom.xml"] $ do
       route   idRoute
@@ -295,9 +307,6 @@ main = do
       compile $ do
         -- Generate nav-bar from pages/*
         pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
-
-        -- Get the current Identifier
-        curId <- getUnderlying
 
         let (pagesFirst, pagesLast') = flip span pages $ \x ->
               (toFilePath . itemIdentifier $ x) /= "pages/blog.markdown"
@@ -362,14 +371,6 @@ main = do
           >>= relativizeUrls
 
 ---------------------------------------------------------------------------------------------------------
--- Functions only used by nojs version of site
---
-loadVersion :: String -> Identifier -> Compiler (Item String)
-loadVersion v i = load (setVersion (listAsMaybe v) i) >>= makeItem . itemBody
-  where listAsMaybe [] = Nothing
-        listAsMaybe xs = Just xs
-
----------------------------------------------------------------------------------------------------------
 -- Functions & Constants --------------------------------------------------------------------------------
 feedConfiguration :: Maybe String -> FeedConfiguration
 feedConfiguration title = FeedConfiguration
@@ -384,13 +385,13 @@ feedConfiguration title = FeedConfiguration
 numPaginatePages :: Int
 numPaginatePages = 6
 
-paginateTagsRules :: Tags -> Rules ()
-paginateTagsRules tags =
+paginateTagsRules :: String -> Tags -> Rules ()
+paginateTagsRules loc tags =
   forM_ (tagsMap tags) $ \(tag, identifiers) -> do
     paginatedTaggedPosts <- buildPaginateWith
                             (fmap (paginateEvery numPaginatePages) . sortRecentFirst)
                             (fromList identifiers)
-                            (\n -> fromCapture (fromGlob $ "tags/" ++ tag ++ "*.html") (show n))
+                            (\n -> fromCapture (fromGlob $ loc ++ "/" ++ tag ++ "*.html") (show n))
 
     paginateRules paginatedTaggedPosts $ \pageNum pattern -> do
       route idRoute

@@ -1,7 +1,7 @@
 ---
 title: Computer From Scratch
 author: Collin J. Doering
-date: Jun 19, 2015
+date: Jul 19, 2015
 description: Building a computer from scratch using VHDL
 tags: general, programming, hardware, nand-to-tetris
 ---
@@ -67,22 +67,23 @@ $ vcd2fst wave/vcd/computer-fib.vcd wave/vcd/computer-fib.fst
 
 First, clone the sources, then import and build them with `ghdl`. Finally run the simulation
 using the default input program and output a vcd file to `src/wave/vcd/computer-fib.vcd` which
-is then converted to a `fst` file using `vcd2fst`. Now once the simulation has complete the
-*vcd* or *fst* file can be opened with a wave form viewer. I recommend and have only tested
-with [GtkWave][]. To open the dump file open [GtkWave][] and go to `File -> Open New Tab` (or
-`C-t`) and select the output file (in our case `src/wave/vcd/computer-fib.fst`). I have
-provided pre-saved "views" for `computer_tb` (as well as the other entities within the project)
-so that the signals of interest for the entity in question don't need to be repopulated into
-the signals panel each time [GtkWave][] is opened. To open the [GtkWave][] save file go to
-`File -> Read Save File` (or `C-o`) and select the appropriate save file. In our case we will
-open `src/wave/gtkw/computer-fib.gtkw`.
+is then converted to a `fst` file using `vcd2fst` (`vcd2fst` is included with [GtkWave][]). Now
+once the simulation has complete the *vcd* or *fst* file can be opened with a wave form viewer.
+I recommend and have only tested with [GtkWave][]. To open the dump file open [GtkWave][] and
+go to `File -> Open New Tab` (or `C-t`) and select the output file (in our case
+`src/wave/vcd/computer-fib.fst`). I have provided pre-saved "views" for `computer_tb` (as well
+as the other entities within the project) so that the signals of interest for the entity in
+question don't need to be repopulated into the signals panel each time [GtkWave][] is opened.
+To open the [GtkWave][] save file go to `File -> Read Save File` (or `C-o`) and select the
+appropriate save file. In our case we will open `src/wave/gtkw/computer-fib.gtkw`.
 
 Note running this simulation will take some time (likely longer then an hour) and will consume
 lots of RAM and CPU and generate a large vcd dump (> 20 GB). By changing the length of time the
 simulation runs for one can limit the size of the vcd dump, but the usage of the CPU and RAM
-will remain the same. The large vcd dump file is unavoidable (as far as I know) because *GHDL*
-records data for all signals in the design and there's no way to filter its output until after
-the simulation has run (using external tools).
+will remain the same. The large vcd dump file is unavoidable because *GHDL* records data for
+all signals in the design and there's no way to filter its output until after the simulation
+has run (using external tools). Hopefully at some point the developers of *GHDL* can fix this
+oversight.
 
 ![[GtkWave][] displaying a simulation dump from *computer_tb* running
  *src/asm/Fib.hack*](files/images/gtkwave.png)
@@ -106,8 +107,35 @@ want to run in the simulation. See the [documentation][hack-docs] for details.
 ![[GtkWave][] zoomed in to view approximately *100 ns* of signal
  output](files/images/gtkwave-closeup.png)
 
+So now that we've seen a quick rundown of how to use the simulator to run *Hack* programs, lets
+take a moment to review some of the deficiencies of the implementation. The most noticeable
+issue is that the memory maps for the *SCREEN* and *KEYBOARD* are currently not implemented.
+This is mainly because it is difficult to simulate keyboard input and video output in real
+time. Note that programs that access the *SCREEN* and *KEYBOARD* memory maps will successfully
+be executed during simulation, but any data sent to the screen will never be remembered and the
+keyboard will always be inactive.
 
-TODO: talk about current state of project (deficiencies in regards to screen and keyboard memory maps)
+One method to implemented the *KEYBOARD* memory map is using a text file similar to the
+technique employed in the ROM entity. This would work fine but wouldn't provide an interactive
+user experience as I would prefer. Similarly for video output, the raw VGA signals or even
+simpler yet, the values of the screen memory map could be dumped to file during the simulation
+and then be processed after the fact by an external program to create a video or set of images
+of the output. This again however, isn't a interactive experience.
+
+An option I haven't mentioned is to have the simulation and an external program communicate
+through a pipe or socket while the simulation is running. This would allow the external program
+to send key presses to the simulation while also simultaneously decoding the output of the
+screen output file in real time and displaying it as a video to the user; essentially creating
+a VM for the *Hack* machine. This approach seems the most promising but is quite challenging to
+implement, and likely will be quite slow. So I determined for the time being, my time would be
+better spent focusing on completing the implementing on a *FPGA*, once I'm able to obtain one.
+Though at some point I may explore this as it would allow an easy way for students to further
+explore after completing the *Nand to Tetris* course.
+
+Anyways, hope you enjoyed reading this post. I will post a few follow up articles once I'm able
+to obtain a *FPGA* and complete the implementation (will a VGA screen and a PS2 or USB
+keyboard). Also just to reintegrate, for those of those interested in the inner workings of a
+computer, I highly recommend checking out the *Nand to Tetris* course.
 
 [hack-git]: http://git.rekahsoft.ca/hack/
 [hack-docs]: http://git.rekahsoft.ca/hack/about

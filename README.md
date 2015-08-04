@@ -90,6 +90,9 @@ This will share the cabal sandbox which we used to build and install our fixed v
 webdriver, with this project. Now the test-suite can be run once its dependencies are installed
 (see [Running Tests](#running-tests)).
 
+If you have an issue while browsing [my blog](http://blog.rekahsoft.ca) please file a bug using
+my [flyspray powered bug tracker](https://bugs.rekahsoft.ca/index.php?project=9).
+
 ## Road Map <a name="road-map"></a>
 
 There are still a few remaining rough edges to be fixed up. The ones I'm aware of are listed

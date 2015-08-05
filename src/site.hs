@@ -105,7 +105,7 @@ main = do
 
   hakyllWith myConfig $ do
 -- All Versions ------------------------------------------------------------------------------------------
-    match ("action/**" .||. "files/**" .||. "images/**" .||. "fonts/**") $ do
+    match ("action/**" .||. "files/**" .||. "images/**" .||. "fonts/**" .||. "robots.txt") $ do
       route   idRoute
       compile copyFileCompiler
 

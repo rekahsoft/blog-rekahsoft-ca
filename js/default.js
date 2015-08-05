@@ -27,6 +27,20 @@
 /*global jQuery, MathJax*/
 //------------------------
 
+// Global array for processing piwik analytics commands
+var _paq = _paq || [];
+_paq.push(["setDoNotTrack", true]);
+_paq.push(['enableLinkTracking']);
+
+// Asynchronously load piwik.js
+(function() {
+  var u="//analytics.rekahsoft.ca/";
+  _paq.push(['setTrackerUrl', u+'piwik.php']);
+  _paq.push(['setSiteId', 1]);
+  var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+  g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+})();
+
 (function ($, mj) {
     "use strict";
 
@@ -166,6 +180,10 @@
             // var pageId = '#page-content', navId = '#nav';
 
             function loadPageContent(page_href, virt_href, handlerCallback) {
+                // Track page view with piwik
+                _paq.push(['setDocumentTitle', document.domain + '/' + virt_href]);
+                _paq.push(['trackPageView']);
+
                 $.ajax({
                     url: page_href,
                     type: 'GET',

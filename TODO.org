@@ -1,0 +1,32 @@
+* rm-js-req TODOs
+
+** Goals
+*** TODO Remove the javascipt requirement (so that all urls can be viewed without javascript)
+*** TODO Only generate one version of the site
+*** TODO Have SPA functionality when javascript is enabled
+
+** Implementation
+   In order to implement this, a reasonable size refactor needs to take place. Below is a list
+   of things to be completed in order to successfully achieve the aforementioned goals.
+
+*** TODO Generate nav with href pointing to normal urls, not virtual ones
+    (Eg. /pages/blog.html instead of #/blog.html)
+*** TODO Modify URLs using javascript once page is loaded
+    If it is indeed enabled then the user can benefit from the SPA functionality of the site.
+    Otherwise they will be able to browse the site using the original, unmodified links. This is
+    similar to how the link withing the page-content div work currently, and mainly would have to
+    be adapted for the navigation.
+*** TODO Generate pages/* to /
+    Instead of having the default version
+*** TODO Generate complete pages (no snippets)
+    The enhanced javascipt additions to the site will then have to extract the page-content div
+    before loading it into the page.
+
+** Benefits
+   This refactor will have a couple added benefits. Namely:
+
+   - The RSS feed which is currently slightly broken for the js version of the site will now
+     function properly with no modification. The current issue with the RSS feed is that the
+     links to the posts are to the snippets instead of the virtual address (Eg.
+     /posts/some-post.html instead of /#/posts/some-post.html).
+   - Having two files for every post is bad for search engines (SEO).

@@ -324,15 +324,18 @@ main = do
           >>= loadAndApplyTemplate "templates/default-nojs.html" postNojsCtx
           >>= relativizeUrls
 
+    let navgenRoute = customRoute (\r -> if toFilePath r == "pages/home.markdown"
+                                   then "pages/index.markdown"
+                                   else toFilePath r) `composeRoutes`
+                      gsubRoute "pages" (const "nojs")      `composeRoutes`
+                      setExtension "html"
+
     match "pages/*" $ version "nav-gen" $ do
+      route     navgenRoute
       compile $ pandocCompiler
 
     match "pages/*" $ version "nojs" $ do
-      route   $ customRoute (\r -> if toFilePath r == "pages/home.markdown"
-                                   then "pages/index.markdown"
-                                   else toFilePath r) `composeRoutes`
-                gsubRoute "pages" (const "nojs")      `composeRoutes`
-                setExtension "html"
+      route     navgenRoute
       compile $ do
         posts <- recentFirst =<< loadAllSnapshots ("posts/**" .&&. hasVersion "nojs") "content"
 

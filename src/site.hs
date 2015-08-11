@@ -163,7 +163,7 @@ main = do
                             , "# " ++ randomStr ]
             manifestCacheSingles = [ "/index.html"
                                    , "/default.css" ]
-            paginatedPostsCache = take 2 $ map (\(n,_) -> "/pages/blog" ++ (show n) ++ ".html") $ toList $ paginateMap paginatedPosts
+            paginatedPostsCache = take 2 $ map (\(n,_) -> "/blog" ++ (show n) ++ ".html") $ toList $ paginateMap paginatedPosts
             tagsCache = concatMap (\(t,ids) -> take 2 $ ["/tags/" ++ t ++ show n ++ ".html" | n <- [1..length $ paginateEvery numPaginatePages ids]]) $ tagsMap tags
             manifestCacheFromIds = filter (not . null) $ fmap (maybe "" ("/"++)) manifestCacheRoutesMaybe
             manifestCache = manifestCacheFromIds ++ tagsCache ++ paginatedPostsCache

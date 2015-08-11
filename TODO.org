@@ -1,26 +1,13 @@
 * rm-js-req TODOs
 
 ** Goals
-*** TODO Remove the javascipt requirement (so that all urls can be viewed without javascript)
-*** TODO Only generate one version of the site
 *** TODO Have SPA functionality when javascript is enabled
+*** Complete
+**** DONE Remove the javascipt requirement (so that all urls can be viewed without javascript)
+     CLOSED: [2015-08-10 Mon 22:57]
+**** DONE Only generate one version of the site
+     CLOSED: [2015-08-10 Mon 22:57]
 
-** Implementation
-   In order to implement this, a reasonable size refactor needs to take place. Below is a list
-   of things to be completed in order to successfully achieve the aforementioned goals.
-
-*** TODO Generate nav with href pointing to normal urls, not virtual ones
-    (Eg. /pages/blog.html instead of #/blog.html)
-*** TODO Modify URLs using javascript once page is loaded
-    If it is indeed enabled then the user can benefit from the SPA functionality of the site.
-    Otherwise they will be able to browse the site using the original, unmodified links. This is
-    similar to how the link withing the page-content div work currently, and mainly would have to
-    be adapted for the navigation.
-*** TODO Generate pages/* to /
-    Instead of having the default version
-*** TODO Generate complete pages (no snippets)
-    The enhanced javascipt additions to the site will then have to extract the page-content div
-    before loading it into the page.
 
 ** Benefits
    This refactor will have a couple added benefits. Namely:
@@ -30,3 +17,41 @@
      links to the posts are to the snippets instead of the virtual address (Eg.
      /posts/some-post.html instead of /#/posts/some-post.html).
    - Having two files for every post is bad for search engines (SEO).
+
+** Implementation
+   In order to implement this, a reasonable size refactor needs to take place. Below is a list
+   of things to be completed in order to successfully achieve the aforementioned goals.
+
+*** TODO Modify nav URLs using javascript once page is loaded
+    If it is indeed enabled then the user can benefit from the SPA functionality of the site.
+    Otherwise they will be able to browse the site using the original, unmodified links. This is
+    similar to how the link withing the page-content div work currently, and mainly would have to
+    be adapted for the navigation.
+
+*** TODO Fix issue with tag and pagination urls <<page loading issue>>
+    All URLs are required to work without javascript. Thus there can't be any tricks employed
+    in javascript to modify urls (the js router rewriting). Currently this happens with the 
+
+    - "/blog.html" to "/blog1.html"
+    - "/tags/general.html" to "/tags/general1.html"
+    - etc..
+
+    Currently URLs to paginated pages (which includes the blog and tag pages) are broken. They
+    generate "/tags/*.html" instead of "/tags/*1.html".
+
+*** TODO Fix ajax page loading
+    Pages don't load properly when javascript is enabled. This likely is having an effect on
+    this [[page loading issue][issue]] as well. More debugging is required.
+
+*** Complete
+**** DONE Generate nav with href pointing to normal urls, not virtual ones
+     CLOSED: [2015-08-10 Mon 22:55]
+     (Eg. /pages/blog.html instead of #/blog.html)
+     Note: must be relative urls (via relativizeUrls)
+**** DONE Generate pages/* to /
+     CLOSED: [2015-08-10 Mon 22:56]
+     Instead of having the default version
+**** DONE Generate complete pages (no snippets)
+     CLOSED: [2015-08-10 Mon 22:57]
+     The enhanced javascipt additions to the site will then have to extract the page-content div
+     before loading it into the page.

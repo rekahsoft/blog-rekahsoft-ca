@@ -86,7 +86,7 @@ has run (using external tools). Hopefully at some point the developers of *GHDL*
 oversight.
 
 ![[GtkWave][] displaying a simulation dump from *computer_tb* running
- *src/asm/Fib.hack*](files/images/gtkwave.png)
+ *src/asm/Fib.hack*](/files/images/gtkwave.png)
 
 Using a
 [generic property](http://www.doulos.com/knowhow/fpga/Setting_Generics_Parameters_for_Synthesis/)
@@ -105,7 +105,7 @@ older version of *GHDL* then you must modify `src/computer_tb.vhdl` to specify t
 want to run in the simulation. See the [documentation][hack-docs] for details.
 
 ![[GtkWave][] zoomed in to view approximately *100 ns* of signal
- output](files/images/gtkwave-closeup.png)
+ output](/files/images/gtkwave-closeup.png)
 
 So now that we've seen a quick rundown of how to use the simulator to run *Hack* programs, lets
 take a moment to review some of the deficiencies of the implementation. The most noticeable

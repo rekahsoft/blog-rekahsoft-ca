@@ -120,13 +120,14 @@ main = do
     match "templates/**" $ compile $ getResourceBody >>= saveSnapshot "original"
       >> templateCompiler
 
--- Default Version --------------------------------------------------------------------------------------
+    -- Generate tags
     tags <- buildTags ("posts/**" .&&. hasNoVersion) (fromCapture "tags/*.html")
 
+    -- Generate paginate
     paginatedPosts <- buildPaginateWith
                       (fmap (paginateEvery numPaginatePages) . sortRecentFirst)
                       ("posts/**" .&&. hasNoVersion)
-                      (\n -> fromCapture "pages/blog*.html" (show n))
+                      (\n -> fromCapture "blog*.html" (show n))
 
     pageIds  <- getMatches ("pages/**" .&&. complement "pages/blog.markdown")
     fontIds  <- getMatches "fonts/**"
@@ -190,154 +191,46 @@ main = do
     -- Generate tag pages
     paginateTagsRules "tags" tags
 
-    paginateRules paginatedPosts $ \pageNum pattern -> do
-      route idRoute
-      compile $ do
-        posts <- recentFirst =<< loadAllSnapshots pattern "content"
-        let ctx = taggedPostCtx tags <>
-                  paginateContext paginatedPosts pageNum <>
-                  virtualPaginateContext paginatedPosts pageNum <>
-                  constField "weight" "0" <>
-                  listField "posts" (taggedPostCtx tags) (return posts)
-        makeItem ""
-          >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
-
-    match "pages/*" $ do
-      route   $ setExtension "html"
-      compile $ do
-        -- Get the current page name
-        pageName <- takeBaseName . toFilePath <$> getUnderlying
-
-        posts <- recentFirst =<< loadAllSnapshots ("posts/**" .&&. hasNoVersion) "content"
-
-        let recentPosts = take 5 posts
-            pageTemplate = "templates/pages/" ++ pageName ++ ".html"
-            masterCtx = listField "recentPosts" (taggedPostCtx tags) (return recentPosts) <>
-                        listField "posts" (taggedPostCtx tags) (return posts)             <>
-                        tagCloudField "tagCloud" 65 135 tags                              <>
-                        defaultContext
-
-        sectionCtx <- getResourceBody >>= genSectionContext
-        pg <- loadSnapshot (fromFilePath pageTemplate) "original"
-          >>= applyAsTemplate (sectionCtx <> masterCtx)
-
-        if pageName == "blog"
-          then makeItem ""
-          else makeItem . itemBody $ pg
-
-    match "posts/**" $ do
-      route   $ setExtension "html"
-      compile $ pandocCompilerWith pandocReaderOptions pandocWriterOptions
-        >>= saveSnapshot "content"
-        >>= loadAndApplyTemplate "templates/partials/post.html" (taggedPostCtx tags)
-
-    create ["atom.xml"] $ do
-      route   idRoute
-      compile $ do
-        let feedCtx = postCtx <> bodyField "description"
-        blogPosts <- loadAllSnapshots ("posts/**" .&&. hasNoVersion) "content"
-                       >>= fmap (take 10) . recentFirst
-        renderAtom (feedConfiguration Nothing) feedCtx blogPosts
-
-    forM_ [("js/**", idRoute),
-           ("lib/JQuery/*", gsubRoute "JQuery" $ const "js"),
-           ("lib/jquery-address/jquery.address.js",
-              customRoute $ const "lib/js/jquery.address.js")] $ \(p, r) ->
-      match p $ do
-          route   r
-          compile $ getResourceString >>= withItemBody (unixFilter "jsmin" [])
-
-    create ["index.html"] $ do
-      route   idRoute
-      compile $ do
-        -- Generate nav-bar from pages/* ordered by metadata 'weight'
-        pages <- sortByM pageWeight =<< filterM (\i -> pageWeight i >>= return . (> 0)) =<< loadAll ("pages/*" .&&. hasNoVersion)
-
-        let indexCtx = listField "pages" pagesCtx (return pages) <> defaultContext
-
-        makeItem "loading"
-          >>= applyAsTemplate indexCtx
-          >>= loadAndApplyTemplate "templates/default.html" indexCtx
-
--- NOJS Version -----------------------------------------------------------------------------------------
-    tagsNoJs <- buildTags ("posts/**" .&&. hasVersion "nojs") (fromCapture "nojs/tags/*.html")
-
-    paginatedPostsNoJs <- buildPaginateWith
-                          (fmap (paginateEvery numPaginatePages) . sortRecentFirst)
-                          ("posts/**" .&&. hasVersion "nojs")
-                          (\n -> fromCapture "nojs/blog*.html" (show n))
-
-    -- Generate nojs tag pages
-    paginateTagsRules "nojs/tags" tagsNoJs
-
-    paginateRules paginatedPostsNoJs $ \pageNum pattern -> do
-      route idRoute
-      compile $ do
-        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
-
-        posts <- recentFirst =<< loadAllSnapshots pattern "content"
-        let (pagesFirst, pagesLast') = flip span pages $ \x ->
-              (toFilePath . itemIdentifier $ x) /= "pages/blog.markdown"
-            pageMid = [head pagesLast']
-            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
-            ctx = taggedPostCtx tagsNoJs <>
-                  paginateContext paginatedPostsNoJs pageNum <>
-                  virtualPaginateContext paginatedPostsNoJs pageNum <>
-                  constField "weight" "0" <>
-                  listField "posts" (taggedPostCtx tagsNoJs) (return posts)
-            indexCtx = listField "pagesFirst" pagesCtx (return pagesFirst)   <>
-                       listField "pageMid" pagesCtx (return pageMid)         <>
-                       listField "pagesLast" pagesCtx (return pagesLast)     <>
-                       defaultContext
-
-        makeItem ""
-          >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
-          >>= loadAndApplyTemplate "templates/default-nojs.html" indexCtx
-
-    create ["nojs/atom.xml"] $ do
-      route   idRoute
-      compile $ do
-        let feedCtx = postCtx <> bodyField "description"
-        blogPosts <- loadAllSnapshots ("posts/**" .&&. hasVersion "nojs") "content"
-                       >>= fmap (take 10) . recentFirst
-        renderAtom (feedConfiguration Nothing) feedCtx blogPosts
-
-    match "posts/**" $ version "nojs" $ do
-      route   $ customRoute (\r -> "nojs" </> toFilePath r) `composeRoutes` setExtension "html"
-      compile $ do
-        -- Generate nav-bar from pages/*
-        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
-
-        let (pagesFirst, pagesLast') = flip span pages $ \x ->
-              (toFilePath . itemIdentifier $ x) /= "pages/blog.markdown"
-            pageMid = [head pagesLast']
-            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
-            postNojsCtx =
-              listField "pagesFirst" pagesCtx (return pagesFirst)   <>
-              listField "pageMid" pagesCtx (return pageMid)         <>
-              listField "pagesLast" pagesCtx (return pagesLast)     <>
-              defaultContext
-
-        pandocCompilerWith pandocReaderOptions pandocWriterOptions
-          >>= saveSnapshot "content"
-          >>= loadAndApplyTemplate "templates/partials/post.html" postCtx
-          >>= loadAndApplyTemplate "templates/default-nojs.html" postNojsCtx
-          >>= relativizeUrls
-
     let navgenRoute = customRoute (\r -> if toFilePath r == "pages/home.markdown"
                                    then "pages/index.markdown"
                                    else toFilePath r) `composeRoutes`
-                      gsubRoute "pages" (const "nojs")      `composeRoutes`
+                      gsubRoute "pages/" (const "")    `composeRoutes`
                       setExtension "html"
 
     match "pages/*" $ version "nav-gen" $ do
       route     navgenRoute
       compile $ pandocCompiler
 
-    match "pages/*" $ version "nojs" $ do
+    paginateRules paginatedPosts $ \pageNum pattern -> do
+      route idRoute
+      compile $ do
+        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
+        posts <- recentFirst =<< loadAllSnapshots pattern "content"
+
+        let (pagesFirst, pagesLast') = flip span pages $ \x ->
+              (toFilePath . itemIdentifier $ x) /= "pages/blog.markdown"
+            pageMid = [head pagesLast']
+            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
+
+            indexCtx = listField "pagesFirst" pagesCtx (return pagesFirst)   <>
+                       listField "pageMid" pagesCtx (return pageMid)         <>
+                       listField "pagesLast" pagesCtx (return pagesLast)     <>
+                       defaultContext
+
+            ctx = taggedPostCtx tags <>
+                  paginateContext paginatedPosts pageNum <>
+                  virtualPaginateContext paginatedPosts pageNum <>
+                  constField "weight" "0" <>
+                  listField "posts" (taggedPostCtx tags) (return posts)
+        makeItem ""
+          >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
+          >>= loadAndApplyTemplate "templates/default.html" indexCtx
+          >>= relativizeUrls
+
+    match "pages/*" $ do
       route     navgenRoute
       compile $ do
-        posts <- recentFirst =<< loadAllSnapshots ("posts/**" .&&. hasVersion "nojs") "content"
+        posts <- recentFirst =<< loadAllSnapshots "posts/**" "content"
 
         -- Generate nav-bar from pages/*
         pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
@@ -356,10 +249,13 @@ main = do
             recentPosts = take 5 posts
             pageTemplate = "templates/pages/" ++ pageName ++ ".html"
 
-            pagesNojsCtx =
-              listField "recentPosts" (taggedPostCtx tagsNoJs) (return recentPosts) <>
-              listField "posts" (taggedPostCtx tagsNoJs) (return posts)             <>
-              tagCloudField "tagCloud" 65 135 tagsNoJs                              <>
+            masterCtx =
+              listField "recentPosts" (taggedPostCtx tags) (return recentPosts) <>
+              listField "posts" (taggedPostCtx tags) (return posts)             <>
+              tagCloudField "tagCloud" 65 135 tags                              <>
+              defaultContext
+
+            indexCtx =
               listField "pagesFirst" pagesCtx (return pagesFirst)                   <>
               listField "pageMid" pagesCtx (return pageMid)                         <>
               listField "pagesLast" pagesCtx (return pagesLast)                     <>
@@ -367,11 +263,49 @@ main = do
 
         sectionCtx <- getResourceBody >>= genSectionContext
         pg <- loadSnapshot (fromFilePath pageTemplate) "original"
-          >>= applyAsTemplate (sectionCtx <> pagesNojsCtx)
+          >>= applyAsTemplate (sectionCtx <> masterCtx)
 
         (makeItem . itemBody) pg
-          >>= loadAndApplyTemplate "templates/default-nojs.html" pagesNojsCtx
+          >>= loadAndApplyTemplate "templates/default.html" indexCtx
           >>= relativizeUrls
+
+    match "posts/**" $ do
+      route   $ setExtension "html"
+      compile $ do
+        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
+
+        let (pagesFirst, pagesLast') = flip span pages $ \x ->
+              (toFilePath . itemIdentifier $ x) /= "pages/blog.markdown"
+            pageMid = [head pagesLast']
+            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
+
+            indexCtx =
+              listField "pagesFirst" pagesCtx (return pagesFirst)   <>
+              listField "pageMid" pagesCtx (return pageMid)         <>
+              listField "pagesLast" pagesCtx (return pagesLast)     <>
+              defaultContext
+
+        pandocCompilerWith pandocReaderOptions pandocWriterOptions
+          >>= saveSnapshot "content"
+          >>= loadAndApplyTemplate "templates/partials/post.html" (taggedPostCtx tags)
+          >>= loadAndApplyTemplate "templates/default.html" indexCtx
+          >>= relativizeUrls
+
+    create ["atom.xml"] $ do
+      route   idRoute
+      compile $ do
+        let feedCtx = postCtx <> bodyField "description"
+        blogPosts <- loadAllSnapshots ("posts/**" .&&. hasNoVersion) "content"
+                       >>= fmap (take 10) . recentFirst
+        renderAtom (feedConfiguration Nothing) feedCtx blogPosts
+
+    forM_ [("js/**", idRoute),
+           ("lib/JQuery/*", gsubRoute "JQuery" $ const "js"),
+           ("lib/jquery-address/jquery.address.js",
+              customRoute $ const "lib/js/jquery.address.js")] $ \(p, r) ->
+      match p $ do
+          route   r
+          compile $ getResourceString >>= withItemBody (unixFilter "jsmin" [])
 
 ---------------------------------------------------------------------------------------------------------
 -- Functions & Constants --------------------------------------------------------------------------------
@@ -399,13 +333,28 @@ paginateTagsRules loc tags =
     paginateRules paginatedTaggedPosts $ \pageNum pattern -> do
       route idRoute
       compile $ do
+        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
         posts <- recentFirst =<< loadAllSnapshots pattern "content"
-        let ctx = taggedPostCtx tags                                    <>
+
+        let (pagesFirst, pagesLast') = flip span pages $ \x ->
+              (toFilePath . itemIdentifier $ x) /= "pages/blog.markdown"
+            pageMid = [head pagesLast']
+            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
+
+            indexCtx = listField "pagesFirst" pagesCtx (return pagesFirst)   <>
+                       listField "pageMid" pagesCtx (return pageMid)         <>
+                       listField "pagesLast" pagesCtx (return pagesLast)     <>
+                       defaultContext
+
+            ctx = taggedPostCtx tags                                    <>
                   paginateContext paginatedTaggedPosts pageNum          <>
                   constField "tag" tag                                  <>
                   listField "posts" (taggedPostCtx tags) (return posts)
+
         makeItem ""
           >>= loadAndApplyTemplate "templates/tag-page.html" ctx
+          >>= loadAndApplyTemplate "templates/default.html" indexCtx
+          >>= relativizeUrls
 
     rulesExtraDependencies [tagsDependency tags] $ do
       create [tagsMakeId tags tag] $ do
@@ -428,7 +377,7 @@ taggedPostCtx :: Tags -> Context String
 taggedPostCtx tags = tagsField "tags" tags <> postCtx
 
 pagesCtx :: Context String
-pagesCtx = field "virtualpath" (fmap (drop 6 . maybe "" toUrl) . getRoute . itemIdentifier) <>
+pagesCtx = field "virtualpath" (fmap (maybe "" toUrl) . getRoute . itemIdentifier) <>
            defaultContext
 
 pageWeight :: (Functor f, MonadMetadata f) => Item a -> f Int
@@ -468,7 +417,7 @@ virtualPaginateContext pag currentPage = mconcat
 
     url :: (Int, Identifier) -> Compiler String
     url (n, i) = getRoute i >>= \mbR -> case mbR of
-        Just r  -> return $ drop 6 . toUrl $ r
+        Just r  -> return . toUrl $ r
         Nothing -> fail $ "No URL for page: " ++ show n
 
 ---------------------------------------------------------------------------------------------------------

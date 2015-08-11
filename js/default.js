@@ -111,12 +111,12 @@ _paq.push(['enableLinkTracking']);
                 acceptUrls: /.*/,
                 rewriteGetUrl: function (url) {
                     if (url === "/") {
-                        url = "/home.html";
+                        url = "/index.html";
                     }
                     return "pages" + url;
                 },
                 rewriteVirtualUrl: function (url) {
-                    if (url === "/home.html") {
+                    if (url === "/index.html") {
                         url = "/";
                     }
                     return url;
@@ -124,7 +124,7 @@ _paq.push(['enableLinkTracking']);
                 ajaxCallbacks: {
                     beforeSend: function (url, virt_url) {
                         if (virt_url === "/") {
-                            virt_url = "/home.html";
+                            virt_url = "/index.html";
                         }
 
                         // Initially set the active menuitem in the nav
@@ -176,144 +176,140 @@ _paq.push(['enableLinkTracking']);
         return spec;
     }()),
 
-        page = (function () {
-            // var pageId = '#page-content', navId = '#nav';
+    page = (function () {
+        // var pageId = '#page-content', navId = '#nav';
 
-            function loadPageContent(page_href, virt_href, handlerCallback) {
-                // Track page view with piwik
-                _paq.push(['setDocumentTitle', document.domain + '/' + virt_href]);
-                _paq.push(['trackPageView']);
+        function loadPageContent(page_href, virt_href, handlerCallback) {
+            // Track page view with piwik
+            _paq.push(['setDocumentTitle', document.domain + '/' + virt_href]);
+            _paq.push(['trackPageView']);
 
-                $.ajax({
-                    url: page_href,
-                    type: 'GET',
-                    dataType: 'html',
-                    beforeSend: function (xhr, settings) {
-                        // Remove loading error from page-content
-                        $('#page-content').removeClass('loading-error');
+            // Remove loading error from page-content
+            $('#page-content').removeClass('loading-error');
 
-                        // Add .loading to #page-content and #nav to facilitate a loading animation
-                        $('#page-content, #nav').removeClass('loading-done').addClass('loading');
+            // Add .loading to #page-content and #nav to facilitate a loading animation
+            $('#page-content, #nav').removeClass('loading-done').addClass('loading');
 
-                        // Run current handlers onSuccess callback (if it exists)
-                        if (handlerCallback.hasOwnProperty('beforeSend') && typeof handlerCallback.beforeSend === 'function') {
-                            handlerCallback.beforeSend(page_href, virt_href);
-                        }
+            // Run current handlers onSuccess callback (if it exists)
+            if (handlerCallback.hasOwnProperty('beforeSend') && typeof handlerCallback.beforeSend === 'function') {
+                handlerCallback.beforeSend(page_href, virt_href);
+            }
 
-                        console.log('beforeSend a.menuitem');
-                    },
-                    success: function (dta) {
-                        // Remove the initial loading gif (if its there)
-                        $('#page-content').removeClass('init');
+            console.log('beforeSend a.menuitem');
 
-                        // Remove any status message errors or successes
-                        $('#status').slideUp('normal', function () {
-                            $('#status').removeClass('error').removeClass('success').children('p.message').remove();
-                        });
-
-                        // Stop animations in the nav and page-content and scroll to the top of the page in a set amount of time
-                        setTimeout(function () {
-                            // Replace old page-content with new page-content
-                            $('#page-content').html(dta);
-
-                            // Stop page loading
-                            $('#page-content, #nav').removeClass('loading');
-
-                            // Reload any new maths using MathJax
-                            $('#page-content .math').each(function (math_elem) {
-                                mj.Hub.Queue(["Typeset", mj.Hub, math_elem[0]]);
-                            });
-
-                            // Rewrite new URLs within new content inserted into #page-content
-                            $('#page-content a').each(function (i) {
-                                var href = $(this).attr('href'),
-                                    external_url_regexp = /https?:\/\/.*/,
-                                    mailto_regexp = /mailto:.*/,
-                                    files_regexp = /files\/.*/,
-                                    images_regexp = /images\/.*/;
-
-                                if (!(external_url_regexp.test(href) || mailto_regexp.test(href) || files_regexp.test(href) || images_regexp.test(href))) {
-                                    $(this).attr('href', "/#" + href);
-                                }
-                            });
-
-                            // Add fullscreen functionality to inline-images and figures
-                            $('article.post p > img').click(function () {
-                                $(this).get(0).toggleFullScreen();
-                            });
-                            $('figure').click(function () {
-                                $(this).children('img').get(0).toggleFullScreen();
-                            });
-
-                            // Run current handles onSuccess callback (if it exists)
-                            if (handlerCallback.hasOwnProperty('onSuccess') && typeof handlerCallback.onSuccess === 'function') {
-                                handlerCallback.onSuccess();
-                            }
-
-                            // Scroll to top of the page
-                            if ($('body').scrollTop() > $('#nav').offset().top - 15) {
-                                $('html, body').animate({
-                                    scrollTop: $('#nav').offset().top - 15
-                                }, 'fast');
-                            }
-                        }, 250);
-                    },
-                    error: function (xhr, status) {
-                        /* Remove .loading from #page-content and #nav to stop the loading
-                         * animation. Then add .loading-error to #page-content if its the sites
-                         * first load (#page-content has class .init). Finally, display an error
-                         * message in #status.
-                         */
-                        $('#page-content, #nav').removeClass('loading');
-                        if ($('#page-content.init')[0]) {
-                            // TODO: instead of immediately displaying error, check if the content is stored in local storage
-                            $('#page-content').addClass('loading-error').html('<p class="container border-box">Error initially loading blog.rekahsoft.ca. Check the url! Given "' + page_href + '"</p>');
-                        } else if ($('#status.error')[0]) {
-                            $('#status').prepend('<p class="message">Error retrieving page ' + page_href + '</p>');
-                        } else {
-                            $('#status').prepend('<p class="message">Error retrieving page ' + page_href + '</p>');
-                            $('#status').addClass('error').slideDown();
-                        }
-
-                        // Run current handles onError callback (if it exists)
-                        if (handlerCallback.hasOwnProperty('onError') && typeof handlerCallback.onError === 'function') {
-                            handlerCallback.onError();
-                        }
+            $('#page-content').load(page_href + ' #page-content', function (dta, status, xhr) {
+                if (status === "error") {
+                    /* Remove .loading from #page-content and #nav to stop the loading
+                     * animation. Then add .loading-error to #page-content if its the sites
+                     * first load (#page-content has class .init). Finally, display an error
+                     * message in #status.
+                     */
+                    $('#page-content, #nav').removeClass('loading');
+                    if ($('#page-content.init')[0]) {
+                        // TODO: instead of immediately displaying error, check if the content is stored in local storage
+                        $('#page-content').addClass('loading-error').html('<p class="container border-box">Error initially loading blog.rekahsoft.ca. Check the url! Given "' + page_href + '"</p>');
+                    } else if ($('#status.error')[0]) {
+                        $('#status').prepend('<p class="message">Error retrieving page ' + page_href + '</p>');
+                    } else {
+                        $('#status').prepend('<p class="message">Error retrieving page ' + page_href + '</p>');
+                        $('#status').addClass('error').slideDown();
                     }
-                });
-            }
 
-            function init(router) {
-                router.setCallback(loadPageContent);
+                    // Run current handles onError callback (if it exists)
+                    if (handlerCallback.hasOwnProperty('onError') && typeof handlerCallback.onError === 'function') {
+                        handlerCallback.onError();
+                    }
+                } else {
+                    // Remove the initial loading gif (if its there)
+                    $('#page-content').removeClass('init');
 
-                $(document).ready(function () {
-                    $('#nav-menu a.menuitem').click(function () {
-                        $(this).closest('ul').find('li.active').removeClass('active');
-                        $(this).closest('li').addClass('active');
-                        //$('.navbar-collapse').collapse('hide');
+                    // Remove any status message errors or successes
+                    $('#status').slideUp('normal', function () {
+                        $('#status').removeClass('error').removeClass('success').children('p.message').remove();
                     });
 
-                    $('#status a.close-button').click(function () {
-                        $(this).parent().slideUp(function () {
-                            $(this).removeClass('error').removeClass('success');
-                            $(this).children('p.message').remove();
+                    // Stop animations in the nav and page-content and scroll to the top of the page in a set amount of time
+                    setTimeout(function () {
+                        // Replace old page-content with new page-content
+                        $('#page-content').html(dta);
+
+                        // Stop page loading
+                        $('#page-content, #nav').removeClass('loading');
+
+                        // Reload any new maths using MathJax
+                        $('#page-content .math').each(function (math_elem) {
+                            mj.Hub.Queue(["Typeset", mj.Hub, math_elem[0]]);
                         });
-                    });
 
-                    // Callback for when the inital page has completely loaded (including images, etc..)
-                    $.address.change(function (event) {
-                        console.log("Change " + event.value);
-                        router.runRouter(event.value);
+                        // Rewrite new URLs within new content inserted into #page-content
+                        $('#page-content a').each(function (i) {
+                            var href = $(this).attr('href'),
+                                external_url_regexp = /https?:\/\/.*/,
+                                mailto_regexp = /mailto:.*/,
+                                files_regexp = /files\/.*/,
+                                images_regexp = /images\/.*/;
+
+                            if (!(external_url_regexp.test(href) || mailto_regexp.test(href) || files_regexp.test(href) || images_regexp.test(href))) {
+                                $(this).attr('href', "/#" + href);
+                            }
+                        });
+
+                        // Add fullscreen functionality to inline-images and figures
+                        $('article.post p > img').click(function () {
+                            $(this).get(0).toggleFullScreen();
+                        });
+                        $('figure').click(function () {
+                            $(this).children('img').get(0).toggleFullScreen();
+                        });
+
+                        // Run current handles onSuccess callback (if it exists)
+                        if (handlerCallback.hasOwnProperty('onSuccess') && typeof handlerCallback.onSuccess === 'function') {
+                            handlerCallback.onSuccess();
+                        }
+
+                        // Scroll to top of the page
+                        if ($('body').scrollTop() > $('#nav').offset().top - 15) {
+                            $('html, body').animate({
+                                scrollTop: $('#nav').offset().top - 15
+                            }, 'fast');
+                        }
+                    }, 250);
+                }
+            });
+        }
+
+        function init(router) {
+            router.setCallback(loadPageContent);
+
+            $(document).ready(function () {
+                $('#nav-menu a.menuitem').click(function () {
+                    $(this).closest('ul').find('li.active').removeClass('active');
+                    $(this).closest('li').addClass('active');
+                    //$('.navbar-collapse').collapse('hide');
+                });
+
+                $('#status a.close-button').click(function () {
+                    $(this).parent().slideUp(function () {
+                        $(this).removeClass('error').removeClass('success');
+                        $(this).children('p.message').remove();
                     });
                 });
-            }
 
-            var spec = {
-                init: init
-            };
-            return spec;
-        }());
+                // Callback for when the inital page has completely loaded (including images, etc..)
+                $.address.change(function (event) {
+                    console.log("Change " + event.value);
+                    router.runRouter(event.value);
+                });
+            });
+        }
 
+        var spec = {
+            init: init
+        };
+        return spec;
+    }());
+
+    // Start of execution
     page.init(router);
 }(jQuery, MathJax));
 

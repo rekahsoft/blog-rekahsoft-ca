@@ -1,13 +1,13 @@
-<article class='post container'>
+<article class="post container">
   <header>
-    <h1 class='title'>
-      <a href='$url$'>$title$</a>
+    <h1 class="title">
+      <a href="$url$">$title$</a>
     </h1>
-    <p class='info'>
+    <p class="info">
       Posted on
-      <span class='date'>$date$</span>
+      <span class="date">$date$</span>
       $if(author)$ by
-      <span class='author'>$author$</span>
+      <span class="author">$author$</span>
       $endif$
     </p>
   </header>
@@ -17,16 +17,16 @@
   $body$
   $endif$
   <footer>
-    <div class='row'>
-      <div class='two columns alpha'>
+    <div class="row">
+      <div class="two columns alpha">
         $if(teaser)$
-        <a class='read-more' href='$url$'>Read More</a>
+        <a class="read-more" href="$url$">Read More</a>
         $else$
-        <span class='no-teaser'></span>
+        <span class="no-teaser"></span>
         $endif$
       </div>
-      <div class='ten columns omega'>
-        <p class='tags'>$tags$</p>
+      <div class="ten columns omega">
+        <p class="tags">$tags$</p>
       </div>
     </div>
   </footer>

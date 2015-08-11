@@ -1,18 +1,18 @@
-<div class='container' id='pagination'>
+<div class="container" id="pagination">
   $if(firstPageUrl)$
     $if(firstPageUrlVirtualPath)$
-      <a class='firstPage' href='$firstPageUrlVirtualPath$'>First Page</a>
+      <a class="firstPage" href="$firstPageUrlVirtualPath$">First Page</a>
     $else$
-      <a class='firstPage' href='$firstPageUrl$'>First Page</a>
+      <a class="firstPage" href="$firstPageUrl$">First Page</a>
     $endif$
   $else$
     <span class="on-first-page">First Page</span>
   $endif$
   $if(previousPageUrl)$
     $if(previousPageUrlVirtualPath)$
-      <a class='previousPage' href='$previousPageUrlVirtualPath$'>Previous Page</a>
+      <a class="previousPage" href="$previousPageUrlVirtualPath$">Previous Page</a>
     $else$
-      <a class='previousPage' href='$previousPageUrl$'>Previous Page</a>
+      <a class="previousPage" href="$previousPageUrl$">Previous Page</a>
     $endif$
   $else$
     <span class="no-previous-page">Previous Page</span>
@@ -20,18 +20,18 @@
 
   $if(nextPageUrl)$
     $if(nextPageUrlVirtualPath)$
-      <a class='nextPage' href='$nextPageUrlVirtualPath$'>Next Page</a>
+      <a class="nextPage" href="$nextPageUrlVirtualPath$">Next Page</a>
     $else$
-      <a class='nextPage' href='$nextPageUrl$'>Next Page</a>
+      <a class="nextPage" href="$nextPageUrl$">Next Page</a>
     $endif$
   $else$
     <span class="no-next-page">Next Page</span>
   $endif$
   $if(lastPageUrl)$
     $if(lastPageUrlVirtualPath)$
-      <a class='lastPage' href='$lastPageUrlVirtualPath$'>Last Page</a>
+      <a class="lastPage" href="$lastPageUrlVirtualPath$">Last Page</a>
     $else$
-      <a class='lastPage' href='$lastPageUrl$'>Last Page</a>
+      <a class="lastPage" href="$lastPageUrl$">Last Page</a>
     $endif$
   $else$
     <span class="on-last-page">Last Page</span>

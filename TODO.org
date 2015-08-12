@@ -8,7 +8,6 @@
 **** DONE Only generate one version of the site
      CLOSED: [2015-08-10 Mon 22:57]
 
-
 ** Benefits
    This refactor will have a couple added benefits. Namely:
 
@@ -22,13 +21,32 @@
    In order to implement this, a reasonable size refactor needs to take place. Below is a list
    of things to be completed in order to successfully achieve the aforementioned goals.
 
-*** TODO Modify nav URLs using javascript once page is loaded
+*** TODO Replace jquery-address with use of window.history.pushState
+    window.history.pushState(object, title, url) can be used to set the browsers url without
+    relading the page and without breaking browser history. It also doesn't use hashes in the
+    url and thus urls appear 'normal' and thus will work without modification with or without
+    javascript.
+
+    This will fix the issue where if the initial landing page is any other page besides "/"
+    like "/blog.html" for example, and then a link is clicked, like for example the 'contact'
+    navigation link, then the url will be "/blog.html#/contact.html" which will indeed load
+    properly but is ugly and worse, means there are many different ways to get to the 'same
+    page'.
+
+    See: https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
+
+*** WAIT Modify nav URLs using javascript once page is loaded
+    - State "WAIT"       from "TODO"       [2015-08-12 Wed 02:54] \\
+      This hasn't been done and doesn't need to be, as the rel attributes on the anchor tags
+      within the nav are 'picked up' by jquery-address and treated correctly (using the
+      clientside router).
+
     If it is indeed enabled then the user can benefit from the SPA functionality of the site.
     Otherwise they will be able to browse the site using the original, unmodified links. This is
     similar to how the link withing the page-content div work currently, and mainly would have to
     be adapted for the navigation.
 
-*** TODO Fix issue with tag and pagination urls <<page loading issue>>
+*** TODO Fix issue with tag and pagination page generation
     All URLs are required to work without javascript. Thus there can't be any tricks employed
     in javascript to modify urls (the js router rewriting). Currently this happens with the 
 
@@ -37,13 +55,20 @@
     - etc..
 
     Currently URLs to paginated pages (which includes the blog and tag pages) are broken. They
-    generate "/tags/*.html" instead of "/tags/*1.html".
+    generate "/tags/*.html" instead of "/tags/*1.html". Also see [[pagination artifact][this issue]]which is related to
+    this last issue (which when solved would hopefully fix this as well).
 
-*** TODO Fix ajax page loading
-    Pages don't load properly when javascript is enabled. This likely is having an effect on
-    this [[page loading issue][issue]] as well. More debugging is required.
+*** TODO Pagination creates an extra unexpected file <<pagination artifact>>
+    When the blog page and tag pages are paginated an extra file is generated that is not
+    expected. For example, for the paginated blog, "/blog1.html through "/blogN.html" and
+    "/blog.html" are generated. "/blog.html" is not expected to be generated and seems to be an
+    artifact of pagination. It contains all blog posts (contained in "/blog1.html" through
+    "/blogN.html").
 
 *** Complete
+**** DONE Fix ajax page loading
+     CLOSED: [2015-08-12 Wed 02:41]
+     Pages don't load properly when javascript is enabled.
 **** DONE Generate nav with href pointing to normal urls, not virtual ones
      CLOSED: [2015-08-10 Mon 22:55]
      (Eg. /pages/blog.html instead of #/blog.html)

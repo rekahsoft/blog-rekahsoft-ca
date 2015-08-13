@@ -44,128 +44,67 @@ _paq.push(['enableLinkTracking']);
 (function ($, mj) {
     "use strict";
 
-    // The identity function
-    function idFun(x) {
-        return x;
-    }
-
     var router = (function () {
         var routes = [
             { // Post pages handler
                 acceptUrls: /posts\/.*\.html/,
-                rewriteGetUrl: idFun,
-                rewriteVirtualUrl: idFun,
                 ajaxCallbacks: {
                     beforeSend: function () {
                         $('#nav-menu li.active').removeClass('active');
-                        $('#nav-menu li a[href="./blog.html"]').parent('li').addClass('active');
+                        $('#nav-menu li a[href="/blog.html"]').parent('li').addClass('active');
                     }
                 }
             },
             { // Tag pages handler
                 acceptUrls: /tags\/.*(\d*)\.html/,
-                rewriteGetUrl: function (url) {
-                    var tag_not_regexp = /(tags\/.*[^\d]+)(\.html)/;
-                    if (tag_not_regexp.test(url)) {
-                        return url.replace(tag_not_regexp, "$11$2");
-                    }
-                    return url;
-                },
-                rewriteVirtualUrl: function (url) {
-                    var tag_one_regexp = /(tags\/.*)1(\.html)/;
-                    if (tag_one_regexp.test(url)) {
-                        return url.replace(tag_one_regexp, "$1$2");
-                    }
-                    return url;
-                },
                 ajaxCallbacks: {
                     beforeSend: function () {
                         $('#nav-menu li.active').removeClass('active');
-                        $('#nav-menu li a[href="./blog.html"]').parent('li').addClass('active');
+                        $('#nav-menu li a[href="/blog.html"]').parent('li').addClass('active');
                     }
                 }
             },
             { // Blog pages handler
                 acceptUrls: /blog\d*\.html/,
-                rewriteGetUrl: function (url) {
-                    if (url === "/blog.html") {
-                        url = "/blog1.html";
-                    }
-                    return url;
-                },
-                rewriteVirtualUrl: function (url) {
-                    if (url === "/blog1.html") {
-                        url = "/blog.html";
-                    }
-                    return url;
-                },
                 ajaxCallbacks: {
                     beforeSend: function () {
                         // Set the blog menuitem as active
-                        $('a.menuitem[href="./blog.html"]').closest('ul').find('li.active').removeClass('active');
-                        $('a.menuitem[href="./blog.html"]').closest('li').addClass('active');
+                        $('a.menuitem[href="/blog.html"]').closest('ul').find('li.active').removeClass('active');
+                        $('a.menuitem[href="/blog.html"]').closest('li').addClass('active');
                     }
                 }
             },
             { // Default page handler
                 acceptUrls: /.*/,
-                rewriteGetUrl: function (url) {
-                    if (url === "/") {
-                        url = "/index.html";
-                    }
-                    return url;
-                },
-                rewriteVirtualUrl: function (url) {
-                    if (url === "/index.html") {
-                        url = "/";
-                    }
-                    return url;
-                },
                 ajaxCallbacks: {
-                    beforeSend: function (url, virt_url) {
-                        if (virt_url === "/") {
-                            virt_url = "/index.html";
+                    beforeSend: function (url) {
+                        if (url === "/") {
+                            url = "/index.html";
                         }
 
                         // Initially set the active menuitem in the nav
-                        $('a.menuitem[href="' + virt_url + '"]').closest('ul').find('li.active').removeClass('active');
-                        $('a.menuitem[href="' + virt_url + '"]').closest('li').addClass('active');
+                        $('a.menuitem[href="' + url + '"]').closest('ul').find('li.active').removeClass('active');
+                        $('a.menuitem[href="' + url + '"]').closest('li').addClass('active');
                     }
                 }
             }],
-            callback = idFun,
+            callback = function () { return null; },
 
             spec = {
                 runRouter: function runRouter(url) {
-                    function runRouter_help(spec) {
-                        var i, new_virt_url;
-                        for (i = 0; i < routes.length; i += 1) {
-                            if (routes[i].acceptUrls.test(spec.url)) {
-                                new_virt_url = routes[i].rewriteVirtualUrl(spec.url);
-                                if (new_virt_url === spec.url) {
-                                    if (spec.hasRedirect) {
-                                        // TODO: use history API in place of $.address (from jquery-address)
-                                        history.pushState(null, "Title", new_virt_url);
-                                    } else {
-                                        callback(routes[i].rewriteGetUrl(spec.url), spec.url, routes[i].ajaxCallbacks);
-                                    }
-                                } else if (spec.numRecur <= spec.recurDepth) {
-                                    runRouter_help({ url: new_virt_url,
-                                                     hasRedirect: true,
-                                                     numRecur: spec.numRecur + 1,
-                                                     recurDepth: spec.recurDepth });
-                                } else {
-                                    console.log("Exceeded recursion depth for router");
-                                }
-                                break;
+                    var i;
+                    for (i = 0; i < routes.length; i += 1) {
+                        if (routes[i].acceptUrls.test(url)) {
+                            if (url === "/index.html") {
+                                history.pushState(null, "Home", "/");
+                            } else {
+                                // TODO: strip url into title
+                                history.pushState(null, "Title", url);
                             }
+                            callback(url, routes[i].ajaxCallbacks);
+                            break;
                         }
                     }
-
-                    runRouter_help({ url: url,
-                                     hasRedirect: false,
-                                     numRecur: 1,
-                                     recurDepth: 5 });
                 },
                 setCallback: function setCallback(cb) {
                     if (typeof cb === 'function') {
@@ -180,9 +119,9 @@ _paq.push(['enableLinkTracking']);
     page = (function () {
         // var pageId = '#page-content', navId = '#nav';
 
-        function loadPageContent(page_href, virt_href, handlerCallback) {
+        function loadPageContent(page_href, handlerCallback) {
             // Track page view with piwik
-            _paq.push(['setDocumentTitle', document.domain + '/' + virt_href]);
+            _paq.push(['setDocumentTitle', document.domain + page_href]);
             _paq.push(['trackPageView']);
 
             $.ajax({
@@ -195,7 +134,7 @@ _paq.push(['enableLinkTracking']);
 
                     // Run current handlers onSuccess callback (if it exists)
                     if (handlerCallback.hasOwnProperty('beforeSend') && typeof handlerCallback.beforeSend === 'function') {
-                        handlerCallback.beforeSend(page_href, virt_href);
+                        handlerCallback.beforeSend(page_href);
                     }
 
                     console.log('beforeSend a.menuitem');
@@ -220,18 +159,8 @@ _paq.push(['enableLinkTracking']);
                             mj.Hub.Queue(["Typeset", mj.Hub, math_elem[0]]);
                         });
 
-                        // Rewrite new URLs within new content inserted into #page-content
-                        $('#page-content a').each(function (i) {
-                            var href = $(this).attr('href'),
-                                external_url_regexp = /https?:\/\/.*/,
-                                mailto_regexp = /mailto:.*/,
-                                files_regexp = /files\/.*/,
-                                images_regexp = /images\/.*/;
-
-                            if (!(external_url_regexp.test(href) || mailto_regexp.test(href) || files_regexp.test(href) || images_regexp.test(href))) {
-                                $(this).attr('href', "/#" + href);
-                            }
-                        });
+                        // Add anchor click handlers for internal links in new content loaded into #page-content
+                        jsUrls('#page-content a');
 
                         // Add fullscreen functionality to inline-images and figures
                         $('article.post p > img').click(function () {
@@ -272,8 +201,29 @@ _paq.push(['enableLinkTracking']);
             });
         }
 
+        function jsUrls(sel) {
+            $(sel).each(function (i) {
+                var href = $(this).attr('href'),
+                    external_url_regexp = /https?:\/\/.*/,
+                    mailto_regexp = /mailto:.*/,
+                    files_regexp = /files\/.*/,
+                    images_regexp = /images\/.*/;
+
+                if (!(external_url_regexp.test(href) || mailto_regexp.test(href) || files_regexp.test(href) || images_regexp.test(href))) {
+                    $(this).click(function (e) {
+                        e.preventDefault();
+                        router.runRouter(href);
+                    });
+                }
+            });
+        }
+
         function init(router) {
             router.setCallback(loadPageContent);
+
+            window.addEventListener("popstate", function (e) {
+                router.runRouter(location.pathname);
+            });
 
             $(document).ready(function () {
                 $('#nav-menu a.menuitem').click(function () {
@@ -289,12 +239,8 @@ _paq.push(['enableLinkTracking']);
                     });
                 });
 
-                // TODO: use history API in place of $.address.change (from jquery-address)
-                // Callback for when the inital page has completely loaded (including images, etc..)
-                //$.address.change(function (event) {
-                //    console.log("Change " + event.value);
-                //    router.runRouter(event.value);
-                //}); // TODO
+                // Add anchor click handlers for internal links
+                jsUrls('#page-content a, #nav-menu a.menuitem');
             });
         }
 

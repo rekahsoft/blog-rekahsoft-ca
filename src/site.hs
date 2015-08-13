@@ -224,7 +224,6 @@ main = do
         makeItem ""
           >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
           >>= loadAndApplyTemplate "templates/default.html" indexCtx
-          >>= relativizeUrls
 
     match "pages/*" $ do
       route     navgenRoute
@@ -266,7 +265,6 @@ main = do
 
         (makeItem . itemBody) pg
           >>= loadAndApplyTemplate "templates/default.html" indexCtx
-          >>= relativizeUrls
 
     match "posts/**" $ do
       route   $ setExtension "html"
@@ -288,7 +286,6 @@ main = do
           >>= saveSnapshot "content"
           >>= loadAndApplyTemplate "templates/partials/post.html" (taggedPostCtx tags)
           >>= loadAndApplyTemplate "templates/default.html" indexCtx
-          >>= relativizeUrls
 
     create ["atom.xml"] $ do
       route   idRoute
@@ -351,7 +348,6 @@ paginateTagsRules loc tags =
         makeItem ""
           >>= loadAndApplyTemplate "templates/tag-page.html" ctx
           >>= loadAndApplyTemplate "templates/default.html" indexCtx
-          >>= relativizeUrls
 
     rulesExtraDependencies [tagsDependency tags] $ do
       create [tagsMakeId tags tag] $ do

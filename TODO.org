@@ -35,30 +35,10 @@
 
     See: https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
 
-*** WAIT Modify nav URLs using javascript once page is loaded
-    - State "WAIT"       from "TODO"       [2015-08-12 Wed 02:54] \\
-      This hasn't been done and doesn't need to be, as the rel attributes on the anchor tags
-      within the nav are 'picked up' by jquery-address and treated correctly (using the
-      clientside router).
-
-    If it is indeed enabled then the user can benefit from the SPA functionality of the site.
-    Otherwise they will be able to browse the site using the original, unmodified links. This is
-    similar to how the link withing the page-content div work currently, and mainly would have to
-    be adapted for the navigation.
-
 *** TODO Fix issue with tag and pagination page generation
-    All URLs are required to work without javascript. Thus there can't be any tricks employed
-    in javascript to modify urls (the js router rewriting). Currently this happens with the 
-
-    - "/blog.html" to "/blog1.html"
-    - "/tags/general.html" to "/tags/general1.html"
-    - etc..
-
     Currently URLs to paginated pages (which includes the blog and tag pages) are broken. They
-    generate "/tags/*.html" instead of "/tags/*1.html". Also see [[pagination artifact][this issue]]which is related to
-    this last issue (which when solved would hopefully fix this as well).
+    generate "/tags/*.html" instead of "/tags/*1.html".
 
-*** TODO Pagination creates an extra unexpected file <<pagination artifact>>
     When the blog page and tag pages are paginated an extra file is generated that is not
     expected. For example, for the paginated blog, "/blog1.html through "/blogN.html" and
     "/blog.html" are generated. "/blog.html" is not expected to be generated and seems to be an
@@ -66,6 +46,19 @@
     "/blogN.html").
 
 *** Complete
+**** CANCELED Modify nav URLs using javascript once page is loaded
+     CLOSED: [2015-08-13 Thu 01:47]
+     - State "CANCELED"   from "WAIT"       [2015-08-13 Thu 01:47] \\
+       As virtual urls are no longer used and normal urls can be set using the HTML5 history api (via history.pushState), all URLs on the page will always be valid. So no modification to the links of any kind needs to take place.
+     - State "WAIT"       from "TODO"       [2015-08-12 Wed 02:54] \\
+       This hasn't been done and doesn't need to be, as the rel attributes on the anchor tags
+       within the nav are 'picked up' by jquery-address and treated correctly (using the
+       clientside router).
+
+     If it is indeed enabled then the user can benefit from the SPA functionality of the site.
+     Otherwise they will be able to browse the site using the original, unmodified links. This is
+     similar to how the link withing the page-content div work currently, and mainly would have to
+     be adapted for the navigation.
 **** DONE Fix ajax page loading
      CLOSED: [2015-08-12 Wed 02:41]
      Pages don't load properly when javascript is enabled.

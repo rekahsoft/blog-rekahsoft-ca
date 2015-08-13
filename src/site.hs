@@ -299,9 +299,7 @@ main = do
         renderAtom (feedConfiguration Nothing) feedCtx blogPosts
 
     forM_ [("js/**", idRoute),
-           ("lib/JQuery/*", gsubRoute "JQuery" $ const "js"),
-           ("lib/jquery-address/jquery.address.js",
-              customRoute $ const "lib/js/jquery.address.js")] $ \(p, r) ->
+           ("lib/JQuery/*", gsubRoute "JQuery" $ const "js")] $ \(p, r) ->
       match p $ do
           route   r
           compile $ getResourceString >>= withItemBody (unixFilter "jsmin" [])

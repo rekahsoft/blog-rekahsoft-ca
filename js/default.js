@@ -144,7 +144,8 @@ _paq.push(['enableLinkTracking']);
                                 new_virt_url = routes[i].rewriteVirtualUrl(spec.url);
                                 if (new_virt_url === spec.url) {
                                     if (spec.hasRedirect) {
-                                        $.address.value(new_virt_url);
+                                        // TODO: use history API in place of $.address (from jquery-address)
+                                        history.pushState(null, "Title", new_virt_url);
                                     } else {
                                         callback(routes[i].rewriteGetUrl(spec.url), spec.url, routes[i].ajaxCallbacks);
                                     }
@@ -288,11 +289,12 @@ _paq.push(['enableLinkTracking']);
                         });
                     });
 
+                    // TODO: use history API in place of $.address.change (from jquery-address)
                     // Callback for when the inital page has completely loaded (including images, etc..)
-                    $.address.change(function (event) {
-                        console.log("Change " + event.value);
-                        router.runRouter(event.value);
-                    });
+                    //$.address.change(function (event) {
+                    //    console.log("Change " + event.value);
+                    //    router.runRouter(event.value);
+                    //}); // TODO
                 });
             }
 

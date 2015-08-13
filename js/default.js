@@ -189,9 +189,6 @@ _paq.push(['enableLinkTracking']);
                     type: 'GET',
                     dataType: 'html',
                     beforeSend: function (xhr, settings) {
-                        // Remove loading error from page-content
-                        $('#page-content').removeClass('loading-error');
-
                         // Add .loading to #page-content and #nav to facilitate a loading animation
                         $('#page-content, #nav').removeClass('loading-done').addClass('loading');
 
@@ -203,9 +200,6 @@ _paq.push(['enableLinkTracking']);
                         console.log('beforeSend a.menuitem');
                     },
                     success: function (dta) {
-                        // Remove the initial loading gif (if its there)
-                        $('#page-content').removeClass('init');
-
                         // Remove any status message errors or successes
                         $('#status').slideUp('normal', function () {
                             $('#status').removeClass('error').removeClass('success').children('p.message').remove();
@@ -261,20 +255,13 @@ _paq.push(['enableLinkTracking']);
                     },
                     error: function (xhr, status) {
                         /* Remove .loading from #page-content and #nav to stop the loading
-                         * animation. Then add .loading-error to #page-content if its the sites
-                         * first load (#page-content has class .init). Finally, display an error
-                         * message in #status.
+                         * animation. Finally, display an error message in #status.
                          */
                         $('#page-content, #nav').removeClass('loading');
-                        if ($('#page-content.init')[0]) {
-                            // TODO: instead of immediately displaying error, check if the content is stored in local storage
-                            $('#page-content').addClass('loading-error').html('<p class="container border-box">Error initially loading blog.rekahsoft.ca. Check the url! Given "' + page_href + '"</p>');
-                        } else if ($('#status.error')[0]) {
-                            $('#status').prepend('<p class="message">Error retrieving page ' + page_href + '</p>');
-                        } else {
-                            $('#status').prepend('<p class="message">Error retrieving page ' + page_href + '</p>');
-                            $('#status').addClass('error').slideDown();
-                        }
+
+                        // TODO: instead of immediately displaying error, check if the content is stored in local storage
+                        $('#status').prepend('<p class="message">Error retrieving page ' + page_href + '</p>');
+                        $('#status').addClass('error').slideDown();
 
                         // Run current handles onError callback (if it exists)
                         if (handlerCallback.hasOwnProperty('onError') && typeof handlerCallback.onError === 'function') {

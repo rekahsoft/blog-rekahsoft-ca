@@ -155,22 +155,6 @@ pageContent = do
     transition "opacity" (sec 1) easeIn (sec 0.5)
     opacity 1
 
-  "#page-content" # ".loading-error" ** p ? do
-    backgroundColor "#fd6f6f"
-    backgroundImage $ url "/images/error-loading.png"
-    backgroundRepeat noRepeat
-    backgroundPosition $ positioned (pct 50) (pct 50)
-    height (px 200)
-    fontWeight bold
-    lineHeight (px 200)
-    textAlign $ alignSide sideCenter
-
-  "#page-content" # ".init" # ".loading" ? do
-    backgroundImage $ url "/images/init-loading.gif"
-    backgroundRepeat noRepeat
-    backgroundPosition $ positioned (pct 50) (pct 50)
-    height (px 125)
-
   "#page-content" ** ul |> (li # ":before") ? do
     content $ stringContent "\\2192"
     paddingRight (em 0.5)

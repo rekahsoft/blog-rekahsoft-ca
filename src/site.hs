@@ -212,14 +212,13 @@ main = do
             pageMid = [head pagesLast']
             pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
 
-            indexCtx = listField "pagesFirst" pagesCtx (return pagesFirst)   <>
-                       listField "pageMid" pagesCtx (return pageMid)         <>
-                       listField "pagesLast" pagesCtx (return pagesLast)     <>
+            indexCtx = listField "pagesFirst" defaultContext (return pagesFirst)   <>
+                       listField "pageMid" defaultContext (return pageMid)         <>
+                       listField "pagesLast" defaultContext (return pagesLast)     <>
                        defaultContext
 
             ctx = taggedPostCtx tags <>
                   paginateContext paginatedPosts pageNum <>
-                  virtualPaginateContext paginatedPosts pageNum <>
                   constField "weight" "0" <>
                   listField "posts" (taggedPostCtx tags) (return posts)
         makeItem ""
@@ -256,9 +255,9 @@ main = do
               defaultContext
 
             indexCtx =
-              listField "pagesFirst" pagesCtx (return pagesFirst)                   <>
-              listField "pageMid" pagesCtx (return pageMid)                         <>
-              listField "pagesLast" pagesCtx (return pagesLast)                     <>
+              listField "pagesFirst" defaultContext (return pagesFirst)                   <>
+              listField "pageMid" defaultContext (return pageMid)                         <>
+              listField "pagesLast" defaultContext (return pagesLast)                     <>
               defaultContext
 
         sectionCtx <- getResourceBody >>= genSectionContext
@@ -280,9 +279,9 @@ main = do
             pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
 
             indexCtx =
-              listField "pagesFirst" pagesCtx (return pagesFirst)   <>
-              listField "pageMid" pagesCtx (return pageMid)         <>
-              listField "pagesLast" pagesCtx (return pagesLast)     <>
+              listField "pagesFirst" defaultContext (return pagesFirst)   <>
+              listField "pageMid" defaultContext (return pageMid)         <>
+              listField "pagesLast" defaultContext (return pagesLast)     <>
               defaultContext
 
         pandocCompilerWith pandocReaderOptions pandocWriterOptions
@@ -341,9 +340,9 @@ paginateTagsRules loc tags =
             pageMid = [head pagesLast']
             pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
 
-            indexCtx = listField "pagesFirst" pagesCtx (return pagesFirst)   <>
-                       listField "pageMid" pagesCtx (return pageMid)         <>
-                       listField "pagesLast" pagesCtx (return pagesLast)     <>
+            indexCtx = listField "pagesFirst" defaultContext (return pagesFirst)   <>
+                       listField "pageMid" defaultContext (return pageMid)         <>
+                       listField "pagesLast" defaultContext (return pagesLast)     <>
                        defaultContext
 
             ctx = taggedPostCtx tags                                    <>
@@ -370,15 +369,10 @@ paginateTagsRules loc tags =
 postCtx :: Context String
 postCtx = dateField "date" "%B %e, %Y"   <>
           teaserField "teaser" "content" <>
-          field "virtualpath" (fmap (drop 6 . maybe "" toUrl) . getRoute . itemIdentifier) <>
           defaultContext
 
 taggedPostCtx :: Tags -> Context String
 taggedPostCtx tags = tagsField "tags" tags <> postCtx
-
-pagesCtx :: Context String
-pagesCtx = field "virtualpath" (fmap (maybe "" toUrl) . getRoute . itemIdentifier) <>
-           defaultContext
 
 pageWeight :: (Functor f, MonadMetadata f) => Item a -> f Int
 pageWeight i = fmap (maybe 0 read) $ getMetadataField (itemIdentifier i) "weight"
@@ -386,39 +380,6 @@ pageWeight i = fmap (maybe 0 read) $ getMetadataField (itemIdentifier i) "weight
 sortByM :: (Monad m, Ord k) => (a -> m k) -> [a] -> m [a]
 sortByM f xs = liftM (map fst . sortBy (comparing snd)) $
                  mapM (\x -> liftM (x,) (f x)) xs
-
--- This is copied verbatim from Web/Paginate.hs as it isn't exported
--- Get the identifier for a certain page by passing in the page number.
-paginatePage :: Paginate -> PageNumber -> Maybe Identifier
-paginatePage pag pageNumber
-    | pageNumber < 1                      = Nothing
-    | pageNumber > (paginateNumPages pag) = Nothing
-    | otherwise                           = Just $ paginateMakeId pag pageNumber
-
--- This is copied verbatim from Web/Paginate.hs as it isn't exported
-paginateNumPages :: Paginate -> Int
-paginateNumPages = size . paginateMap
-
-virtualPaginateContext :: Paginate -> PageNumber -> Context a
-virtualPaginateContext pag currentPage = mconcat
-    [ field "firstPageUrlVirtualPath"    $ \_ -> otherPage 1                 >>= url
-    , field "previousPageUrlVirtualPath" $ \_ -> otherPage (currentPage - 1) >>= url
-    , field "nextPageUrlVirtualPath"     $ \_ -> otherPage (currentPage + 1) >>= url
-    , field "lastPageUrlVirtualPath"     $ \_ -> otherPage lastPage          >>= url
-    ]
-  where
-    lastPage = paginateNumPages pag
-
-    otherPage n
-        | n == currentPage = fail $ "This is the current page: " ++ show n
-        | otherwise        = case paginatePage pag n of
-            Nothing -> fail $ "No such page: " ++ show n
-            Just i  -> return (n, i)
-
-    url :: (Int, Identifier) -> Compiler String
-    url (n, i) = getRoute i >>= \mbR -> case mbR of
-        Just r  -> return . toUrl $ r
-        Nothing -> fail $ "No URL for page: " ++ show n
 
 ---------------------------------------------------------------------------------------------------------
 -- Page section parser

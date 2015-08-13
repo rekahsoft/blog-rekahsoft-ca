@@ -58,7 +58,7 @@ _paq.push(['enableLinkTracking']);
                 ajaxCallbacks: {
                     beforeSend: function () {
                         $('#nav-menu li.active').removeClass('active');
-                        $('#nav-menu li a[rel="address:/blog.html"]').parent('li').addClass('active');
+                        $('#nav-menu li a[href="./blog.html"]').parent('li').addClass('active');
                     }
                 }
             },
@@ -81,7 +81,7 @@ _paq.push(['enableLinkTracking']);
                 ajaxCallbacks: {
                     beforeSend: function () {
                         $('#nav-menu li.active').removeClass('active');
-                        $('#nav-menu li a[rel="address:/blog.html"]').parent('li').addClass('active');
+                        $('#nav-menu li a[href="./blog.html"]').parent('li').addClass('active');
                     }
                 }
             },
@@ -102,8 +102,8 @@ _paq.push(['enableLinkTracking']);
                 ajaxCallbacks: {
                     beforeSend: function () {
                         // Set the blog menuitem as active
-                        $('a.menuitem[rel="address:/blog.html"]').closest('ul').find('li.active').removeClass('active');
-                        $('a.menuitem[rel="address:/blog.html"]').closest('li').addClass('active');
+                        $('a.menuitem[href="./blog.html"]').closest('ul').find('li.active').removeClass('active');
+                        $('a.menuitem[href="./blog.html"]').closest('li').addClass('active');
                     }
                 }
             },
@@ -128,8 +128,8 @@ _paq.push(['enableLinkTracking']);
                         }
 
                         // Initially set the active menuitem in the nav
-                        $('a.menuitem[rel="address:' + virt_url + '"]').closest('ul').find('li.active').removeClass('active');
-                        $('a.menuitem[rel="address:' + virt_url + '"]').closest('li').addClass('active');
+                        $('a.menuitem[href="' + virt_url + '"]').closest('ul').find('li.active').removeClass('active');
+                        $('a.menuitem[href="' + virt_url + '"]').closest('li').addClass('active');
                     }
                 }
             }],

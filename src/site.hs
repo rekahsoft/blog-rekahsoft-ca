@@ -104,7 +104,6 @@ main = do
   stdGen <- getStdGen
 
   hakyllWith myConfig $ do
--- All Versions ------------------------------------------------------------------------------------------
     match ("action/**" .||. "files/**" .||. "images/**" .||. "fonts/**" .||. "robots.txt") $ do
       route   idRoute
       compile copyFileCompiler
@@ -186,8 +185,6 @@ main = do
     match "templates/**" $ compile $ getResourceBody >>= saveSnapshot "original"
       >> templateCompiler
 
----------------------------------------------------------------------------------------------------------
--- Default Version --------------------------------------------------------------------------------------
     -- Generate tag pages
     paginateTagsRules "tags" tags
 
@@ -217,9 +214,9 @@ main = do
                        listField "pagesLast" defaultContext (return pagesLast)     <>
                        defaultContext
 
-            ctx = taggedPostCtx tags <>
-                  paginateContext paginatedPosts pageNum <>
-                  constField "weight" "0" <>
+            ctx = taggedPostCtx tags                                    <>
+                  paginateContext paginatedPosts pageNum                <>
+                  constField "weight" "0"                               <>
                   listField "posts" (taggedPostCtx tags) (return posts)
         makeItem ""
           >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
@@ -254,9 +251,9 @@ main = do
               defaultContext
 
             indexCtx =
-              listField "pagesFirst" defaultContext (return pagesFirst)                   <>
-              listField "pageMid" defaultContext (return pageMid)                         <>
-              listField "pagesLast" defaultContext (return pagesLast)                     <>
+              listField "pagesFirst" defaultContext (return pagesFirst)         <>
+              listField "pageMid" defaultContext (return pageMid)               <>
+              listField "pagesLast" defaultContext (return pagesLast)           <>
               defaultContext
 
         sectionCtx <- getResourceBody >>= genSectionContext

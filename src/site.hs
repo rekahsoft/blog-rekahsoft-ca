@@ -200,20 +200,11 @@ main = do
     paginateRules paginatedPosts $ \pageNum pattern -> do
       route idRoute
       compile $ do
-        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
         posts <- recentFirst =<< loadAllSnapshots pattern "content"
 
-        let (pagesFirst, pagesLast') = flip span pages $ \x ->
-              (toFilePath . itemIdentifier $ x) /= "pages/blog.markdown"
-            pageMid = [head pagesLast']
-            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
+        indexCtx <- genNavContext "pages/blog.markdown"
 
-            indexCtx = listField "pagesFirst" defaultContext (return pagesFirst)   <>
-                       listField "pageMid" defaultContext (return pageMid)         <>
-                       listField "pagesLast" defaultContext (return pagesLast)     <>
-                       defaultContext
-
-            ctx = taggedPostCtx tags                                    <>
+        let ctx = taggedPostCtx tags                                    <>
                   paginateContext paginatedPosts pageNum                <>
                   constField "weight" "0"                               <>
                   listField "posts" (taggedPostCtx tags) (return posts)
@@ -226,33 +217,21 @@ main = do
       compile $ do
         posts <- recentFirst =<< loadAllSnapshots "posts/**" "content"
 
-        -- Generate nav-bar from pages/*
-        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
-
-        -- Get the current page name
-        pageName <- takeBaseName . toFilePath <$> getUnderlying
-
         -- Get the current Identifier
         curId <- getUnderlying
 
-        let (pagesFirst, pagesLast') = flip span pages $ \x ->
-              toFilePath curId /= (toFilePath . itemIdentifier $ x)
-            pageMid = [head pagesLast']
-            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
-
-            recentPosts = take 5 posts
+        let pageFilePath = toFilePath curId
+            pageName     = takeBaseName pageFilePath
+            recentPosts  = take 5 posts
             pageTemplate = "templates/pages/" ++ pageName ++ ".html"
 
-            masterCtx =
+        -- Generate navigation context
+        indexCtx <- genNavContext pageFilePath
+
+        let masterCtx =
               listField "recentPosts" (taggedPostCtx tags) (return recentPosts) <>
               listField "posts" (taggedPostCtx tags) (return posts)             <>
               tagCloudField "tagCloud" 65 135 tags                              <>
-              defaultContext
-
-            indexCtx =
-              listField "pagesFirst" defaultContext (return pagesFirst)         <>
-              listField "pageMid" defaultContext (return pageMid)               <>
-              listField "pagesLast" defaultContext (return pagesLast)           <>
               defaultContext
 
         sectionCtx <- getResourceBody >>= genSectionContext
@@ -265,18 +244,7 @@ main = do
     match "posts/**" $ do
       route   $ setExtension "html"
       compile $ do
-        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
-
-        let (pagesFirst, pagesLast') = flip span pages $ \x ->
-              (toFilePath . itemIdentifier $ x) /= "pages/blog.markdown"
-            pageMid = [head pagesLast']
-            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
-
-            indexCtx =
-              listField "pagesFirst" defaultContext (return pagesFirst)   <>
-              listField "pageMid" defaultContext (return pageMid)         <>
-              listField "pagesLast" defaultContext (return pagesLast)     <>
-              defaultContext
+        indexCtx <- genNavContext "pages/blog.markdown"
 
         pandocCompilerWith pandocReaderOptions pandocWriterOptions
           >>= saveSnapshot "content"
@@ -309,6 +277,21 @@ feedConfiguration title = FeedConfiguration
     } where title' = maybe defaultTitle ((defaultTitle ++ "; Specifically on the topic of ") ++) title
             defaultTitle = "Technical Musings of a Minimalist"
 
+genNavContext :: String -> Compiler (Context String)
+genNavContext ident = do
+  pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
+
+  let (pagesFirst, pagesLast') = flip span pages $ \x ->
+        (toFilePath . itemIdentifier $ x) /= ident
+      pageMid = [head pagesLast']
+      pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
+
+      indexCtx = listField "pagesFirst" defaultContext (return pagesFirst) <>
+                 listField "pageMid"    defaultContext (return pageMid)    <>
+                 listField "pagesLast"  defaultContext (return pagesLast)  <>
+                 defaultContext
+  return indexCtx
+
 numPaginatePages :: Int
 numPaginatePages = 6
 
@@ -323,20 +306,11 @@ paginateTagsRules loc tags =
     paginateRules paginatedTaggedPosts $ \pageNum pattern -> do
       route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "html"
       compile $ do
-        pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
         posts <- recentFirst =<< loadAllSnapshots pattern "content"
 
-        let (pagesFirst, pagesLast') = flip span pages $ \x ->
-              (toFilePath . itemIdentifier $ x) /= "pages/blog.markdown"
-            pageMid = [head pagesLast']
-            pagesLast = if not . null $ pagesLast' then tail pagesLast' else []
+        indexCtx <- genNavContext "pages/blog.markdown"
 
-            indexCtx = listField "pagesFirst" defaultContext (return pagesFirst)   <>
-                       listField "pageMid" defaultContext (return pageMid)         <>
-                       listField "pagesLast" defaultContext (return pagesLast)     <>
-                       defaultContext
-
-            ctx = taggedPostCtx tags                                    <>
+        let ctx = taggedPostCtx tags                                    <>
                   paginateContext paginatedTaggedPosts pageNum          <>
                   constField "tag" tag                                  <>
                   listField "posts" (taggedPostCtx tags) (return posts)

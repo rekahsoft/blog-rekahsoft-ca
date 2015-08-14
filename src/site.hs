@@ -321,7 +321,7 @@ paginateTagsRules loc tags =
                             (\n -> fromCapture (fromGlob $ loc ++ "/" ++ tag ++ "*.html") (show n))
 
     paginateRules paginatedTaggedPosts $ \pageNum pattern -> do
-      route idRoute
+      route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "html"
       compile $ do
         pages <- sortByM pageWeight =<< loadAll ("pages/*" .&&. hasVersion "nav-gen")
         posts <- recentFirst =<< loadAllSnapshots pattern "content"
@@ -346,15 +346,11 @@ paginateTagsRules loc tags =
           >>= loadAndApplyTemplate "templates/default.html" indexCtx
 
     rulesExtraDependencies [tagsDependency tags] $ do
-      create [tagsMakeId tags tag] $ do
-        route   $ gsubRoute " " (const "-")
-        compile $ makeItem ("" :: String)
-
-        version "rss" $ do
-          route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "xml"
-          compile $ loadAllSnapshots (fromList identifiers) "content"
-            >>= fmap (take 10) . recentFirst
-            >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
+      create [fromFilePath $ "tags/" ++ tag ++ ".xml"] $ do
+        route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "xml"
+        compile $ loadAllSnapshots (fromList identifiers) "content"
+          >>= fmap (take 10) . recentFirst
+          >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
 
 postCtx :: Context String
 postCtx = dateField "date" "%B %e, %Y"   <>

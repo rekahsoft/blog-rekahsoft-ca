@@ -187,10 +187,7 @@ main = do
     -- Generate tag pages
     paginateTagsRules "tags" tags
 
-    let navgenRoute = customRoute (\r -> if toFilePath r == "pages/home.markdown"
-                                   then "pages/index.markdown"
-                                   else toFilePath r) `composeRoutes`
-                      gsubRoute "pages/" (const "")    `composeRoutes`
+    let navgenRoute = gsubRoute "pages/" (const "") `composeRoutes`
                       setExtension "html"
 
     match "pages/*" $ version "nav-gen" $ do

@@ -1,23 +1,37 @@
 #!/bin/bash
 
-if [ "$1" == "test" ]; then
-    if [ "$2" == "-s" ] || [ "$2" == "--run-selenium" ]; then
-        if ! type selenium &> /dev/null; then
-            echo "Failed to run Selenium. It must not be installed or not accessible on \$PATH!"
-            exit 1
+CABAL="/usr/bin/cabal"
+CONFIGURE_SITE="configure --enable-tests"
+BUILD_SITE="build"
+RUN_SITE="run --verbose=0 blog-rekahsoft-ca"
+TEST_SITE="test --show-details=always --test-option=--color"
+
+case "$1" in
+    test)
+        if [ "$2" == "-s" ] || [ "$2" == "--run-selenium" ]; then
+            if ! type selenium &> /dev/null; then
+                echo "Failed to run Selenium. It must not be installed or not accessible on \$PATH!"
+                exit 1
+            fi
+
+            echo "Running Selenium..."
+            selenium 2> /dev/null &
+            sleep 3s
         fi
 
-        echo "Running Selenium..."
-        selenium 2> /dev/null &
-        sleep 3s
-    fi
-
-    # Remove empty files under directory _site
-    echo "Removing empty files..."
-    find _site -type f -empty -exec rm -v {} \;
-
-    # Test site
-    cabal test --show-details=always --test-option=--color
-else
-    exec "./%site" "$@"
-fi
+        # Test site
+        $CABAL $TEST_SITE
+        ;;
+    clear)
+        $CABAL clean
+        ;;
+    configure)
+        $CABAL $CONFIGURE_SITE
+        ;;
+    make)
+        $CABAL $BUILD_SITE
+        ;;
+    *)
+        $CABAL $RUN_SITE "--" "$@"
+        ;;
+esac

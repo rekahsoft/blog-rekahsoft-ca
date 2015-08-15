@@ -91,9 +91,7 @@ pandocWriterOptions = defaultHakyllWriterOptions
 
 myConfig :: Configuration
 myConfig = defaultConfiguration
-        { deployCommand = "echo 'Removing empty files...' && " ++
-                          "find _site -type f -empty -exec rm -v {} \\; && " ++
-                          "echo '\nDeploying website...' && " ++
+        { deployCommand = "echo '\nDeploying website...' && " ++
                           "rsync -rpogtzcv --delete -e ssh _site/ collin@rekahsoft.ca:~/public_html/blog/"
         , previewPort = 3000
         }

@@ -25,7 +25,8 @@ import           Control.Exception (bracket)
 import           Control.Monad
 import qualified Data.Text as T
 import           System.Process
-import           System.Directory (getDirectoryContents)
+import           System.FilePath (takeExtension)
+import           System.Directory (getDirectoryContents, doesFileExist)
 import           Test.Hspec.WebDriver
 import qualified Test.WebDriver.Commands.Wait as WDw
 import qualified Test.WebDriver.Session as WDs
@@ -64,8 +65,9 @@ waitWhile = secsWhile waitTime
 ensurePageLoaded :: WD ()
 ensurePageLoaded = do
   waitUntil $ findElem $ ById "page-content"
-  waitWhile $ findElem $ ByCSS "#page-content.loading"
-  waitWhile $ findElem $ ByCSS "#status.error"
+  -- TODO: add a few more element checks to replace the deprecated ones below
+  --waitWhile $ findElem $ ByCSS "#page-content.loading"
+  --waitWhile $ findElem $ ByCSS "#status.error"
 
 main :: IO ()
 main = runSiteServerWith $ hspec $ do
@@ -96,7 +98,7 @@ main = runSiteServerWith $ hspec $ do
 
       describe "blog Page" $ do
         it "is paginated" $ runWD $ do
-          openPage $ siteUrl ++ "/#/blog.html"
+          openPage $ siteUrl ++ "/blog1.html"
           ensurePageLoaded
 
           pagination     <- findElem $ ById "pagination"
@@ -107,14 +109,8 @@ main = runSiteServerWith $ hspec $ do
           noFirstPage    `shouldBeTag` "span"
           noPreviousPage `shouldBeTag` "span"
 
-      describe "invalid virtual URLS" $ do
-        context "when requested" $ do
-          it "show a error message dialog" $ runWD $ do
-            openPage $ siteUrl ++ "/#/thispagedoesnotexist.html"
-            waitUntil $ (findElem (ById "status") >>= isDisplayed)
-
-      describe "loads all pages (html files in pages/*)" $ do
-        pages <- runIO $ liftM (filter (flip notElem [".", ".."])) $ getDirectoryContents "_site/pages"
+      describe "loads all pages (html files in site root)" $ do
+        pages <- runIO $ filterDir "_site"
 
         it "opens the app index page" $ runWD $ do
           openPage siteUrl
@@ -122,20 +118,19 @@ main = runSiteServerWith $ hspec $ do
 
         flip mapM_ pages $ \page -> do
           it ("opens the " ++ page ++ " page") $ runWD $ do
-            openPage $ siteUrl ++ "/#/" ++ page
+            openPage $ siteUrl ++ "/" ++ page
             ensurePageLoaded
 
       describe "Loads all posts (html files in posts/*)" $ do
-        posts <- runIO $ liftM (filter (flip notElem [".", ".."])) $ getDirectoryContents "_site/posts"
+        posts <- runIO $ filterDir "_site/posts"
 
         flip mapM_ posts $ \post -> do
           it ("opens post with filename " ++ post) $ runWD $ do
-            openPage $ siteUrl ++ "/#/posts/" ++ post
+            openPage $ siteUrl ++ "/posts/" ++ post
             ensurePageLoaded
 
-    parallel $ session "Initialization tests" $ using [Firefox, Chrome] $ do
-      it "shows a error message in page-content when an invalid url is accessed" $ runWD $ do
-        openPage $ siteUrl ++ "/#/thisPageDoesNotExist.html"
-
-        waitUntil $ findElem $ ById "page-content"
-        waitUntil $ findElem $ ByCSS "#page-content.init.loading-error"
+filterDir :: FilePath -> IO [FilePath]
+filterDir fp = do
+  dirList <- getDirectoryContents fp
+  filterM (\x -> doesFileExist x >>= \y ->
+             return (y && takeExtension x == ".html")) dirList

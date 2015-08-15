@@ -23,7 +23,7 @@
    In order to implement this, a reasonable size refactor needs to take place. Below is a list
    of things to be completed in order to successfully achieve the aforementioned goals.
 
-*** TODO [1/3] Fix issue with tag and pagination page generation <<link issue>>
+*** TODO [2/3] Fix issue with tag and pagination page generation <<link issue>>
     Currently URLs to paginated pages (which includes the blog and tag pages) are broken. They
     generate "/tags/*.html" instead of "/tags/*1.html".
 
@@ -33,7 +33,8 @@
     artifact of pagination. It contains all blog posts (contained in "/blog1.html" through
     "/blogN.html").
 
-**** TODO Blog pagination
+**** DONE Blog pagination
+     CLOSED: [2015-08-15 Sat 05:21]
 **** DONE Tag pages pagination
      CLOSED: [2015-08-13 Thu 22:26]
 **** TODO Tag cloud and tagField are broken

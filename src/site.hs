@@ -187,11 +187,14 @@ main = do
     -- Generate tag pages
     paginateTagsRules "tags" tags
 
-    let navgenRoute = gsubRoute "pages/" (const "") `composeRoutes`
-                      setExtension "html"
+    let pageRoute = gsubRoute "pages/" (const "") `composeRoutes` setExtension "html"
 
-    match "pages/*" $ version "nav-gen" $ do
-      route     navgenRoute
+    match ("pages/*" .&&. complement "pages/blog.markdown") $ version "nav-gen" $ do
+      route   $ pageRoute
+      compile $ pandocCompiler
+
+    match "pages/blog.markdown" $ version "nav-gen" $ do
+      route   $ constRoute "blog1.html"
       compile $ pandocCompiler
 
     paginateRules paginatedPosts $ \pageNum pattern -> do
@@ -209,8 +212,8 @@ main = do
           >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
           >>= loadAndApplyTemplate "templates/default.html" indexCtx
 
-    match "pages/*" $ do
-      route     navgenRoute
+    match ("pages/*" .&&. complement "pages/blog.markdown") $ do
+      route   $ pageRoute
       compile $ do
         posts <- recentFirst =<< loadAllSnapshots "posts/**" "content"
 

@@ -51,7 +51,7 @@ _paq.push(['enableLinkTracking']);
                 ajaxCallbacks: {
                     beforeSend: function () {
                         $('#nav-menu li.active').removeClass('active');
-                        $('#nav-menu li a[href="/blog.html"]').parent('li').addClass('active');
+                        $('#nav-menu li a[href="/blog1.html"]').parent('li').addClass('active');
                     }
                 }
             },
@@ -60,7 +60,7 @@ _paq.push(['enableLinkTracking']);
                 ajaxCallbacks: {
                     beforeSend: function () {
                         $('#nav-menu li.active').removeClass('active');
-                        $('#nav-menu li a[href="/blog.html"]').parent('li').addClass('active');
+                        $('#nav-menu li a[href="/blog1.html"]').parent('li').addClass('active');
                     }
                 }
             },
@@ -69,8 +69,8 @@ _paq.push(['enableLinkTracking']);
                 ajaxCallbacks: {
                     beforeSend: function () {
                         // Set the blog menuitem as active
-                        $('a.menuitem[href="/blog.html"]').closest('ul').find('li.active').removeClass('active');
-                        $('a.menuitem[href="/blog.html"]').closest('li').addClass('active');
+                        $('a.menuitem[href="/blog1.html"]').closest('ul').find('li.active').removeClass('active');
+                        $('a.menuitem[href="/blog1.html"]').closest('li').addClass('active');
                     }
                 }
             },

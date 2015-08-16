@@ -194,12 +194,15 @@ main = do
         compile $ do
           posts <- recentFirst =<< loadAllSnapshots pattern "content"
 
-          indexCtx <- genNavContext "pages/blog.markdown"
+          navCtx <- genNavContext "pages/blog.markdown"
 
           let ctx = taggedPostCtx tags                                    <>
                     paginateContext paginatedTaggedPosts pageNum          <>
                     constField "tag" tag                                  <>
                     listField "posts" (taggedPostCtx tags) (return posts)
+              indexCtx = if pageNum <= 2
+                         then appCacheCtx <> navCtx
+                         else navCtx
 
           makeItem ""
             >>= loadAndApplyTemplate "templates/tag-page.html" ctx
@@ -227,12 +230,16 @@ main = do
       compile $ do
         posts <- recentFirst =<< loadAllSnapshots pattern "content"
 
-        indexCtx <- genNavContext "pages/blog.markdown"
+        navCtx <- genNavContext "pages/blog.markdown"
 
         let ctx = taggedPostCtx tags                                    <>
                   paginateContext paginatedPosts pageNum                <>
                   constField "weight" "0"                               <>
                   listField "posts" (taggedPostCtx tags) (return posts)
+            indexCtx = if pageNum <= 2
+                       then appCacheCtx <> navCtx
+                       else navCtx
+
         makeItem ""
           >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
           >>= loadAndApplyTemplate "templates/default.html" indexCtx
@@ -251,13 +258,14 @@ main = do
             pageTemplate = "templates/pages/" ++ pageName ++ ".html"
 
         -- Generate navigation context
-        indexCtx <- genNavContext pageFilePath
+        navCtx <- genNavContext pageFilePath
 
         let masterCtx =
               listField "recentPosts" (taggedPostCtx tags) (return recentPosts) <>
               listField "posts" (taggedPostCtx tags) (return posts)             <>
               tagCloudField "tagCloud" 65 135 tags                              <>
               defaultContext
+            indexCtx = navCtx <> appCacheCtx
 
         sectionCtx <- getResourceBody >>= genSectionContext
         pg <- loadSnapshot (fromFilePath pageTemplate) "original"
@@ -327,6 +335,9 @@ postCtx = dateField "date" "%B %e, %Y"   <>
 
 taggedPostCtx :: Tags -> Context String
 taggedPostCtx tags = tagsField "tags" tags <> postCtx
+
+appCacheCtx :: Context String
+appCacheCtx = constField "appcache" "true"
 
 pageWeight :: (Functor f, MonadMetadata f) => Item a -> f Int
 pageWeight i = fmap (maybe 0 read) $ getMetadataField (itemIdentifier i) "weight"

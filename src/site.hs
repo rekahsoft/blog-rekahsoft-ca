@@ -118,7 +118,7 @@ main = do
       >> templateCompiler
 
     -- Generate tags
-    tags <- buildTags ("posts/**" .&&. hasNoVersion) (fromCapture "tags/*.html")
+    tags <- buildTags ("posts/**" .&&. hasNoVersion) (fromCapture "tags/*1.html")
 
     -- Generate paginate
     paginatedPosts <- buildPaginateWith

@@ -1,7 +1,9 @@
 * rm-js-req TODOs
 
 ** Goals
-*** WAIT Have SPA functionality when javascript is enabled
+*** DONE Have SPA functionality when javascript is enabled
+    CLOSED: [2015-08-16 Sun 00:17]
+    - State "DONE"       from "WAIT"       [2015-08-16 Sun 00:17]
     - State "WAIT"       from "TODO"       [2015-08-13 Thu 05:22] \\
       Does have SPA functionality when javascript is enabled but still suffers from a [[link issue]]
 *** Complete
@@ -23,28 +25,29 @@
    In order to implement this, a reasonable size refactor needs to take place. Below is a list
    of things to be completed in order to successfully achieve the aforementioned goals.
 
-*** TODO [2/3] Fix issue with tag and pagination page generation <<link issue>>
-    Currently URLs to paginated pages (which includes the blog and tag pages) are broken. They
-    generate "/tags/*.html" instead of "/tags/*1.html".
+*** DONE [3/3] Fix issue with tag and pagination page generation <<link issue>>
+   CLOSED: [2015-08-16 Sun 00:16]
+   Currently URLs to paginated pages (which includes the blog and tag pages) are broken. They
+   generate "/tags/*.html" instead of "/tags/*1.html".
 
-    When the blog page and tag pages are paginated an extra file is generated that is not
-    expected. For example, for the paginated blog, "/blog1.html through "/blogN.html" and
-    "/blog.html" are generated. "/blog.html" is not expected to be generated and seems to be an
-    artifact of pagination. It contains all blog posts (contained in "/blog1.html" through
-    "/blogN.html").
+   When the blog page and tag pages are paginated an extra file is generated that is not
+   expected. For example, for the paginated blog, "/blog1.html through "/blogN.html" and
+   "/blog.html" are generated. "/blog.html" is not expected to be generated and seems to be an
+   artifact of pagination. It contains all blog posts (contained in "/blog1.html" through
+   "/blogN.html").
 
 **** DONE Blog pagination
-     CLOSED: [2015-08-15 Sat 05:21]
+    CLOSED: [2015-08-15 Sat 05:21]
 **** DONE Tag pages pagination
-     CLOSED: [2015-08-13 Thu 22:26]
-**** TODO Tag cloud and tagField are broken
-     After fixing the [[Tag pages pagination]] issue, another issue cropped up. Namely:
+    CLOSED: [2015-08-13 Thu 22:26]
+**** DONE Tag cloud and tagField are broken
+    CLOSED: [2015-08-16 Sun 00:16]
+    After fixing the [[Tag pages pagination]] issue, another issue cropped up. Namely:
 
-     - tagCloud :: all links in tag cloud are to "/" instead of their respective tag page
-     - tagField :: nothing seems to be generated at all (no links to tags in blog posts)
+    - tagCloud :: all links in tag cloud are to "/" instead of their respective tag page
+    - tagField :: nothing seems to be generated at all (no links to tags in blog posts)
 
-*** Complete
-**** CANCELED Modify nav URLs using javascript once page is loaded
+*** CANCELED Modify nav URLs using javascript once page is loaded
      CLOSED: [2015-08-13 Thu 01:47]
      - State "CANCELED"   from "WAIT"       [2015-08-13 Thu 01:47] \\
        As virtual urls are no longer used and normal urls can be set using the HTML5 history api (via history.pushState), all URLs on the page will always be valid. So no modification to the links of any kind needs to take place.
@@ -57,21 +60,21 @@
      Otherwise they will be able to browse the site using the original, unmodified links. This is
      similar to how the link withing the page-content div work currently, and mainly would have to
      be adapted for the navigation.
-**** DONE Fix ajax page loading
+*** DONE Fix ajax page loading
      CLOSED: [2015-08-12 Wed 02:41]
      Pages don't load properly when javascript is enabled.
-**** DONE Generate nav with href pointing to normal urls, not virtual ones
+*** DONE Generate nav with href pointing to normal urls, not virtual ones
      CLOSED: [2015-08-10 Mon 22:55]
      (Eg. /pages/blog.html instead of #/blog.html)
      Note: must be relative urls (via relativizeUrls)
-**** DONE Generate pages/* to /
+*** DONE Generate pages/* to /
      CLOSED: [2015-08-10 Mon 22:56]
      Instead of having the default version
-**** DONE Generate complete pages (no snippets)
+*** DONE Generate complete pages (no snippets)
      CLOSED: [2015-08-10 Mon 22:57]
      The enhanced javascipt additions to the site will then have to extract the page-content div
      before loading it into the page.
-**** DONE Replace jquery-address with use of window.history.pushState
+*** DONE Replace jquery-address with use of window.history.pushState
      CLOSED: [2015-08-13 Thu 05:21]
      window.history.pushState(object, title, url) can be used to set the browsers url without
      relading the page and without breaking browser history. It also doesn't use hashes in the

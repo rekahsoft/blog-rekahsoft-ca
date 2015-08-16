@@ -183,7 +183,34 @@ main = do
       >> templateCompiler
 
     -- Generate tag pages
-    paginateTagsRules "tags" tags
+    forM_ (tagsMap tags) $ \(tag, identifiers) -> do
+      paginatedTaggedPosts <- buildPaginateWith
+                              (fmap (paginateEvery numPaginatePages) . sortRecentFirst)
+                              (fromList identifiers)
+                              (\n -> fromCapture (fromGlob $ "tags/" ++ tag ++ "*.html") (show n))
+
+      paginateRules paginatedTaggedPosts $ \pageNum pattern -> do
+        route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "html"
+        compile $ do
+          posts <- recentFirst =<< loadAllSnapshots pattern "content"
+
+          indexCtx <- genNavContext "pages/blog.markdown"
+
+          let ctx = taggedPostCtx tags                                    <>
+                    paginateContext paginatedTaggedPosts pageNum          <>
+                    constField "tag" tag                                  <>
+                    listField "posts" (taggedPostCtx tags) (return posts)
+
+          makeItem ""
+            >>= loadAndApplyTemplate "templates/tag-page.html" ctx
+            >>= loadAndApplyTemplate "templates/default.html" indexCtx
+
+      rulesExtraDependencies [tagsDependency tags] $ do
+        create [fromFilePath $ "tags/" ++ tag ++ ".xml"] $ do
+          route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "xml"
+          compile $ loadAllSnapshots (fromList identifiers) "content"
+            >>= fmap (take 10) . recentFirst
+            >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
 
     let pageRoute = gsubRoute "pages/" (const "") `composeRoutes` setExtension "html"
 
@@ -292,37 +319,6 @@ genNavContext ident = do
 
 numPaginatePages :: Int
 numPaginatePages = 6
-
-paginateTagsRules :: String -> Tags -> Rules ()
-paginateTagsRules loc tags =
-  forM_ (tagsMap tags) $ \(tag, identifiers) -> do
-    paginatedTaggedPosts <- buildPaginateWith
-                            (fmap (paginateEvery numPaginatePages) . sortRecentFirst)
-                            (fromList identifiers)
-                            (\n -> fromCapture (fromGlob $ loc ++ "/" ++ tag ++ "*.html") (show n))
-
-    paginateRules paginatedTaggedPosts $ \pageNum pattern -> do
-      route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "html"
-      compile $ do
-        posts <- recentFirst =<< loadAllSnapshots pattern "content"
-
-        indexCtx <- genNavContext "pages/blog.markdown"
-
-        let ctx = taggedPostCtx tags                                    <>
-                  paginateContext paginatedTaggedPosts pageNum          <>
-                  constField "tag" tag                                  <>
-                  listField "posts" (taggedPostCtx tags) (return posts)
-
-        makeItem ""
-          >>= loadAndApplyTemplate "templates/tag-page.html" ctx
-          >>= loadAndApplyTemplate "templates/default.html" indexCtx
-
-    rulesExtraDependencies [tagsDependency tags] $ do
-      create [fromFilePath $ "tags/" ++ tag ++ ".xml"] $ do
-        route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "xml"
-        compile $ loadAllSnapshots (fromList identifiers) "content"
-          >>= fmap (take 10) . recentFirst
-          >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
 
 postCtx :: Context String
 postCtx = dateField "date" "%B %e, %Y"   <>

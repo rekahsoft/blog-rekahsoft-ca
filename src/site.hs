@@ -234,7 +234,6 @@ main = do
 
         let ctx = taggedPostCtx tags                                    <>
                   paginateContext paginatedPosts pageNum                <>
-                  constField "weight" "0"                               <>
                   listField "posts" (taggedPostCtx tags) (return posts)
             indexCtx = if pageNum <= 2
                        then appCacheCtx <> navCtx

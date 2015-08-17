@@ -130,7 +130,7 @@ _paq.push(['enableLinkTracking']);
                 dataType: 'html',
                 beforeSend: function (xhr, settings) {
                     // Add .loading to #page-content and #nav to facilitate a loading animation
-                    $('#page-content, #nav').removeClass('loading-done').addClass('loading');
+                    $('#page-content, #nav').addClass('loading');
 
                     // Run current handlers onSuccess callback (if it exists)
                     if (handlerCallback.hasOwnProperty('beforeSend') && typeof handlerCallback.beforeSend === 'function') {

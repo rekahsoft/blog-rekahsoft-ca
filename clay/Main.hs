@@ -151,10 +151,6 @@ pageContent = do
   "#page-content" # ".loading" ?
     opacity 0.35
 
-  "#page-content" # ".loading-done" ? do
-    transition "opacity" (sec 1) easeIn (sec 0.5)
-    opacity 1
-
   "#page-content" ** ul |> (li # ":before") ? do
     content $ stringContent "\\2192"
     paddingRight (em 0.5)

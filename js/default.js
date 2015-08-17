@@ -218,12 +218,22 @@ _paq.push(['enableLinkTracking']);
             });
         }
 
+        function appCacheUpdateReady () {
+            window.applicationCache.swapCache();
+            // TODO: find what resource is loaded currently and reload it if it has changed
+        }
+
         function init(router) {
             router.setCallback(loadPageContent);
 
             window.addEventListener("popstate", function (e) {
                 router.runRouter(location.pathname);
             });
+
+            window.addEventListener("updateready", appCacheUpdateReady);
+            if (window.applicationCache.status === window.applicationCache.UPDATEREADY) {
+                appCacheUpdateReady();
+            }
 
             $(document).ready(function () {
                 $('#nav-menu a.menuitem').click(function () {

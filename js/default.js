@@ -114,21 +114,15 @@ var _paq = _paq || [];
                    };
 
         function init () {
-            var u = "//analytics.rekahsoft.ca/",
-                d = document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-
             _paq.push(["setDoNotTrack", true]);
-            _paq.push(['enableLinkTracking']);
-            _paq.push(['setTrackerUrl', u+'piwik.php']);
-            _paq.push(['setSiteId', 1]);
-
-            // Asynchronously load piwik.js
-            g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+            _paq.push(["enableLinkTracking"]);
+            _paq.push(["setTrackerUrl", "//analytics.rekahsoft.ca/piwik.php"]);
+            _paq.push(["setSiteId", 1]);
         }
 
         function trackPageView (href) {
-            _paq.push(['setDocumentTitle', document.domain + href]);
-            _paq.push(['trackPageView']);
+            _paq.push(["setDocumentTitle", document.domain + href]);
+            _paq.push(["trackPageView"]);
         }
 
         return spec

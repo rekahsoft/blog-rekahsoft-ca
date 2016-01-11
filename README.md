@@ -57,7 +57,7 @@ directly via the internet or by using the ```fetch``` argument to cabal).
 ## Running Tests <a name="running-tests"></a>
 
 To the run the tests that accompany this site, one must have [Selenium][] installed and an
-instances running on port 4444. Then one must run the following:` 
+instances running on port 4444. Then one must run the following:
 
     $ cabal configure --enable-tests
     $ cabal install --enable-tests --only-dependencies
@@ -110,7 +110,6 @@ articles. An example of what this could look like:
   cache can be unreliable and also can't be controlled from javascript so a better solution is
   to use LocalStorage as mentioned.
 * Make tag specific RSS feeds available via links (on individual tag pages and perhaps somewhere on the home page).
-* Re-enable simple nojs site as fallback when javascript is disabled by the client browser
 
 [Hakyll]: http://jaspervdj.be/hakyll/
 [Clay]: http://fvisser.nl/clay/

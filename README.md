@@ -8,7 +8,7 @@
 * [Issues](#issues)
 * [Road Map](#road-map)
 
-[#! λ Slang](http://blog.rekahsoft.ca) is the personal technical blog of *Collin Doering*,
+[#! Lambda Slang](http://blog.rekahsoft.ca) is the personal technical blog of *Collin Doering*,
 built using software that [respects our freedoms](https://www.gnu.org/philosophy/free-sw.html).
 
 ## Features <a name="features"></a>
@@ -34,7 +34,7 @@ The creation of this website was made possible by the following open source tool
 
 Simply put, you're welcome to use the code used to generate this site though there are a few restrictions:
 
-* Any images and artwork that embody the likeness of "#! λ Slang" are not to be distributed or
+* Any images and artwork that embody the likeness of "#! Lambda Slang" are not to be distributed or
   used and are strictly copyright
 * The content of pages and posts can be used with attribution, providing you aren't making money off of it
 

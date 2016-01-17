@@ -1,4 +1,4 @@
-# Source Code for **[#! λ Slang](http://blog.rekahsoft.ca)**
+# Source Code for **[#! Lambda Slang](http://blog.rekahsoft.ca)**
 
 * [Features](#features)
 * [Tools](#tools)

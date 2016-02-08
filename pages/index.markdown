@@ -28,7 +28,7 @@ Terms of Use
 ============
 ------------
 
-This site is _Copyright 2013 © - Collin Doering_ and is distributed under the following terms.
+This site is _Copyright 2016 © - Collin Doering_ and is distributed under the following terms.
 
 1. All rights reserved on the "#! λ Slang" name, as well as on the
    [banner image](/images/logo-banner.svg), favicons([1](/images/favicon.ico),

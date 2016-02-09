@@ -240,11 +240,7 @@ var _paq = _paq || [];
     }()),
 
     site = (function () {
-        var spec = {
-            init: init
-        },
-
-        status = (function () {
+        var status = (function () {
             var messages = [],
                 validIndicators = ["error", "success", "info"],
                 spec = {
@@ -341,7 +337,13 @@ var _paq = _paq || [];
             });
 
             return spec;
-        }());
+        }()),
+
+        spec = {
+            init: init,
+            nav: nav,
+            status: status
+        };
 
         function appCacheUpdateReady () {
             window.applicationCache.swapCache();
@@ -366,11 +368,17 @@ var _paq = _paq || [];
 
     // Initialize routes
     router.route({ // Post pages handler
-        acceptUrls: /posts\/.*\.html/
+        acceptUrls: /posts\/.*\.html/,
+        onSuccess: function (url, dta) {
+            site.nav.setActive('/blog1.html');
+        }
     });
 
     router.route({ // Tag pages handler
-        acceptUrls: /tags\/.*(\d*)\.html/
+        acceptUrls: /tags\/.*(\d*)\.html/,
+        onSuccess: function (url, dta) {
+            site.nav.setActive('/blog1.html');
+        }
     });
 
     router.route({ // Blog pages handler

@@ -47,37 +47,17 @@ runSiteServerWith action = void $ bracket makeSiteProc terminateProcess (const a
 siteUrl :: String
 siteUrl = "http://localhost:3000"
 
-waitTime :: Double
-waitTime = 10
-
-secsUntil :: WDs.WDSessionState m => Double -> m a -> m ()
-secsUntil t a = void $ WDw.waitUntil t a
-
-waitUntil :: WDs.WDSessionState m => m a -> m ()
-waitUntil = secsUntil waitTime
-
-secsWhile :: WDs.WDSessionState m => Double -> m a -> m ()
-secsWhile = WDw.waitWhile
-
-waitWhile :: WDs.WDSessionState m => m a -> m ()
-waitWhile = secsWhile waitTime
-
 ensurePageLoaded :: WD ()
-ensurePageLoaded = do
-  waitUntil $ findElem $ ById "page-content"
-  -- TODO: add a few more element checks to replace the deprecated ones below
-  --waitWhile $ findElem $ ByCSS "#page-content.loading"
-  --waitWhile $ findElem $ ByCSS "#status.error"
+ensurePageLoaded = void $ WDw.waitUntil 10 $ findElem $ ById "page-content"
 
 main :: IO ()
 main = runSiteServerWith $ hspec $ do
   describe "RekahSoft Blog Tests" $ do
-
     -- session "for application cache" $ using [Firefox, Chrome] $ do
     --   it "has a fresh cache manifest" $ do
     --     pending
 
-    parallel $ session "general site navigation tests" $ using [Firefox, Chrome] $ do
+    parallel $ session "general site navigation tests" $ using [chromeCaps] $ do
       describe "navigation menuitems" $ do
          context "when clicked" $ do
            it "load the expected page and sets the menuitems parent as active" $ runWD $ do

@@ -1,10 +1,13 @@
 # Source Code for **[#! Lambda Slang](http://blog.rekahsoft.ca)**
 
+[![build status](https://gitlab.com/rekahsoft/blog-rekahsoft/badges/master/build.svg)](https://gitlab.com/rekahsoft/blog-rekahsoft/commits/master)
+
 * [Features](#features)
 * [Tools](#tools)
 * [License](#license)
 * [Building](#building)
 * [Running Tests](#running-tests)
+* [Deploying](#deploying)
 * [Issues](#issues)
 * [Road Map](#road-map)
 
@@ -65,6 +68,24 @@ instances running on port 4444. Then one must run the following:
 
 The `-s` or `--run-selenium` option to `site test` starts a selenium server before running the
 tests. Another way to run the tests is using cabal directly by running `cabal test`.
+
+## Deploying <a name="deploying"></a>
+
+To deploy the site, use the provided `init-env.sh` script. Its usage is as follows:
+
+```
+Usage: init_env.sh [create|update] <stack-name> <cf-bucket> <cnames>
+       init_env.sh init <cf-bucket>
+       init_env.sh info <stack-name>
+       init_env.sh [help|--help|-h]
+```
+
+First create required initial resources, then create the projects stack, thereby deploying the project.
+
+```
+./init-env.sh init <cf-bucket-name>
+./init-env.sh create <stack-name> <cf-bucket-name> <cnames>
+```
 
 ## Issues <a name="issues"></a>
 

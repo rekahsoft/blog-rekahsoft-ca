@@ -107,6 +107,7 @@ Resources:
           S3OriginConfig:
             OriginAccessIdentity: ''# origin-access-identity/cloudfront/S3Origin
         Enabled: true
+        HttpVersion: http2
         Comment: Some comment
         DefaultRootObject: index.html
         Logging:

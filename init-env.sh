@@ -1,8 +1,11 @@
 #!/bin/bash
 
+TEMPLATE="blog-rekahsoft.yaml"
+
 display_help() {
     cat <<EOF
 Usage: init_env.sh [create|update] <stack-name> <cf-bucket> <cnames>
+       init_env.sh init <cf-bucket>
        init_env.sh info <stack-name>
        init_env.sh [help|--help|-h]
 EOF
@@ -26,14 +29,18 @@ BUCKET="$3"
 CNAMES="$4"
 
 case "$OP" in
+    init)
+        BUCKET="$2"
+        aws s3 mb "s3://${BUCKET}"
+        ;;
     update|create)
         # Push cloudformation template to provided bucket
-        echo aws s3 cp blog-rekahsoft.yaml "s3://${BUCKET}"
+        aws s3 cp "$TEMPLATE" "s3://${BUCKET}"
 
         # Create cloudformation stack
-        echo aws cloudformation "${OP}-stack" --stack-name "$STACK_NAME" --template-url "https://${BUCKET}.s3.amazonaws.com/blog-rekahsoft.yaml" --parameters ParameterKey=AlternateURLs,ParameterValue=\"${CNAMES}\" --capabilities CAPABILITY_IAM
+        aws cloudformation "${OP}-stack" --stack-name "$STACK_NAME" --template-url "https://${BUCKET}.s3.amazonaws.com/${TEMPLATE}" --parameters ParameterKey=AlternateURLs,ParameterValue=\"${CNAMES}\" --capabilities CAPABILITY_IAM
 
-        echo aws cloudformation wait stack-update-complete --stack-name "$STACK_NAME"
+        aws cloudformation wait stack-update-complete --stack-name "$STACK_NAME"
 
         display_info
         ;;

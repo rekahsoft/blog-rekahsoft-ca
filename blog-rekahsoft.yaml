@@ -1,0 +1,174 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: RekahSoft blog stack
+
+#
+# Parameters
+#
+
+Parameters:
+  AlternateURLs:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: A list of URLs that act as aliases for accessing the cloudfront site
+  PriceClass:
+    Type: String
+    AllowedValues: [PriceClass_100, PriceClass_200, PriceClass_All]
+    Default: PriceClass_100
+    Description: The cloud front price class to use with the web distribution
+
+
+#
+# Conditions
+#
+
+Conditions:
+  NoAlternateURLs: !Equals [!Join [',', !Ref AlternateURLs], '' ]
+
+
+#
+# Resources
+#
+
+Resources:
+  User:
+    Type: AWS::IAM::User
+  AccessKeyUser:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref User
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: S3BucketPolicy
+        Version: '2012-10-17'
+        Statement:
+        - Sid: ListAccess
+          Action:
+            - s3:ListBucket
+          Effect: Allow
+          Resource: !Join ['', ['arn:aws:s3:::', !Ref S3Bucket]]
+          Principal:
+            AWS: !GetAtt User.Arn
+        - Sid: ReadWriteAccess
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:DeleteObject
+          Effect: Allow
+          Resource: !Join ['', ['arn:aws:s3:::', !Ref S3Bucket, '/*']]
+          Principal:
+            AWS: !GetAtt User.Arn
+        - Sid: PublicReadAccess
+          Action:
+            - s3:GetObject
+          Effect: Allow
+          Resource: !Join ['', ['arn:aws:s3:::', !Ref S3Bucket, '/*']]
+          Principal: '*'
+      Bucket: !Ref S3Bucket
+
+  LogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: LogsBucketPolicy
+        Version: '2012-10-17'
+        Statement:
+        - Sid: ReadWriteAccess
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:DeleteObject
+          Effect: Allow
+          Resource: !Join ['', ['arn:aws:s3:::', !Ref LogsBucket, '/*']]
+          Principal:
+            AWS: !GetAtt User.Arn
+      Bucket: !Ref LogsBucket
+  LogsBucket:
+    Type: AWS::S3::Bucket
+
+  CloudfrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn:
+      - S3Bucket
+      - LogsBucket
+    Properties:
+      DistributionConfig:
+        Origins:
+        - DomainName: !GetAtt S3Bucket.DomainName # mybucket.s3.amazonaws.com
+          Id: S3Origin
+          S3OriginConfig:
+            OriginAccessIdentity: ''# origin-access-identity/cloudfront/S3Origin
+        Enabled: true
+        Comment: Some comment
+        DefaultRootObject: index.html
+        Logging:
+          IncludeCookies: false
+          Bucket: !GetAtt LogsBucket.DomainName # mylogs.s3.amazonaws.com
+          Prefix: myprefix
+        Aliases: !If [NoAlternateURLs, !Ref 'AWS::NoValue', !Ref AlternateURLs ]
+        CacheBehaviors:
+          - AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            TargetOriginId: S3Origin
+            MaxTTL: 0
+            MinTTL: 0
+            DefaultTTL: 0
+            PathPattern: index.html
+            ForwardedValues:
+              QueryString: 'false'
+              Cookies:
+                Forward: none
+            # TrustedSigners:
+            # - 1234567890EX
+            # - 1234567891EX
+            ViewerProtocolPolicy: allow-all
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - GET
+          - HEAD
+          - OPTIONS
+          TargetOriginId: S3Origin
+          ForwardedValues:
+            QueryString: 'false'
+            Cookies:
+              Forward: none
+          # TrustedSigners:
+          # - 1234567890EX
+          # - 1234567891EX
+          ViewerProtocolPolicy: allow-all
+        PriceClass: !Ref PriceClass
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: whitelist
+            Locations:
+            - CA
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: 'true'
+
+#
+# Outputs
+#
+
+Outputs:
+  WebAddress:
+    Value: !GetAtt CloudfrontDistribution.DomainName
+
+  S3Bucket:
+    Value: !Ref S3Bucket
+  LogsBucket:
+    Value: !Ref LogsBucket
+
+  UserAccessKey:
+    Value: !Ref AccessKeyUser
+  UserSecretKey:
+    Value: !GetAtt AccessKeyUser.SecretAccessKey

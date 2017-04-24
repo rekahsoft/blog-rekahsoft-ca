@@ -92,7 +92,7 @@ pandocWriterOptions = defaultHakyllWriterOptions
 myConfig :: Configuration
 myConfig = defaultConfiguration
         { deployCommand = "echo '\nDeploying website...' && " ++
-                          "rsync -rpogtzcv --delete -e ssh _site/ collin@rekahsoft.ca:~/public_html/blog/"
+                          "aws s3 sync _site/ s3://$S3_BUCKET"
         , previewPort = 3000
         }
 

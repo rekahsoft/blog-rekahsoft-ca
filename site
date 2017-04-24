@@ -1,6 +1,5 @@
 #!/bin/bash
 
-CABAL="/usr/bin/cabal"
 CONFIGURE_SITE="configure --enable-tests"
 BUILD_SITE="build"
 RUN_SITE="run --verbose=0 blog-rekahsoft-ca"
@@ -20,18 +19,22 @@ case "$1" in
         fi
 
         # Test site
-        $CABAL $TEST_SITE
+        cabal $TEST_SITE
         ;;
     clear)
-        $CABAL clean
+        cabal clean
         ;;
     configure)
-        $CABAL $CONFIGURE_SITE
+        cabal $CONFIGURE_SITE
         ;;
     make)
-        $CABAL $BUILD_SITE
+        cabal $BUILD_SITE
+        ;;
+    init-env)
+        shift
+        ./init-env.sh "$@"
         ;;
     *)
-        $CABAL $RUN_SITE "--" "$@"
+        cabal $RUN_SITE "--" "$@"
         ;;
 esac

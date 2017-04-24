@@ -295,7 +295,7 @@ main = do
            ("lib/JQuery/*", gsubRoute "JQuery" $ const "js")] $ \(p, r) ->
       match p $ do
           route   r
-          compile $ getResourceString >>= withItemBody (unixFilter "jsmin" [])
+          compile $ compressCssCompiler
 
 ---------------------------------------------------------------------------------------------------------
 -- Functions & Constants --------------------------------------------------------------------------------

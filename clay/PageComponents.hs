@@ -184,7 +184,7 @@ srcCodeBlock = do
       sym margin nil
       sym padding nil
       border none nil black
-      verticalAlign baseline
+      verticalAlign vAlignBaseline
 
   td # ".lineNumbers" ? do
     borderRight solid (px 1) "#AAAAAA"

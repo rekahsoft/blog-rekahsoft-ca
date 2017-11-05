@@ -8,7 +8,7 @@ variables:
 
 build:
   stage: build
-  image: haskell:8.0.2
+  image: haskell:8.2
   artifacts:
     name: "${CI_PROJECT_NAME}__${CI_COMMIT_TAG}__${CI_COMMIT_REF_NAME}__${CI_COMMIT_SHA}"
     paths:

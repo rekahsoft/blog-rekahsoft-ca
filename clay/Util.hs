@@ -26,7 +26,7 @@ import Clay hiding (i, s, id)
 import Data.Maybe (fromMaybe)
 import Prelude hiding (div, span, (**))
 
-makeBorderBox :: Maybe (Size Abs) -> Maybe Color -> Css
+makeBorderBox :: Maybe (Size LengthUnit) -> Maybe Color -> Css
 makeBorderBox pad backCol =
   let pad' = fromMaybe (px 8) pad
       backCol' = fromMaybe (rgba 250 250 255 165) backCol

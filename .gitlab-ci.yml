@@ -15,7 +15,7 @@ build:
       - _site/*
   script:
     - cabal update
-    - cabal install --enable-tests
+    - cabal install --enable-tests --force-reinstalls
     - ./site configure
     - ./site make
     - ./site build

@@ -26,6 +26,18 @@ provider "aws" {
   }]
 }
 
+provider "null" {
+  version = "~> 1.0"
+}
+
+provider "random" {
+  version = "~> 1.3"
+}
+
+provider "template" {
+  version = "~> 1.0"
+}
+
 #
 # Local values to be re-used throughout this template
 

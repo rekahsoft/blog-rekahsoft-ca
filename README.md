@@ -1,7 +1,5 @@
 # Source Code for **[#! Lambda Slang](http://blog.rekahsoft.ca)**
 
-[![build status](https://gitlab.com/rekahsoft/blog-rekahsoft/badges/master/build.svg)](https://gitlab.com/rekahsoft/blog-rekahsoft/commits/master)
-
 * [Features](#features)
 * [Tools](#tools)
 * [License](#license)
@@ -71,21 +69,19 @@ tests. Another way to run the tests is using cabal directly by running `cabal te
 
 ## Deploying <a name="deploying"></a>
 
-To deploy the site, use the provided `init-env.sh` script. Its usage is as follows:
+Terraform is used to deploy this site. Its configuration files are located in `./infra`. Three
+workspaces are currently available, including:
 
-```
-Usage: init_env.sh [create|update] <stack-name> <cf-bucket> <cnames>
-       init_env.sh init <cf-bucket>
-       init_env.sh info <stack-name>
-       init_env.sh [help|--help|-h]
-```
+  - default (unused)
+  - staging
+  - production
 
-First create required initial resources, then create the projects stack, thereby deploying the project.
+For example, this is how to deploy the production version of the site:
 
-```
-./init-env.sh init <cf-bucket-name>
-./init-env.sh create <stack-name> <cf-bucket-name> <cnames>
-```
+    $ cd infra
+    $ terraform workspace select production
+    $ terraform plan --var-file=production.tfvars --out local.plan
+    $ terraform apply local.plan
 
 ## Issues <a name="issues"></a>
 

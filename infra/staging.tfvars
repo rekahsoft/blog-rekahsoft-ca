@@ -1,3 +1,3 @@
 dns_apex            = "rekahsoft.ca"
-subdomain           = "blog"
+subdomain           = "blog.staging"
 enable_naked_domain = false

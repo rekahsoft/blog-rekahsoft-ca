@@ -26,6 +26,18 @@ provider "aws" {
   }]
 }
 
+provider "null" {
+  version = "~> 1.0"
+}
+
+provider "random" {
+  version = "~> 1.3"
+}
+
+provider "template" {
+  version = "~> 1.0"
+}
+
 #
 # Local values to be re-used throughout this template
 
@@ -35,6 +47,10 @@ locals {
     "Environment", "${terraform.workspace}"
   )}"
   cdn_origin_id     = "${terraform.workspace}-origin-cdn"
+  www               = "${var.enable_naked_domain ? "" : "www."}"
+  subdomain         = "${var.subdomain == "" ? "" : "${var.subdomain}."}"
+  naked_domain      = "${local.subdomain}${var.dns_apex}"
+  domain            = "${local.www}${local.naked_domain}"
   project_env       = "${var.project}-${terraform.workspace}"
 }
 
@@ -61,24 +77,27 @@ data "aws_route53_zone" "external" {
 # Resources
 
 resource "aws_acm_certificate" "cert" {
-  domain_name = "${var.dns_name}"
-  validation_method = "DNS"
-  tags = "${local.common_tags}"
+  domain_name               = "${local.domain}"
+  subject_alternative_names = "${compact(list("${var.enable_naked_domain}" ? "" : "${local.naked_domain}"))}"
+  validation_method         = "DNS"
+  tags                      = "${local.common_tags}"
 
   provider = "aws.us_east_1"
 }
 
 resource "aws_route53_record" "cert_validation" {
-  name = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_name}"
-  type = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_type}"
+  count = "${1 + "${var.enable_naked_domain ? 0 : 1}"}"
+
   zone_id = "${data.aws_route53_zone.external.id}"
-  records = ["${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"]
-  ttl = 60
+  name    = "${lookup(aws_acm_certificate.cert.domain_validation_options[count.index], "resource_record_name")}"
+  type    = "${lookup(aws_acm_certificate.cert.domain_validation_options[count.index], "resource_record_type")}"
+  ttl     = 60
+  records = ["${lookup(aws_acm_certificate.cert.domain_validation_options[count.index], "resource_record_value")}"]
 }
 
 resource "aws_acm_certificate_validation" "cert" {
   certificate_arn = "${aws_acm_certificate.cert.arn}"
-  validation_record_fqdns = ["${aws_route53_record.cert_validation.fqdn}"]
+  validation_record_fqdns = ["${aws_route53_record.cert_validation.*.fqdn}"]
 
   provider = "aws.us_east_1"
 }
@@ -90,6 +109,19 @@ resource "aws_s3_bucket" "static" {
   website {
     index_document = "index.html"
     error_document = "error.html"
+  }
+
+  tags = "${local.common_tags}"
+}
+
+resource "aws_s3_bucket" "static_redirect" {
+  count = "${var.enable_naked_domain ? 0 : 1}"
+
+  bucket_prefix = "${local.project_env}"
+  acl           = "private"
+
+  website {
+    redirect_all_requests_to = "https://${local.domain}"
   }
 
   tags = "${local.common_tags}"
@@ -117,12 +149,26 @@ resource "aws_iam_access_key" "app_deploy" {
 
 resource "aws_route53_record" "static" {
   zone_id = "${data.aws_route53_zone.external.zone_id}"
-  name    = "${var.dns_name}."
+  name    = "${local.domain}."
   type    = "A"
 
   alias {
     name                   = "${aws_cloudfront_distribution.cdn.domain_name}"
     zone_id                = "${aws_cloudfront_distribution.cdn.hosted_zone_id}"
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_route53_record" "static_redirect" {
+  count = "${var.enable_naked_domain ? 0 : 1}"
+
+  zone_id = "${data.aws_route53_zone.external.zone_id}"
+  name    = "${local.naked_domain}."
+  type    = "A"
+
+  alias {
+    name                   = "${aws_cloudfront_distribution.cdn_redirect.domain_name}"
+    zone_id                = "${aws_cloudfront_distribution.cdn_redirect.hosted_zone_id}"
     evaluate_target_health = true
   }
 }
@@ -165,7 +211,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     bucket          = "${aws_s3_bucket.static_logs.bucket_domain_name}"
   }
 
-  aliases = ["${var.dns_name}"]
+  aliases = ["${local.domain}"]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
@@ -225,10 +271,78 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 }
 
+resource "aws_cloudfront_distribution" "cdn_redirect" {
+  count = "${var.enable_naked_domain ? 0 : 1}"
+
+  # Static file origin
+  origin {
+    domain_name = "${aws_s3_bucket.static_redirect.id}.${aws_s3_bucket.static_redirect.website_domain}"
+    origin_id   = "${local.cdn_origin_id}"
+
+    custom_origin_config {
+      http_port = 80
+      https_port = 443
+
+      origin_ssl_protocols   = ["TLSv1.1", "TLSv1.2"]
+      origin_protocol_policy = "http-only"
+    }
+  }
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  comment             = "CDN redirect for ${var.project} (environment ${terraform.workspace})"
+
+  logging_config {
+    include_cookies = false
+    bucket          = "${aws_s3_bucket.static_logs.bucket_domain_name}"
+  }
+
+  aliases = ["${local.naked_domain}"]
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id = "${local.cdn_origin_id}"
+
+    forwarded_values {
+      query_string = false
+
+      cookies {
+        forward = "none"
+      }
+    }
+
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+    viewer_protocol_policy = "redirect-to-https"
+  }
+
+  price_class = "PriceClass_100"
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  tags = "${local.common_tags}"
+
+  viewer_certificate {
+    acm_certificate_arn      = "${aws_acm_certificate_validation.cert.certificate_arn}"
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.1_2016"
+  }
+}
+
 resource "null_resource" "deploy_app" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
     command = <<SCRIPT
+: Create temporary aws config and credentials files
+export AWS_CONFIG_FILE=$(mktemp);
+export AWS_SHARED_CREDENTIALS_FILE=$(mktemp);
+
 : Add default AWS account profile;
 aws configure --profile ${aws_iam_user.app_deploy.name} set aws_access_key_id ${aws_iam_access_key.app_deploy.id};
 aws configure --profile ${aws_iam_user.app_deploy.name} set aws_secret_access_key ${aws_iam_access_key.app_deploy.secret};
@@ -236,6 +350,9 @@ aws configure --profile ${aws_iam_user.app_deploy.name} set region ${var.region}
 
 : Sync latest app build to s3 bucket;
 aws --profile ${aws_iam_user.app_deploy.name} s3 sync --delete ../_site s3://${aws_s3_bucket.static.id}/;
+
+: Cleanup temporary aws config and credentials files
+rm $${AWS_CONFIG_FILE} $${AWS_SHARED_CREDENTIALS_FILE};
 SCRIPT
   }
 }

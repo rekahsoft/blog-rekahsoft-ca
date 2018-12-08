@@ -1,6 +1,7 @@
 variable "workspace_iam_roles" {
   default = {
     default    = "arn:aws:iam::068963069293:role/pipeline-role"
+    staging    = "arn:aws:iam::068963069293:role/pipeline-role"
     production = "arn:aws:iam::068963069293:role/pipeline-role"
   }
 }
@@ -15,4 +16,10 @@ variable "project" {
 
 variable "dns_apex" {}
 
-variable "dns_name" {}
+variable "subdomain" {
+  default = ""
+}
+
+variable "enable_naked_domain" {
+  default = false
+}

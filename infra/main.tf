@@ -339,6 +339,10 @@ resource "null_resource" "deploy_app" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
     command = <<SCRIPT
+: Create temporary aws config and credentials files
+export AWS_CONFIG_FILE=$(mktemp);
+export AWS_SHARED_CREDENTIALS_FILE=$(mktemp);
+
 : Add default AWS account profile;
 aws configure --profile ${aws_iam_user.app_deploy.name} set aws_access_key_id ${aws_iam_access_key.app_deploy.id};
 aws configure --profile ${aws_iam_user.app_deploy.name} set aws_secret_access_key ${aws_iam_access_key.app_deploy.secret};
@@ -346,6 +350,9 @@ aws configure --profile ${aws_iam_user.app_deploy.name} set region ${var.region}
 
 : Sync latest app build to s3 bucket;
 aws --profile ${aws_iam_user.app_deploy.name} s3 sync --delete ../_site s3://${aws_s3_bucket.static.id}/;
+
+: Cleanup temporary aws config and credentials files
+rm $${AWS_CONFIG_FILE} $${AWS_SHARED_CREDENTIALS_FILE};
 SCRIPT
   }
 }

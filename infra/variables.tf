@@ -15,4 +15,10 @@ variable "project" {
 
 variable "dns_apex" {}
 
-variable "dns_name" {}
+variable "subdomain" {
+  default = ""
+}
+
+variable "enable_naked_domain" {
+  default = false
+}

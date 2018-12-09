@@ -89,8 +89,9 @@ pandocWriterOptions = defaultHakyllWriterOptions
 
 myConfig :: Configuration
 myConfig = defaultConfiguration
-        { deployCommand = "echo '\nDeploying website...' && " ++
-                          "aws s3 sync _site/ s3://$S3_BUCKET"
+        { deployCommand = "echo 'Deploying website...' && " ++
+                          "aws s3 sync _site/ s3://$S3_BUCKET &&"  ++
+                          "echo 'Done!'"
         , previewPort = 3000
         }
 

@@ -26,24 +26,23 @@ import Hakyll
 import Control.Monad
 import Data.Monoid (mconcat,(<>))
 import Data.List (sortBy)
-import Data.Map (toList, size)
-import qualified Data.Set as S
+import Data.Map (toList)
 import Data.Ord (comparing)
 import System.Random
-import System.FilePath (takeBaseName, (</>))
+import System.FilePath (takeBaseName)
 import System.Process
 import System.Exit
 import System.IO (hGetContents)
 
 import Text.Parsec
 import Text.Pandoc.Options
-import Control.Applicative hiding ((<|>),many)
+import Control.Applicative()
 
 ---------------------------------------------------------------------------------------------------------
 
 pandocReaderOptions :: ReaderOptions
-pandocReaderOptions = defaultHakyllReaderOptions
-                  { readerExtensions = S.fromList
+pandocReaderOptions = def
+                  { readerExtensions = extensionsFromList
                                        [ Ext_footnotes
                                        , Ext_inline_notes
                                        , Ext_pandoc_title_block
@@ -84,15 +83,15 @@ pandocReaderOptions = defaultHakyllReaderOptions
 
 pandocWriterOptions :: WriterOptions
 pandocWriterOptions = defaultHakyllWriterOptions
-                      { writerHtml5 = True
-                      , writerHTMLMathMethod = MathJax ""
+                      { writerHTMLMathMethod = MathJax ""
                       , writerEmailObfuscation = NoObfuscation -- ReferenceObfuscation
                       }
 
 myConfig :: Configuration
 myConfig = defaultConfiguration
-        { deployCommand = "echo '\nDeploying website...' && " ++
-                          "aws s3 sync _site/ s3://$S3_BUCKET"
+        { deployCommand = "echo 'Deploying website...' && " ++
+                          "aws s3 sync _site/ s3://$S3_BUCKET &&"  ++
+                          "echo 'Done!'"
         , previewPort = 3000
         }
 
@@ -142,12 +141,12 @@ main = do
     rulesExtraDependencies [clayDeps] $ create ["default.css"] $ do
       route     idRoute
       compile $ makeItem =<< (unsafeCompiler $ do
-        (_, hout, _, ph) <- createProcess $ shell "cabal build gencss"
+        (_, hout, _, ph) <- createProcess $ shell "stack build blog-rekahsoft-ca:gencss"
         exitCode <- waitForProcess ph
         if exitCode == ExitSuccess
-           then readProcess "cabal" ["run", "--verbose=0", "gencss", "compact"] ""
+           then readProcess "stack" ["exec", "gencss", "--", "compact"] ""
            else case hout of
-                 Nothing -> fail "Error running 'cabal build gencss'"
+                 Nothing -> fail "Error running 'stack build blog-rekahsoft-ca:gencss'"
                  Just hout' -> hGetContents hout' >>= fail)
 
     rulesExtraDependencies [manifestDeps] $ create ["manifest.appcache"] $ do

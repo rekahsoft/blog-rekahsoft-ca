@@ -34,6 +34,6 @@ makeBorderBox pad backCol =
     backgroundColor backCol'
     border solid (px 1) "#888"
     borderRadius (px 5) (px 5) (px 5) (px 5)
-    boxShadow (px 2) (px 5) (px 2) "#888"
+--    boxShadow (px 2) (px 5) (px 2) "#888"
     sym padding pad'
     marginBottom (em 1.25)

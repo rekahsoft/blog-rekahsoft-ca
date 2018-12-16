@@ -131,8 +131,8 @@ statusMessage = do
     borderBottomRightRadius (px 5) (px 5)
     borderBottomLeftRadius (px 5) (px 5)
     backgroundColor $ rgb 146 208 240
-    -- boxShadow (px 2) (px 5) (px 5) (px 2) "#888888"
-    boxShadow (px 2) (px 5) (px 5) "#888888"
+    -- boxShadow (px 2) (px 5) (px 5) "#888888"
+    --boxShadow [shadowWithSpread (px 2) (px 5) (px 5), bsColor "#888888" $ shadow (px 1) (px 2)]
     sym padding (px 8)
     marginBottom (em 1.25)
 

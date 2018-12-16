@@ -1,9 +1,20 @@
+# Editor specific files
 .*
 *~
+.dir-locals.el
+.tern-port
+
+# Haskell
 *.o
 *.hi
+.stack
 
+# Hakyll
 _site
 _cache
 dist
-cabal.sandbox.config
+
+# Terraform
+.terraform
+terraform.tfstate.d
+*.local.tfvars

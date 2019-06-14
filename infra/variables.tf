@@ -14,7 +14,8 @@ variable "project" {
   default = "blog-rekahsoft-ca"
 }
 
-variable "dns_apex" {}
+variable "dns_apex" {
+}
 
 variable "subdomain" {
   default = ""
@@ -23,3 +24,4 @@ variable "subdomain" {
 variable "enable_naked_domain" {
   default = false
 }
+

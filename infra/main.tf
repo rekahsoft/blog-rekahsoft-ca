@@ -9,7 +9,7 @@ terraform {
 
 provider "aws" {
   region  = "${var.region}"
-  version = "~> 1.9"
+  version = "~> 2.15"
 
   assume_role = [{
     role_arn = "${var.workspace_iam_roles[terraform.workspace]}"
@@ -19,7 +19,7 @@ provider "aws" {
 provider "aws" {
   alias   = "us_east_1"
   region  = "us-east-1"
-  version = "~> 1.9"
+  version = "~> 2.1"
 
   assume_role = [{
     role_arn = "${var.workspace_iam_roles[terraform.workspace]}"
@@ -27,15 +27,15 @@ provider "aws" {
 }
 
 provider "null" {
-  version = "~> 1.0"
+  version = "~> 2.1"
 }
 
 provider "random" {
-  version = "~> 1.3"
+  version = "~> 2.1"
 }
 
 provider "template" {
-  version = "~> 1.0"
+  version = "~> 2.1"
 }
 
 #

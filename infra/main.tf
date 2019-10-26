@@ -168,12 +168,38 @@ resource "aws_route53_record" "static" {
   }
 }
 
+resource "aws_route53_record" "static_ipv6" {
+  zone_id = data.aws_route53_zone.external.zone_id
+  name    = "${local.domain}."
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.cdn.domain_name
+    zone_id                = aws_cloudfront_distribution.cdn.hosted_zone_id
+    evaluate_target_health = true
+  }
+}
+
 resource "aws_route53_record" "static_redirect" {
   count = var.enable_naked_domain ? 0 : 1
 
   zone_id = data.aws_route53_zone.external.zone_id
   name    = "${local.naked_domain}."
   type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.cdn_redirect[0].domain_name
+    zone_id                = aws_cloudfront_distribution.cdn_redirect[0].hosted_zone_id
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_route53_record" "static_redirect_ipv6" {
+  count = var.enable_naked_domain ? 0 : 1
+
+  zone_id = data.aws_route53_zone.external.zone_id
+  name    = "${local.naked_domain}."
+  type    = "AAAA"
 
   alias {
     name                   = aws_cloudfront_distribution.cdn_redirect[0].domain_name
@@ -382,4 +408,3 @@ SCRIPT
 
   }
 }
-

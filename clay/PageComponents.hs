@@ -131,6 +131,8 @@ businessCard = do
 
     ".photo" ? do
       backgroundImage $ url "/images/business-card.png"
+      backgroundSize cover
+      backgroundPosition $ placed sideCenter sideCenter
       border solid (px 1) black
       sym borderRadius (px 10)
       minHeight (px 215)

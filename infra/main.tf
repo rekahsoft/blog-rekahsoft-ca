@@ -387,6 +387,10 @@ resource "aws_cloudfront_distribution" "cdn_redirect" {
 }
 
 resource "null_resource" "deploy_app" {
+  triggers = {
+    always = uuid()
+  }
+
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
     command     = <<SCRIPT

@@ -1,0 +1,9 @@
+kind: pipeline
+type: docker
+name: blog-rekahsoft-ca
+
+steps:
+- name: build-site
+  image: docker.nexus.home.rekahsoft.ca/haskell:8
+  commands:
+  - ./site build

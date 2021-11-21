@@ -28,15 +28,11 @@ provider "aws" {
   }
 }
 
-provider "null" {
-  version = "~> 2.1"
-}
+# provider "null" {
+#   version = "~> 2.1"
+# }
 
 provider "random" {
-  version = "~> 2.1"
-}
-
-provider "template" {
   version = "~> 2.1"
 }
 
@@ -55,18 +51,41 @@ locals {
   naked_domain  = "${local.subdomain}${var.dns_apex}"
   domain        = "${local.www}${local.naked_domain}"
   project_env   = "${var.project}-${terraform.workspace}"
+
+  bucket_arn     = aws_s3_bucket.static.arn
+  user_arn       = aws_iam_user.app_deploy.arn
+  cloudfront_arn = aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn
 }
 
 #
 # Data Sources
 
-data "template_file" "s3_origin_policy" {
-  template = file("templates/s3_origin_policy.json")
+data "aws_iam_policy_document" "s3_origin_policy" {
+  statement {
+    principals {
+      type = "AWS"
+      identifiers = [local.cloudfront_arn]
+    }
+    actions = ["s3:GetObject"]
+    resources = ["${local.bucket_arn}/*"]
+  }
 
-  vars = {
-    bucket_arn     = aws_s3_bucket.static.arn
-    user_arn       = aws_iam_user.app_deploy.arn
-    cloudfront_arn = aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn
+  statement {
+    principals {
+      type = "AWS"
+      identifiers = [local.user_arn]
+    }
+    actions = ["s3:ListBucket"]
+    resources = ["${local.bucket_arn}"]
+  }
+
+  statement {
+    principals {
+      type = "AWS"
+      identifiers = [local.user_arn]
+    }
+    actions = ["s3:*"]
+    resources = ["${local.bucket_arn}/*"]
   }
 }
 
@@ -210,7 +229,7 @@ resource "aws_route53_record" "static_redirect_ipv6" {
 
 resource "aws_s3_bucket_policy" "static_policy" {
   bucket = aws_s3_bucket.static.id
-  policy = data.template_file.s3_origin_policy.rendered
+  policy = data.aws_iam_policy_document.s3_origin_policy.json
 }
 
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
@@ -386,29 +405,29 @@ resource "aws_cloudfront_distribution" "cdn_redirect" {
   }
 }
 
-resource "null_resource" "deploy_app" {
-  triggers = {
-    always = uuid()
-  }
+# resource "null_resource" "deploy_app" {
+#   triggers = {
+#     always = uuid()
+#   }
 
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    command     = <<SCRIPT
-: Create temporary aws config and credentials files
-export AWS_CONFIG_FILE=$(mktemp);
-export AWS_SHARED_CREDENTIALS_FILE=$(mktemp);
+#   provisioner "local-exec" {
+#     interpreter = ["bash", "-c"]
+#     command     = <<SCRIPT
+# : Create temporary aws config and credentials files
+# export AWS_CONFIG_FILE=$(mktemp);
+# export AWS_SHARED_CREDENTIALS_FILE=$(mktemp);
 
-: Add default AWS account profile;
-aws configure --profile ${aws_iam_user.app_deploy.name} set aws_access_key_id ${aws_iam_access_key.app_deploy.id};
-aws configure --profile ${aws_iam_user.app_deploy.name} set aws_secret_access_key ${aws_iam_access_key.app_deploy.secret};
-aws configure --profile ${aws_iam_user.app_deploy.name} set region ${var.region};
+# : Add default AWS account profile;
+# aws configure --profile ${aws_iam_user.app_deploy.name} set aws_access_key_id ${aws_iam_access_key.app_deploy.id};
+# aws configure --profile ${aws_iam_user.app_deploy.name} set aws_secret_access_key ${aws_iam_access_key.app_deploy.secret};
+# aws configure --profile ${aws_iam_user.app_deploy.name} set region ${var.region};
 
-: Sync latest app build to s3 bucket;
-aws --profile ${aws_iam_user.app_deploy.name} s3 sync --delete ../_site s3://${aws_s3_bucket.static.id}/;
+# : Sync latest app build to s3 bucket;
+# aws --profile ${aws_iam_user.app_deploy.name} s3 sync --delete ../_site s3://${aws_s3_bucket.static.id}/;
 
-: Cleanup temporary aws config and credentials files
-rm $${AWS_CONFIG_FILE} $${AWS_SHARED_CREDENTIALS_FILE};
-SCRIPT
+# : Cleanup temporary aws config and credentials files
+# rm $${AWS_CONFIG_FILE} $${AWS_SHARED_CREDENTIALS_FILE};
+# SCRIPT
 
-  }
-}
+#   }
+# }

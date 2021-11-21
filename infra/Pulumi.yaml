@@ -1,0 +1,6 @@
+name: blog-rekahsoft-ca
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: Personal blog of Collin Doering

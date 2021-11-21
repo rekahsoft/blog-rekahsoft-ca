@@ -19,3 +19,7 @@ dist
 terraform.tfstate.d
 *.local.tfvars
 *.plan
+
+# Pulumi
+*.pyc
+infra/venv/

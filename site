@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 function run_site_only() {
     [ "$SITE_ONLY" == "true" ]
@@ -38,7 +38,7 @@ case "$1" in
         ;;
     gencss)
         shift
-        stack exec gencss -- "$@"
+        gencss -- "$@"
         ;;
     # Override of hakyll site commands
     -h|--help)
@@ -77,7 +77,7 @@ EOF
         run_override_only && exit
 
         # Only run hakyll site --help command if -- site only
-        run_site_only && stack exec blog-rekahsoft-ca -- --help | sed 's/\(Usage: \)blog-rekahsoft-ca/\1.\/site -/g'
+        run_site_only && blog-rekahsoft-ca -- --help | sed 's/\(Usage: \)blog-rekahsoft-ca/\1.\/site -/g'
         ;;
     build)
         run_override_only || ! run_site_only && stack build
@@ -104,6 +104,6 @@ EOF
         popd > /dev/null
         ;;&
     *)
-        stack exec blog-rekahsoft-ca -- "$@"
+        blog-rekahsoft-ca -- "$@"
         ;;
 esac

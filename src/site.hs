@@ -138,16 +138,17 @@ main = do
     clayDeps     <- makePatternDependency $ fromList clayIds
     manifestDeps <- makePatternDependency $ fromList manifestIds
 
-    rulesExtraDependencies [clayDeps] $ create ["default.css"] $ do
-      route     idRoute
-      compile $ makeItem =<< (unsafeCompiler $ do
-        (_, hout, _, ph) <- createProcess $ shell "stack build blog-rekahsoft-ca:gencss"
-        exitCode <- waitForProcess ph
-        if exitCode == ExitSuccess
-           then readProcess "stack" ["exec", "gencss", "--", "compact"] ""
-           else case hout of
-                 Nothing -> fail "Error running 'stack build blog-rekahsoft-ca:gencss'"
-                 Just hout' -> hGetContents hout' >>= fail)
+    -- TODO: this needs to be re-thought out when guix is used instead of stack
+    -- rulesExtraDependencies [clayDeps] $ create ["default.css"] $ do
+    --   route     idRoute
+    --   compile $ makeItem =<< (unsafeCompiler $ do
+    --     (_, hout, _, ph) <- createProcess $ shell "stack build blog-rekahsoft-ca:gencss"
+    --     exitCode <- waitForProcess ph
+    --     if exitCode == ExitSuccess
+    --        then readProcess "stack" ["exec", "gencss", "--", "compact"] ""
+    --        else case hout of
+    --              Nothing -> fail "Error running 'stack build blog-rekahsoft-ca:gencss'"
+    --              Just hout' -> hGetContents hout' >>= fail)
 
     rulesExtraDependencies [manifestDeps] $ create ["manifest.appcache"] $ do
       route     idRoute

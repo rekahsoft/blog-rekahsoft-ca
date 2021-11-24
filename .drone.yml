@@ -6,7 +6,12 @@ workspace:
   path: /drone/blog-rekahsoft-ca
 
 steps:
-- name: build-site
-  image: docker.nexus.home.rekahsoft.ca/fpco/stack-build:lts-12.0
+- name: build
+  pull: if-not-exists
+  image: docker.nexus.home.rekahsoft.ca/guix:latest
   commands:
-  - ./site build
+  - guix --version
+  - guix time-machine -C channels.scm -- build -f blog-rekahsoft-ca.scm --with-source=blog-rekahsoft-ca=$(pwd)
+
+node:
+  guix: on

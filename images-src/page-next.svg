@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="55.391273"
+   height="69.249252"
+   id="svg6166"
+   version="1.1"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20, custom)"
+   sodipodi:docname="page-next.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs6168">
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path8766"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <filter
+       inkscape:collect="always"
+       id="filter9710"
+       color-interpolation-filters="sRGB"
+       x="-0.058799997"
+       y="-0.006681818"
+       width="1.1176"
+       height="1.0133636">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.2625"
+         id="feGaussianBlur9712" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="-276.5"
+     inkscape:cy="-116"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     showborder="true"
+     inkscape:showpageshadow="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="944"
+     inkscape:window-height="1046"
+     inkscape:window-x="5"
+     inkscape:window-y="1103"
+     inkscape:window-maximized="0"
+     inkscape:pagecheckerboard="0" />
+  <metadata
+     id="metadata6171">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-469.66731,-534.0202)">
+    <g
+       id="g9738">
+      <g
+         transform="matrix(-1.4120922,1.4120922,-1.4120922,-1.4120922,1625.951,-48.42554)"
+         id="g5873"
+         style="stroke:none;display:inline">
+        <path
+           inkscape:connector-curvature="0"
+           id="path6537-5-2-1-9"
+           d="m 635.53312,174.02289 c -8.17336,0 -16.34673,0 -24.52009,0 0,8.17336 0,16.34673 0,24.52009 8.17336,-8.17336 16.34673,-16.34673 24.52009,-24.52009 z"
+           style="opacity:0.73443986;fill:#000000;fill-opacity:1;stroke:none;display:inline" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path6537-5-2-1-4-28"
+           d="m 636.56876,177.86442 c -7.14409,0 -14.28819,0 -21.43228,0 0,7.14409 0,14.28818 0,21.43227 7.14409,-7.14409 14.28819,-14.28818 21.43228,-21.43227 z"
+           style="opacity:0.73443986;fill:#000000;fill-opacity:1;stroke:none;display:inline" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path6537-5-2-1-4-2-3"
+           d="m 636.78931,182.05502 c -5.96778,0 -11.93557,0 -17.90335,0 0,5.96778 0,11.93556 0,17.90334 5.96778,-5.96778 11.93557,-11.93556 17.90335,-17.90334 z"
+           style="opacity:0.73443986;fill:#000000;fill-opacity:1;stroke:none;display:inline" />
+      </g>
+      <rect
+         transform="matrix(0.71573023,0,0,0.64570643,133.51222,207.36881)"
+         y="512.36218"
+         x="535.71429"
+         height="94.285713"
+         width="10.714286"
+         id="rect9704"
+         style="opacity:0.7;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;filter:url(#filter9710)" />
+    </g>
+  </g>
+</svg>

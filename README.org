@@ -1,4 +1,4 @@
-#+TITLE: Source Code for [[http://www.blog.rekahsoft.ca][#! Lambda Slang]]
+#+TITLE: Source Code for[[http://www.blog.rekahsoft.ca][ #! Lambda Slang]]
 #+AUTHOR: Collin J. Doering
 
 #+begin_abstract
@@ -84,4 +84,12 @@ See: http://blog.tpleyer.de/posts/2019-04-21-external-code-inclusion-with-hakyll
 ** TODO Modernize javascript in [[file:js/default.js][js/default.js]]
 ** TODO Allow posts (and pages?) to be written in org-mode
 
-See: https://github.com/jaspervdj/hakyll/issues/700
+See:
+- https://github.com/jaspervdj/hakyll/issues/700
+- https://turbomack.github.io/posts/2016-12-21-org-mode-in-hakyll.html
+** TODO Fix rendering of mathjax
+** TODO Setup automated deployment from ci
+** TODO Add missing terraform backend files to repository
+** TODO Figure out fast workflow for modifying haskell sources without rebuilding guix package
+*** TODO [[./clay][clay sources]]
+*** TODO [[./src][hakell sources]]

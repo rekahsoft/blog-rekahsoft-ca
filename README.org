@@ -1,5 +1,7 @@
-#+TITLE: Source Code for[[http://www.blog.rekahsoft.ca][ Shebang Lambda Slang]]
+#+TITLE: Source Code for [[http://www.blog.rekahsoft.ca][#! Lambda Slang]]
 #+AUTHOR: Collin J. Doering
+
+[[https://ci.home.rekahsoft.ca/api/badges/rekahsoft/blog-rekahsoft-ca/status.svg][https://ci.home.rekahsoft.ca/rekahsoft/blog-rekahsoft-ca]]
 
 #+begin_abstract
 [[http://www.blog.rekahsoft.ca][#! Lambda Slang]] is the personal technical blog of *Collin Doering*, built using software that

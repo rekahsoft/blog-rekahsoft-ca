@@ -23,7 +23,7 @@
  (guix profiles)
  (guix transformations))
 
-(load "blog-rekahsoft-ca.scm")
+(load "guix.scm")
 
 (define dev-transform
   (options->transformation

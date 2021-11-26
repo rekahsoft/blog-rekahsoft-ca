@@ -1,4 +1,4 @@
-#+TITLE: Source Code for[[http://www.blog.rekahsoft.ca][ #! Lambda Slang]]
+#+TITLE: Source Code for[[http://www.blog.rekahsoft.ca][ \#! Lambda Slang]]
 #+AUTHOR: Collin J. Doering
 
 #+begin_abstract

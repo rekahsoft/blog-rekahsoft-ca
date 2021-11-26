@@ -1,4 +1,4 @@
-#+TITLE: Source Code for[[http://www.blog.rekahsoft.ca][ \#! Lambda Slang]]
+#+TITLE: Source Code for[[http://www.blog.rekahsoft.ca][ Shebang Lambda Slang]]
 #+AUTHOR: Collin J. Doering
 
 #+begin_abstract
@@ -38,6 +38,23 @@ restrictions:
 Various licenses ([[https://www.gnu.org/licenses/gpl.html][GPLv3]], [[http://creativecommons.org/licenses/by-nc-sa/4.0/][Creative Commons BY-NC-SA License]], and [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons BY-NC-ND
 License]]) are deployed dependent on which part of the site is in question. Please see the
 [[./LICENSE][LICENSE]] file for full details.
+
+* TODO Guix Development Environment
+:PROPERTIES:
+:header-args:  :session dev
+:END:
+
+** Build Site
+
+#+begin_src shell :results drawer :async
+  guix shell -CP -E LANG -E GUIX_LOCPATH -m manifest.scm -- bash -c './site clean; ./site build'
+#+end_src
+
+** Modify haskell sources
+
+#+begin_src shell
+  guix time-machine -C channels.scm -- shell -CNP -E LANG -E GUIX_LOCPATH -Df guix.scm -m manifest.scm
+#+end_src
 
 * TODO Building
 

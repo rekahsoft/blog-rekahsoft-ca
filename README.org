@@ -1,0 +1,87 @@
+#+TITLE: Source Code for [[http://www.blog.rekahsoft.ca][#! Lambda Slang]]
+#+AUTHOR: Collin J. Doering
+
+#+begin_abstract
+[[http://www.blog.rekahsoft.ca][#! Lambda Slang]] is the personal technical blog of *Collin Doering*, built using software that
+[[https://www.gnu.org/philosophy/free-sw.html][respects our freedoms]].
+#+end_abstract
+
+* Features
+
+- [[http://en.wikipedia.org/wiki/Single-page_application][Single Page Application (SPA)]]
+- Utilizes CSS 3
+- Uses HTML5 Application Cache for offline viewing of website
+
+* Tools
+
+The creation of this website was made possible by the following open source tools and
+libraries:
+
+- [[http://jaspervdj.be/hakyll/][Hakyll]] is used to generate site from static files
+- [[http://fvisser.nl/clay/][Clay]] is used for CSS pre-processing
+- [[http://www.getskeleton.com/][Skeleton]] is used for CSS boilerplate
+- [[http://www.mathjax.org/][MathJax]] is used for rendering mathematics
+- [[http://jquery.com][JQuery]] and [[https://github.com/asual/jquery-address][JQuery-address]] are used for various DOM manipulations
+- [[http://inkscape.org/][Inkscape]] and the [[http://www.gimp.org/][Gimp]] were used to create various images/artwork
+- [[http://www.gnu.org/software/freefont/][Gnu Free Fonts]], specifically *FreeMono* is used as main font
+- [[http://www.gnu.org/software/emacs/][Gnu Emacs]] because there is no place like home; and no greater editor!
+
+* License
+
+Simply put, you're welcome to use the code used to generate this site though there are a few
+restrictions:
+
+- Any images and artwork that embody the likeness of "#! Lambda Slang" are not to be distributed or
+  used and are strictly copyright
+- The content of pages and posts can be used with attribution, providing you aren't making money off of it
+
+Various licenses ([[https://www.gnu.org/licenses/gpl.html][GPLv3]], [[http://creativecommons.org/licenses/by-nc-sa/4.0/][Creative Commons BY-NC-SA License]], and [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons BY-NC-ND
+License]]) are deployed dependent on which part of the site is in question. Please see the
+[[./LICENSE][LICENSE]] file for full details.
+
+* TODO Building
+
+[[https://guix.gnu.org/][Guix]] is used to manage dependencies for this project. 
+
+A simple wrapper script ~site~ is provided that also takes care of building the static site
+and offering access to hakyll commands.
+
+#+begin_src shell
+  ./site build
+  ./site watch
+#+end_src
+
+* Deploying
+
+Terraform is used to deploy this site. Its configuration files are located in ~./infra~. Three
+workspaces are currently available, including:
+
+  - default (unused)
+  - staging
+  - production
+
+For example, this is how to deploy the production version of the site:
+
+#+begin_src shell
+  cd infra
+  terraform workspace select production
+  terraform plan --var-file=production.tfvars --out local.plan
+  terraform apply local.plan
+#+end_src
+
+* Known Issues
+
+If you have an issue while browsing [[http://www.blog.rekahsoft.ca][my blog]] please file a issue in the [[https://git.rekahsoft.ca/rekahsoft/blog-rekahsoft-ca/issues][blog-rekahsoft-ca]]
+issue tracker.
+
+** TODO Allow external code files to be included in pages and blog entries
+
+See: http://blog.tpleyer.de/posts/2019-04-21-external-code-inclusion-with-hakyll.html
+
+** TODO Remove the use of application cache now that most major browsers are pulling support
+** TODO Completely replace all references to stack
+** TODO Fix analytics (pywiki is no longer in use, find and use something else)
+** TODO Modernize javascript in [[file:js/default.js][js/default.js]]
+** TODO Allow posts (and pages?) to be written in org-mode
+
+See: https://github.com/jaspervdj/hakyll/issues/700

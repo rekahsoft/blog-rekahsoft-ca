@@ -1,7 +1,9 @@
 #+TITLE: Source Code for [[http://www.blog.rekahsoft.ca][#! Lambda Slang]]
 #+AUTHOR: Collin J. Doering
 
-[[https://ci.home.rekahsoft.ca/api/badges/rekahsoft/blog-rekahsoft-ca/status.svg][https://ci.home.rekahsoft.ca/rekahsoft/blog-rekahsoft-ca]]
+#+BEGIN_EXPORT html
+<p><a href="https://ci.home.rekahsoft.ca/rekahsoft/blog-rekahsoft-ca"><img src="https://ci.home.rekahsoft.ca/api/badges/rekahsoft/blog-rekahsoft-ca/status.svg" alt="Build Status"></a></p>
+#+END_EXPORT
 
 #+begin_abstract
 [[http://www.blog.rekahsoft.ca][#! Lambda Slang]] is the personal technical blog of *Collin Doering*, built using software that

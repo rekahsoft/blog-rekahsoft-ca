@@ -125,51 +125,11 @@ main = do
                       ("posts/**" .&&. hasNoVersion)
                       (\n -> fromCapture "blog*.html" (show n))
 
-    pageIds  <- getMatches ("pages/**" .&&. complement "pages/blog.markdown")
-    fontIds  <- getMatches "fonts/**"
-    imageIds <- getMatches "images/**"
-    cssIds   <- getMatches "css/**"
-    jsIds    <- getMatches "js/**"
-    libIds   <- getMatches "lib/**"
+    clayDeps <- makePatternDependency $ fromGlob "clay/**.hs"
 
-    clayIds <- getMatches "clay/**.hs"
-    let manifestIds = clayIds ++ fontIds ++ imageIds ++ pageIds ++ cssIds ++ libIds ++ jsIds
-
-    clayDeps     <- makePatternDependency $ fromList clayIds
-    manifestDeps <- makePatternDependency $ fromList manifestIds
-
-    -- TODO: this needs to be re-thought out when guix is used instead of stack
-    -- rulesExtraDependencies [clayDeps] $ create ["default.css"] $ do
-    --   route     idRoute
-    --   compile $ makeItem =<< (unsafeCompiler $ do
-    --     (_, hout, _, ph) <- createProcess $ shell "stack build blog-rekahsoft-ca:gencss"
-    --     exitCode <- waitForProcess ph
-    --     if exitCode == ExitSuccess
-    --        then readProcess "stack" ["exec", "gencss", "--", "compact"] ""
-    --        else case hout of
-    --              Nothing -> fail "Error running 'stack build blog-rekahsoft-ca:gencss'"
-    --              Just hout' -> hGetContents hout' >>= fail)
-
-    rulesExtraDependencies [manifestDeps] $ create ["manifest.appcache"] $ do
+    rulesExtraDependencies [clayDeps] $ create ["default.css"] $ do
       route     idRoute
-      compile $ do
-        manifestCacheRoutesMaybe <- sequence $ liftM getRoute (fontIds ++ pageIds ++ imageIds ++ cssIds ++ libIds ++ jsIds)
-        let randomNum = random stdGen :: (Int, StdGen)
-            randomStr = show . abs . fst $ randomNum
-            manifestStart = [ "CACHE MANIFEST"
-                            , "# " ++ randomStr ]
-            manifestCacheSingles = [ "/default.css" ]
-            paginatedPostsCache = take 2 $ map (\(n,_) -> "/blog" ++ (show n) ++ ".html") $ toList $ paginateMap paginatedPosts
-            tagsCache = concatMap (\(t,ids) -> take 2 $ ["/tags/" ++ t ++ show n ++ ".html" | n <- [1..length $ paginateEvery numPaginatePages ids]]) $ tagsMap tags
-            manifestCacheFromIds = filter (not . null) $ fmap (maybe "" ("/"++)) manifestCacheRoutesMaybe
-            manifestCache = manifestCacheFromIds ++ tagsCache ++ paginatedPostsCache
-            manifestNetwork = [ "NETWORK:"
-                              , "*"
-                              , "http://*"
-                              , "https://*" ]
-        makeItem . unlines $ manifestStart ++ [""] ++
-                             manifestCacheSingles ++ manifestCache ++ [""] ++
-                             manifestNetwork ++ [""]
+      compile $ makeItem =<< (unsafeCompiler $ readProcess "gencss" ["compact"] "")
 
     match "css/**" $ do
       route   idRoute

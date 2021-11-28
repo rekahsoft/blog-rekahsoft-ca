@@ -345,17 +345,7 @@ var _paq = _paq || [];
             status: status
         };
 
-        function appCacheUpdateReady () {
-            window.applicationCache.swapCache();
-            // TODO: find what resource is loaded currently and reload it if it has changed
-        }
-
         function init() {
-            window.addEventListener("updateready", appCacheUpdateReady);
-            if (window.applicationCache.status === window.applicationCache.UPDATEREADY) {
-                appCacheUpdateReady();
-            }
-
             // TODO: deal with jsUrls function which is moved to the router
             $(document).ready(function () {
                // Add anchor click handlers for internal links

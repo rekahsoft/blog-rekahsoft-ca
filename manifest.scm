@@ -34,7 +34,5 @@
   (packages->manifest
    `(,(dev-transform blog-rekahsoft-ca)))
   (specifications->manifest
-   `("bash"
-     "coreutils"
-     "ghc"
+   `("coreutils"
      "glibc-utf8-locales"))))

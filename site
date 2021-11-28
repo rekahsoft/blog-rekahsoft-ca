@@ -21,21 +21,6 @@ case "$1" in
 esac
 
 case "$1" in
-    test)
-        if [[ "$2" == "-s" || "$2" == "--run-selenium" ]]; then
-            if ! type selenium &> /dev/null; then
-                echo "Failed to run Selenium. It must not be installed or not accessible on \$PATH!"
-                exit 1
-            fi
-
-            echo "Running Selenium..."
-            selenium 2> /dev/null &
-            sleep 3s
-        fi
-
-        # Test site
-        stack test
-        ;;
     gencss)
         shift
         gencss -- "$@"
@@ -53,7 +38,6 @@ Available commands:
   clean*
   deploy*
   gencss
-  test
 
 Hakyll site commands:
   build

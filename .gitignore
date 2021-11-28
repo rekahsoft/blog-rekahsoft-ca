@@ -7,7 +7,6 @@
 # Haskell
 *.o
 *.hi
-.stack
 
 # Hakyll
 _site

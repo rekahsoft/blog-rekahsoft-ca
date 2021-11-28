@@ -14,6 +14,5 @@ steps:
   image: docker.nexus.home.rekahsoft.ca/guix:latest
   commands:
   - guix --version
-  - pwd
-  - echo $HOME
   - guix time-machine -C channels.scm -- build -f guix.scm --with-source=blog-rekahsoft-ca=$(pwd)
+  - ls -l /.cache/guix/

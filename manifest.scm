@@ -25,6 +25,8 @@
 
 (load "guix.scm")
 
+(setenv "PS1" "\\W [env]\\$ ")
+
 (define dev-transform
   (options->transformation
    `((with-source . ,(string-append "blog-rekahsoft-ca=" (getcwd))))))
@@ -34,5 +36,4 @@
   (packages->manifest
    `(,(dev-transform blog-rekahsoft-ca)))
   (specifications->manifest
-   `("coreutils"
-     "glibc-utf8-locales"))))
+   `("coreutils"))))

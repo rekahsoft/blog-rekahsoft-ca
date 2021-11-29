@@ -21,16 +21,43 @@
  ((guix licenses) #:prefix license:)
  (guix packages)
  (guix build-system haskell)
+ (gnu packages base)
  (rekahsoft-gnu packages haskell-web))
+
+(define release-version "0.0.0.0")
 
 (define-public blog-rekahsoft-ca
   (package
     (name "blog-rekahsoft-ca")
-    (version "0.0.0-0")
-    (source #f)
+    (version release-version)
+    (source (string-append "./dist/blog-rekahsoft-ca-" release-version ".tar.gz"))
     (build-system haskell-build-system)
+    (native-inputs `(("glibc-utf8-locales" ,glibc-utf8-locales)))
     (inputs `(("ghc-hakyll" ,ghc-hakyll)
               ("ghc-clay" ,ghc-clay)))
+    (outputs `("out" "site" "static"))
+    (arguments
+     `(#:phases
+       (modify-phases %standard-phases
+         (add-after 'install 'install-site-script
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let ((out (assoc-ref outputs "out")))
+               (setenv "PATH" (string-append out "/bin:" (getenv "PATH")))
+               (install-file "site" (string-append out "/bin/"))
+               #t)))
+         (add-after 'install-site-script 'build-site
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (site (assoc-ref outputs "site")))
+               (setenv "LANG" "en_US.UTF-8")
+
+               ;; For some reason, all files are read-only and need to be adjusted to allow the
+               ;; site to be generated
+               (for-each make-file-writable (find-files "."))
+
+               (invoke "site" "build")
+               (copy-recursively "_site" site)
+               #t))))))
     (home-page "http://git.rekahsoft.ca/rekahsoft/blog-rekahsoft-ca")
     (synopsis "Code, templates and content for my Hakyll powered blog at blog.rekahsoft.ca")
     (description

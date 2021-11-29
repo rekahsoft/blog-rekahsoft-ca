@@ -24,15 +24,10 @@
 
 import Hakyll
 import Control.Monad
-import Data.Monoid (mconcat,(<>))
 import Data.List (sortBy)
-import Data.Map (toList)
 import Data.Ord (comparing)
-import System.Random
 import System.FilePath (takeBaseName)
 import System.Process
-import System.Exit
-import System.IO (hGetContents)
 
 import Text.Parsec
 import Text.Pandoc.Options
@@ -96,166 +91,162 @@ myConfig = defaultConfiguration
         }
 
 main :: IO ()
-main = do
-  -- Get a random number generator before going into Rules monad
-  stdGen <- getStdGen
+main = hakyllWith myConfig $ do
+  match ("action/**" .||. "files/**" .||. "images/**" .||. "fonts/**" .||. "robots.txt") $ do
+    route   idRoute
+    compile copyFileCompiler
 
-  hakyllWith myConfig $ do
-    match ("action/**" .||. "files/**" .||. "images/**" .||. "fonts/**" .||. "robots.txt") $ do
-      route   idRoute
-      compile copyFileCompiler
+  match "css/**" $ do
+    route   idRoute
+    compile compressCssCompiler
 
-    match "css/**" $ do
-      route   idRoute
-      compile compressCssCompiler
+  match "lib/Skeleton/*.css" $ do
+    route   $ gsubRoute "Skeleton" (const "css")
+    compile compressCssCompiler
 
-    match "lib/Skeleton/*.css" $ do
-      route   $ gsubRoute "Skeleton" (const "css")
-      compile compressCssCompiler
+  match "templates/**" $ compile $ getResourceBody >>= saveSnapshot "original"
+    >> templateCompiler
 
-    match "templates/**" $ compile $ getResourceBody >>= saveSnapshot "original"
-      >> templateCompiler
+  -- Generate tags
+  tags <- buildTags ("posts/**" .&&. hasNoVersion) (fromCapture "tags/*1.html")
 
-    -- Generate tags
-    tags <- buildTags ("posts/**" .&&. hasNoVersion) (fromCapture "tags/*1.html")
+  -- Generate paginate
+  paginatedPosts <- buildPaginateWith
+                    (fmap (paginateEvery numPaginatePages) . sortRecentFirst)
+                    ("posts/**" .&&. hasNoVersion)
+                    (\n -> fromCapture "blog*.html" (show n))
 
-    -- Generate paginate
-    paginatedPosts <- buildPaginateWith
-                      (fmap (paginateEvery numPaginatePages) . sortRecentFirst)
-                      ("posts/**" .&&. hasNoVersion)
-                      (\n -> fromCapture "blog*.html" (show n))
+  clayDeps <- makePatternDependency $ fromGlob "clay/**.hs"
 
-    clayDeps <- makePatternDependency $ fromGlob "clay/**.hs"
+  rulesExtraDependencies [clayDeps] $ create ["default.css"] $ do
+    route     idRoute
+    compile $ makeItem =<< (unsafeCompiler $ readProcess "gencss" ["compact"] "")
 
-    rulesExtraDependencies [clayDeps] $ create ["default.css"] $ do
-      route     idRoute
-      compile $ makeItem =<< (unsafeCompiler $ readProcess "gencss" ["compact"] "")
+  match "css/**" $ do
+    route   idRoute
+    compile compressCssCompiler
 
-    match "css/**" $ do
-      route   idRoute
-      compile compressCssCompiler
+  match "lib/Skeleton/*.css" $ do
+    route   $ gsubRoute "Skeleton" (const "css")
+    compile compressCssCompiler
 
-    match "lib/Skeleton/*.css" $ do
-      route   $ gsubRoute "Skeleton" (const "css")
-      compile compressCssCompiler
+  match "templates/**" $ compile $ getResourceBody >>= saveSnapshot "original"
+    >> templateCompiler
 
-    match "templates/**" $ compile $ getResourceBody >>= saveSnapshot "original"
-      >> templateCompiler
+  -- Generate tag pages
+  forM_ (tagsMap tags) $ \(tag, identifiers) -> do
+    paginatedTaggedPosts <- buildPaginateWith
+                            (fmap (paginateEvery numPaginatePages) . sortRecentFirst)
+                            (fromList identifiers)
+                            (\n -> fromCapture (fromGlob $ "tags/" ++ tag ++ "*.html") (show n))
 
-    -- Generate tag pages
-    forM_ (tagsMap tags) $ \(tag, identifiers) -> do
-      paginatedTaggedPosts <- buildPaginateWith
-                              (fmap (paginateEvery numPaginatePages) . sortRecentFirst)
-                              (fromList identifiers)
-                              (\n -> fromCapture (fromGlob $ "tags/" ++ tag ++ "*.html") (show n))
-
-      paginateRules paginatedTaggedPosts $ \pageNum pattern -> do
-        route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "html"
-        compile $ do
-          posts <- recentFirst =<< loadAllSnapshots pattern "content"
-
-          navCtx <- genNavContext "pages/blog.markdown"
-
-          let ctx = taggedPostCtx tags                                    <>
-                    paginateContext paginatedTaggedPosts pageNum          <>
-                    constField "tag" tag                                  <>
-                    listField "posts" (taggedPostCtx tags) (return posts)
-              indexCtx = if pageNum <= 2
-                         then appCacheCtx <> navCtx
-                         else navCtx
-
-          makeItem ""
-            >>= loadAndApplyTemplate "templates/tag-page.html" ctx
-            >>= loadAndApplyTemplate "templates/default.html" indexCtx
-
-      rulesExtraDependencies [tagsDependency tags] $ do
-        create [fromFilePath $ "tags/" ++ tag ++ ".xml"] $ do
-          route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "xml"
-          compile $ loadAllSnapshots (fromList identifiers) "content"
-            >>= fmap (take 10) . recentFirst
-            >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
-
-    let pageRoute = gsubRoute "pages/" (const "") `composeRoutes` setExtension "html"
-
-    match ("pages/*" .&&. complement "pages/blog.markdown") $ version "nav-gen" $ do
-      route   $ pageRoute
-      compile $ pandocCompiler
-
-    match "pages/blog.markdown" $ version "nav-gen" $ do
-      route   $ constRoute "blog1.html"
-      compile $ pandocCompiler
-
-    paginateRules paginatedPosts $ \pageNum pattern -> do
-      route idRoute
+    paginateRules paginatedTaggedPosts $ \pageNum pattern -> do
+      route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "html"
       compile $ do
         posts <- recentFirst =<< loadAllSnapshots pattern "content"
 
         navCtx <- genNavContext "pages/blog.markdown"
 
         let ctx = taggedPostCtx tags                                    <>
-                  paginateContext paginatedPosts pageNum                <>
+                  paginateContext paginatedTaggedPosts pageNum          <>
+                  constField "tag" tag                                  <>
                   listField "posts" (taggedPostCtx tags) (return posts)
             indexCtx = if pageNum <= 2
                        then appCacheCtx <> navCtx
                        else navCtx
 
         makeItem ""
-          >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
+          >>= loadAndApplyTemplate "templates/tag-page.html" ctx
           >>= loadAndApplyTemplate "templates/default.html" indexCtx
 
-    match ("pages/*" .&&. complement "pages/blog.markdown") $ do
-      route   $ pageRoute
-      compile $ do
-        posts <- recentFirst =<< loadAllSnapshots "posts/**" "content"
+    rulesExtraDependencies [tagsDependency tags] $ do
+      create [fromFilePath $ "tags/" ++ tag ++ ".xml"] $ do
+        route   $ gsubRoute " " (const "-") `composeRoutes` setExtension "xml"
+        compile $ loadAllSnapshots (fromList identifiers) "content"
+          >>= fmap (take 10) . recentFirst
+          >>= renderAtom (feedConfiguration $ Just tag) (bodyField "description" <> defaultContext)
 
-        -- Get the current Identifier
-        curId <- getUnderlying
+  let pageRoute = gsubRoute "pages/" (const "") `composeRoutes` setExtension "html"
 
-        let pageFilePath = toFilePath curId
-            pageName     = takeBaseName pageFilePath
-            recentPosts  = take 5 posts
-            pageTemplate = "templates/pages/" ++ pageName ++ ".html"
+  match ("pages/*" .&&. complement "pages/blog.markdown") $ version "nav-gen" $ do
+    route   $ pageRoute
+    compile $ pandocCompiler
 
-        -- Generate navigation context
-        navCtx <- genNavContext pageFilePath
+  match "pages/blog.markdown" $ version "nav-gen" $ do
+    route   $ constRoute "blog1.html"
+    compile $ pandocCompiler
 
-        let masterCtx =
-              listField "recentPosts" (taggedPostCtx tags) (return recentPosts) <>
-              listField "posts" (taggedPostCtx tags) (return posts)             <>
-              tagCloudField "tagCloud" 65 135 tags                              <>
-              defaultContext
-            indexCtx = navCtx <> appCacheCtx
+  paginateRules paginatedPosts $ \pageNum pattern -> do
+    route idRoute
+    compile $ do
+      posts <- recentFirst =<< loadAllSnapshots pattern "content"
 
-        sectionCtx <- getResourceBody >>= genSectionContext
-        pg <- loadSnapshot (fromFilePath pageTemplate) "original"
-          >>= applyAsTemplate (sectionCtx <> masterCtx)
+      navCtx <- genNavContext "pages/blog.markdown"
 
-        (makeItem . itemBody) pg
-          >>= loadAndApplyTemplate "templates/default.html" indexCtx
+      let ctx = taggedPostCtx tags                                    <>
+                paginateContext paginatedPosts pageNum                <>
+                listField "posts" (taggedPostCtx tags) (return posts)
+          indexCtx = if pageNum <= 2
+                     then appCacheCtx <> navCtx
+                     else navCtx
 
-    match "posts/**" $ do
-      route   $ setExtension "html"
-      compile $ do
-        indexCtx <- genNavContext "pages/blog.markdown"
+      makeItem ""
+        >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
+        >>= loadAndApplyTemplate "templates/default.html" indexCtx
 
-        pandocCompilerWith pandocReaderOptions pandocWriterOptions
-          >>= saveSnapshot "content"
-          >>= loadAndApplyTemplate "templates/partials/post.html" (taggedPostCtx tags)
-          >>= loadAndApplyTemplate "templates/default.html" indexCtx
+  match ("pages/*" .&&. complement "pages/blog.markdown") $ do
+    route   $ pageRoute
+    compile $ do
+      posts <- recentFirst =<< loadAllSnapshots "posts/**" "content"
 
-    create ["atom.xml"] $ do
-      route   idRoute
-      compile $ do
-        let feedCtx = postCtx <> bodyField "description"
-        blogPosts <- loadAllSnapshots ("posts/**" .&&. hasNoVersion) "content"
-                       >>= fmap (take 10) . recentFirst
-        renderAtom (feedConfiguration Nothing) feedCtx blogPosts
+      -- Get the current Identifier
+      curId <- getUnderlying
 
-    forM_ [("js/**", idRoute),
-           ("lib/JQuery/*", gsubRoute "JQuery" $ const "js")] $ \(p, r) ->
-      match p $ do
-          route   r
-          compile $ copyFileCompiler
+      let pageFilePath = toFilePath curId
+          pageName     = takeBaseName pageFilePath
+          recentPosts  = take 5 posts
+          pageTemplate = "templates/pages/" ++ pageName ++ ".html"
+
+      -- Generate navigation context
+      navCtx <- genNavContext pageFilePath
+
+      let masterCtx =
+            listField "recentPosts" (taggedPostCtx tags) (return recentPosts) <>
+            listField "posts" (taggedPostCtx tags) (return posts)             <>
+            tagCloudField "tagCloud" 65 135 tags                              <>
+            defaultContext
+          indexCtx = navCtx <> appCacheCtx
+
+      sectionCtx <- getResourceBody >>= genSectionContext
+      pg <- loadSnapshot (fromFilePath pageTemplate) "original"
+        >>= applyAsTemplate (sectionCtx <> masterCtx)
+
+      (makeItem . itemBody) pg
+        >>= loadAndApplyTemplate "templates/default.html" indexCtx
+
+  match "posts/**" $ do
+    route   $ setExtension "html"
+    compile $ do
+      indexCtx <- genNavContext "pages/blog.markdown"
+
+      pandocCompilerWith pandocReaderOptions pandocWriterOptions
+        >>= saveSnapshot "content"
+        >>= loadAndApplyTemplate "templates/partials/post.html" (taggedPostCtx tags)
+        >>= loadAndApplyTemplate "templates/default.html" indexCtx
+
+  create ["atom.xml"] $ do
+    route   idRoute
+    compile $ do
+      let feedCtx = postCtx <> bodyField "description"
+      blogPosts <- loadAllSnapshots ("posts/**" .&&. hasNoVersion) "content"
+                     >>= fmap (take 10) . recentFirst
+      renderAtom (feedConfiguration Nothing) feedCtx blogPosts
+
+  forM_ [("js/**", idRoute),
+         ("lib/JQuery/*", gsubRoute "JQuery" $ const "js")] $ \(p, r) ->
+    match p $ do
+        route   r
+        compile $ copyFileCompiler
 
 ---------------------------------------------------------------------------------------------------------
 -- Functions & Constants --------------------------------------------------------------------------------

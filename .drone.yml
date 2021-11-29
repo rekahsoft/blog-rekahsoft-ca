@@ -15,4 +15,3 @@ steps:
   commands:
   - guix --version
   - guix time-machine -C channels.scm -- build -f guix.scm --with-source=blog-rekahsoft-ca=$(pwd)
-  - ls -l /.cache/guix/

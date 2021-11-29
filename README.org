@@ -45,31 +45,71 @@ License]]) are deployed dependent on which part of the site is in question. Plea
 
 * TODO Guix Development Environment
 :PROPERTIES:
-:header-args:  :session dev
+:header-args:  :session *vterm blog-rekahsoft-ca* :results none
 :END:
-
-** Build Site
-
-#+begin_src shell :results drawer :async
-  guix shell -CP -E LANG -E GUIX_LOCPATH -m manifest.scm -- bash -c './site clean; ./site build'
-#+end_src
-
-** Modify haskell sources
-
-#+begin_src shell
-  guix time-machine -C channels.scm -- shell -CNP -E LANG -E GUIX_LOCPATH -Df guix.scm -m manifest.scm
-#+end_src
-
-* TODO Building
 
 [[https://guix.gnu.org/][Guix]] is used to manage dependencies for this project. 
 
 A simple wrapper script ~site~ is provided that also takes care of building the static site
 and offering access to hakyll commands.
 
-#+begin_src shell
+** Start Development Environment
+
+The development environment is defined by the following files:
+
+- [[./channels.scm][channels.scm]] :: Specifically defines a set of available software, their versions and their build recipe.
+- [[./guix.scm][guix.scm]] :: Defines the package for this site, ~blog-rekahsoft-ca~.
+- [[./manifest.scm][manifest.scm]] :: Defines packages required for development of this site.
+
+#+begin_src sh
+  guix time-machine -C channels.scm -- shell -CN -E LANG -E TERM -E PS1 -Df guix.scm -m manifest.scm
+#+end_src
+
+This uses the [[info:guix#Invoking guix time-machine][guix time-machine]] feature to ensure the development environment is reproducible
+by supplying a set of guix channels, effectively pinning all software versions used. The [[info:guix#Invoking guix shell][guix
+shell]] command is used within the time-machine to start a development environment in a
+container (~-C~), which shares the hosts network namespace (~-N~). The environment variable
+~LANG~ is passed into the container to ensure locales work as expected; without this, site
+building will fail! Additionally, the environment variable ~TERM~ is passed into the
+container to ensure the development shell behaves correctly. Finally, ~-Df guix.scm~
+indicates that development dependencies of the ~blog-rekahsoft-ca~ package should be included
+in the environment and ~-m manifest.scm~ ensures that extra tools for development are
+included as well.
+
+** Build Site
+
+#+begin_src sh
   ./site build
+#+end_src
+
+** Clean Site
+
+#+begin_src sh
+  ./site clean
+#+end_src
+
+** Watch
+
+#+begin_src sh
   ./site watch
+#+end_src
+
+** Deploy Site
+
+#+begin_src sh
+  ./site deploy
+#+end_src
+
+** Test
+
+#+begin_src sh
+  ./site test
+#+end_src
+
+* Writing a Blog Post
+
+#+begin_src sh
+  guix time-machine -C channels.scm -- shell -CN -E LANG
 #+end_src
 
 * Deploying
@@ -95,11 +135,13 @@ For example, this is how to deploy the production version of the site:
 If you have an issue while browsing [[http://www.blog.rekahsoft.ca][my blog]] please file a issue in the [[https://git.rekahsoft.ca/rekahsoft/blog-rekahsoft-ca/issues][blog-rekahsoft-ca]]
 issue tracker.
 
-** TODO Allow external code files to be included in pages and blog entries
+** DONE Remove the use of application cache now that most major browsers are pulling support
+CLOSED: [2021-11-28 Sun 10:43]
+- State "DONE"       from "TODO"       [2021-11-28 Sun 10:43]
+** TODO The image full screen features does not work on initial page loads and requires going to at least one other page :bug:
 
-See: http://blog.tpleyer.de/posts/2019-04-21-external-code-inclusion-with-hakyll.html
-
-** TODO Remove the use of application cache now that most major browsers are pulling support
+See:
+- [[file:js/default.js::// Add fullscreen functionality to inline-images and figures][Fullscreen image onclik functionality is added in the router upon content loading, which doesn't occur on the intial page load]]
 ** TODO Completely replace all references to stack
 ** TODO Fix analytics (pywiki is no longer in use, find and use something else)
 ** TODO Modernize javascript in [[file:js/default.js][js/default.js]]
@@ -109,8 +151,22 @@ See:
 - https://github.com/jaspervdj/hakyll/issues/700
 - https://turbomack.github.io/posts/2016-12-21-org-mode-in-hakyll.html
 ** TODO Fix rendering of mathjax
+** TODO Use javascript/css sources from guix packages instead of vendoring them or using them from the internet
+- [ ] jQuery
+- [ ] mathjax
+- [ ] skeleton
 ** TODO Setup automated deployment from ci
-** TODO Add missing terraform backend files to repository
+** TODO Use separate file for terraform backend
+
+Used to be: +Add missing terraform backend files to repository+, however this was not true.
+The backend is just embedded in [[./infra/main.tf][infra/main.tf]].
+
 ** TODO Figure out fast workflow for modifying haskell sources without rebuilding guix package
 *** TODO [[./clay][clay sources]]
 *** TODO [[./src][hakell sources]]
+** TODO Allow external code files to be included in pages and blog entries
+
+See: http://blog.tpleyer.de/posts/2019-04-21-external-code-inclusion-with-hakyll.html
+** TODO Ensure [[./blog-rekahsoft-ca.cabal][blog-rekahsoft-ca.cabal]] is usable with cabal and has the correct dependencies
+** TODO Build the site as a guix package output of ~blog-rekahsoft-ca~
+

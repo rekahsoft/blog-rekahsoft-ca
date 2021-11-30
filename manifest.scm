@@ -34,6 +34,6 @@
 (concatenate-manifests
  (list
   (packages->manifest
-   `(,(dev-transform blog-rekahsoft-ca)))
+   `(,(dev-transform %blog-rekahsoft-ca)))
   (specifications->manifest
    `("coreutils"))))

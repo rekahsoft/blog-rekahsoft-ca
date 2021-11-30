@@ -21,16 +21,21 @@
  ((guix licenses) #:prefix license:)
  (guix packages)
  (guix build-system haskell)
+ (guix git-download)
+ (guix gexp)
  (gnu packages base)
  (rekahsoft-gnu packages haskell-web))
 
-(define release-version "0.0.0.0")
+(define %srcdir
+  (dirname (current-filename)))
 
-(define-public blog-rekahsoft-ca
+(define %blog-rekahsoft-ca
   (package
     (name "blog-rekahsoft-ca")
-    (version release-version)
-    (source (string-append "./dist/blog-rekahsoft-ca-" release-version ".tar.gz"))
+    (version "0.0.0.0")
+    (source (local-file "." "blog-rekahsoft-ca-git-checkout"
+                        #:recursive? #t
+                        #:select? (git-predicate %srcdir)))
     (build-system haskell-build-system)
     (native-inputs `(("glibc-utf8-locales" ,glibc-utf8-locales)))
     (inputs `(("ghc-hakyll" ,ghc-hakyll)
@@ -49,10 +54,8 @@
            (lambda* (#:key outputs #:allow-other-keys)
              (let* ((out (assoc-ref outputs "out"))
                     (site (assoc-ref outputs "site")))
-               (setenv "LANG" "en_US.UTF-8")
-
-               ;; For some reason, all files are read-only and need to be adjusted to allow the
-               ;; site to be generated
+               ;; All source files are read-only and need to be adjusted to allow the
+               ;; site to be generated at the end of the build
                (for-each make-file-writable (find-files "."))
 
                (invoke "site" "build")
@@ -64,4 +67,4 @@
      "The code, templates and content for my Hakyll powered blog at blog.rekahsoft.ca.")
     (license license:gpl3)))
 
-blog-rekahsoft-ca
+%blog-rekahsoft-ca

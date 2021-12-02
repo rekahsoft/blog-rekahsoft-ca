@@ -24,47 +24,52 @@
  (guix git-download)
  (guix gexp)
  (gnu packages base)
- (rekahsoft-gnu packages haskell-web))
+ (rekahsoft-gnu packages haskell-web)
+ (git))
 
 (define %srcdir
   (dirname (current-filename)))
 
 (define %blog-rekahsoft-ca
-  (package
-    (name "blog-rekahsoft-ca")
-    (version "0.0.0.0")
-    (source (local-file "." "blog-rekahsoft-ca-git-checkout"
-                        #:recursive? #t
-                        #:select? (git-predicate %srcdir)))
-    (build-system haskell-build-system)
-    (native-inputs `(("glibc-utf8-locales" ,glibc-utf8-locales)))
-    (inputs `(("ghc-hakyll" ,ghc-hakyll)
-              ("ghc-clay" ,ghc-clay)))
-    (outputs `("out" "site" "static"))
-    (arguments
-     `(#:phases
-       (modify-phases %standard-phases
-         (add-after 'install 'install-site-script
-           (lambda* (#:key outputs #:allow-other-keys)
-             (let ((out (assoc-ref outputs "out")))
-               (setenv "PATH" (string-append out "/bin:" (getenv "PATH")))
-               (install-file "site" (string-append out "/bin/"))
-               #t)))
-         (add-after 'install-site-script 'build-site
-           (lambda* (#:key outputs #:allow-other-keys)
-             (let* ((out (assoc-ref outputs "out"))
-                    (site (assoc-ref outputs "site")))
-               ;; All source files are read-only and need to be adjusted to allow the
-               ;; site to be generated at the end of the build
-               (for-each make-file-writable (find-files "."))
+  (let ((commit (oid->string
+                 (reference-target
+                  (repository-head (repository-open (getcwd))))))
+        (revision "1"))
+    (package
+      (name "blog-rekahsoft-ca")
+      (version (git-version "0.0.0.0" revision commit))
+      (source (local-file "." "blog-rekahsoft-ca-git-checkout"
+                          #:recursive? #t
+                          #:select? (git-predicate %srcdir)))
+      (build-system haskell-build-system)
+      (native-inputs `(("glibc-utf8-locales" ,glibc-utf8-locales)))
+      (inputs `(("ghc-hakyll" ,ghc-hakyll)
+                ("ghc-clay" ,ghc-clay)))
+      (outputs '("out" "site" "static"))
+      (arguments
+       `(#:phases
+         (modify-phases %standard-phases
+           (add-after 'install 'install-site-script
+             (lambda* (#:key outputs #:allow-other-keys)
+               (let ((out (assoc-ref outputs "out")))
+                 (setenv "PATH" (string-append out "/bin:" (getenv "PATH")))
+                 (install-file "site" (string-append out "/bin/"))
+                 #t)))
+           (add-after 'install-site-script 'build-site
+             (lambda* (#:key outputs #:allow-other-keys)
+               (let* ((out (assoc-ref outputs "out"))
+                      (site (assoc-ref outputs "site")))
+                 ;; All source files are read-only and need to be adjusted to allow the
+                 ;; site to be generated at the end of the build
+                 (for-each make-file-writable (find-files "."))
 
-               (invoke "site" "build")
-               (copy-recursively "_site" site)
-               #t))))))
-    (home-page "http://git.rekahsoft.ca/rekahsoft/blog-rekahsoft-ca")
-    (synopsis "Code, templates and content for my Hakyll powered blog at blog.rekahsoft.ca")
-    (description
-     "The code, templates and content for my Hakyll powered blog at blog.rekahsoft.ca.")
-    (license license:gpl3)))
+                 (invoke "site" "build")
+                 (copy-recursively "_site" site)
+                 #t))))))
+      (home-page "http://git.rekahsoft.ca/rekahsoft/blog-rekahsoft-ca")
+      (synopsis "Code, templates and content for my Hakyll powered blog at blog.rekahsoft.ca")
+      (description
+       "The code, templates and content for my Hakyll powered blog at blog.rekahsoft.ca.")
+      (license license:gpl3))))
 
 %blog-rekahsoft-ca

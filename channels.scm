@@ -2,7 +2,7 @@
         (name 'guix)
         (url "https://git.savannah.gnu.org/git/guix.git")
         (commit
-          "9d370029c21487c54b7bda4aa53e49251107a71f")
+          "15404ff19b304bc9efcdb9a326318fb9fa9716da")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
@@ -12,7 +12,7 @@
         (name 'rekahsoft-guix)
         (url "https://git.rekahsoft.ca/rekahsoft/rekahsoft-guix.git")
         (commit
-          "6f9cdbddba30e68d50c427e96927f80db9d4da7b")
+          "792792e9408ac183d36eef43d2a9d943298d42d1")
         (introduction
           (make-channel-introduction
             "191cdaa0947657e0c85fe89ebbb8e7b1e7a8e0a4"

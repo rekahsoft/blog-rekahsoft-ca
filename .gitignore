@@ -14,7 +14,7 @@ _cache
 dist
 
 # Terraform
-.terraform
-terraform.tfstate.d
-*.local.tfvars
-*.plan
+infra/.terraform
+infra/terraform.tfstate.d
+infra/*.local.tfvars
+infra/*.plan

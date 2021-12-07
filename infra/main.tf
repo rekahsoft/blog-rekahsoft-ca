@@ -11,7 +11,7 @@ terraform {
 
 provider "aws" {
   region  = var.region
-  version = "~> 2.15"
+  version = "= 2.70.0"
 
   assume_role {
     role_arn = var.workspace_iam_roles[terraform.workspace]
@@ -21,7 +21,7 @@ provider "aws" {
 provider "aws" {
   alias   = "us_east_1"
   region  = "us-east-1"
-  version = "~> 2.1"
+  version = "= 2.70.0"
 
   assume_role {
     role_arn = var.workspace_iam_roles[terraform.workspace]
@@ -33,11 +33,11 @@ provider "null" {
 }
 
 provider "random" {
-  version = "~> 2.1"
+  version = "= 2.1.2"
 }
 
 provider "template" {
-  version = "~> 2.1"
+  version = "= 2.2.0"
 }
 
 #
@@ -55,18 +55,41 @@ locals {
   naked_domain  = "${local.subdomain}${var.dns_apex}"
   domain        = "${local.www}${local.naked_domain}"
   project_env   = "${var.project}-${terraform.workspace}"
+
+  bucket_arn     = aws_s3_bucket.static.arn
+  user_arn       = aws_iam_user.app_deploy.arn
+  cloudfront_arn = aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn
 }
 
 #
 # Data Sources
 
-data "template_file" "s3_origin_policy" {
-  template = file("templates/s3_origin_policy.json")
+data "aws_iam_policy_document" "s3_origin_policy" {
+  statement {
+    principals {
+      type = "AWS"
+      identifiers = [local.cloudfront_arn]
+    }
+    actions = ["s3:GetObject"]
+    resources = ["${local.bucket_arn}/*"]
+  }
 
-  vars = {
-    bucket_arn     = aws_s3_bucket.static.arn
-    user_arn       = aws_iam_user.app_deploy.arn
-    cloudfront_arn = aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn
+  statement {
+    principals {
+      type = "AWS"
+      identifiers = [local.user_arn]
+    }
+    actions = ["s3:ListBucket"]
+    resources = ["${local.bucket_arn}"]
+  }
+
+  statement {
+    principals {
+      type = "AWS"
+      identifiers = [local.user_arn]
+    }
+    actions = ["s3:*"]
+    resources = ["${local.bucket_arn}/*"]
   }
 }
 
@@ -93,14 +116,6 @@ resource "aws_route53_record" "cert_validation" {
   name    = aws_acm_certificate.cert.domain_validation_options[count.index]["resource_record_name"]
   type    = aws_acm_certificate.cert.domain_validation_options[count.index]["resource_record_type"]
   ttl     = 60
-  # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-  # force an interpolation expression to be interpreted as a list by wrapping it
-  # in an extra set of list brackets. That form was supported for compatibilty in
-  # v0.11, but is no longer supported in Terraform v0.12.
-  #
-  # If the expression in the following list itself returns a list, remove the
-  # brackets to avoid interpretation as a list of lists. If the expression
-  # returns a single list item then leave it as-is and remove this TODO comment.
   records = [aws_acm_certificate.cert.domain_validation_options[count.index]["resource_record_value"]]
 }
 
@@ -210,7 +225,7 @@ resource "aws_route53_record" "static_redirect_ipv6" {
 
 resource "aws_s3_bucket_policy" "static_policy" {
   bucket = aws_s3_bucket.static.id
-  policy = data.template_file.s3_origin_policy.rendered
+  policy = data.aws_iam_policy_document.s3_origin_policy.json
 }
 
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
@@ -246,14 +261,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     bucket          = aws_s3_bucket.static_logs.bucket_domain_name
   }
 
-  # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-  # force an interpolation expression to be interpreted as a list by wrapping it
-  # in an extra set of list brackets. That form was supported for compatibilty in
-  # v0.11, but is no longer supported in Terraform v0.12.
-  #
-  # If the expression in the following list itself returns a list, remove the
-  # brackets to avoid interpretation as a list of lists. If the expression
-  # returns a single list item then leave it as-is and remove this TODO comment.
   aliases = [local.domain]
 
   default_cache_behavior {
@@ -340,14 +347,6 @@ resource "aws_cloudfront_distribution" "cdn_redirect" {
     bucket          = aws_s3_bucket.static_logs.bucket_domain_name
   }
 
-  # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-  # force an interpolation expression to be interpreted as a list by wrapping it
-  # in an extra set of list brackets. That form was supported for compatibilty in
-  # v0.11, but is no longer supported in Terraform v0.12.
-  #
-  # If the expression in the following list itself returns a list, remove the
-  # brackets to avoid interpretation as a list of lists. If the expression
-  # returns a single list item then leave it as-is and remove this TODO comment.
   aliases = [local.naked_domain]
 
   default_cache_behavior {
@@ -404,7 +403,7 @@ aws configure --profile ${aws_iam_user.app_deploy.name} set aws_secret_access_ke
 aws configure --profile ${aws_iam_user.app_deploy.name} set region ${var.region};
 
 : Sync latest app build to s3 bucket;
-aws --profile ${aws_iam_user.app_deploy.name} s3 sync --delete ../_site s3://${aws_s3_bucket.static.id}/;
+aws --profile ${aws_iam_user.app_deploy.name} s3 sync --delete ${var.site_static_files_dir} s3://${aws_s3_bucket.static.id}/;
 
 : Cleanup temporary aws config and credentials files
 rm $${AWS_CONFIG_FILE} $${AWS_SHARED_CREDENTIALS_FILE};

@@ -25,3 +25,6 @@ variable "enable_naked_domain" {
   default = false
 }
 
+variable "site_static_files_dir" {
+  default = "../_site"
+}

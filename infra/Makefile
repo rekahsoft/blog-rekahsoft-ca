@@ -5,11 +5,14 @@
 .PHONY: default
 default: deploy
 
-SELECTED_WORKSPACE := $(shell terraform workspace show)
+SELECTED_WORKSPACE := $(shell cat .terraform/environment 2>/dev/null || echo default)
 ENV := $(if $(ENV),$(ENV),$(SELECTED_WORKSPACE))
 
 .PHONY: setup
-setup:
+setup: init workspace
+
+.PHONY: workspace
+workspace:
 ifneq ($(SELECTED_WORKSPACE),$(ENV))
 ifndef CI
 	@terraform workspace select $(ENV)
@@ -38,3 +41,7 @@ destroy: setup
 	@terraform destroy \
 		$(if $(ENV),--var-file=$(ENV).tfvars) \
 		$(ARGS)
+
+.PHONY: clean
+clean:
+	@rm -rf .terraform

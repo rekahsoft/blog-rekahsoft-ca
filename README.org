@@ -13,8 +13,9 @@
 * Features
 
 - [[http://en.wikipedia.org/wiki/Single-page_application][Single Page Application (SPA)]]
-- Utilizes CSS 3
-- Uses HTML5 Application Cache for offline viewing of website
+- Write blog posts and pages in markdown
+- Support for math markup via MathJax
+- RSS/Atom feed
 
 * Tools
 
@@ -26,6 +27,7 @@ libraries:
 - [[http://www.getskeleton.com/][Skeleton]] is used for CSS boilerplate
 - [[http://www.mathjax.org/][MathJax]] is used for rendering mathematics
 - [[http://jquery.com][JQuery]] and [[https://github.com/asual/jquery-address][JQuery-address]] are used for various DOM manipulations
+- [[https://guix.gnu.org/][Gnu Guix]] is used to manage development environments and packaging
 - [[http://inkscape.org/][Inkscape]] and the [[http://www.gimp.org/][Gimp]] were used to create various images/artwork
 - [[http://www.gnu.org/software/freefont/][Gnu Free Fonts]], specifically *FreeMono* is used as main font
 - [[http://www.gnu.org/software/emacs/][Gnu Emacs]] because there is no place like home; and no greater editor!
@@ -48,10 +50,11 @@ License]]) are deployed dependent on which part of the site is in question. Plea
 :header-args:  :session *vterm blog-rekahsoft-ca* :results none
 :END:
 
-[[https://guix.gnu.org/][Guix]] is used to manage dependencies for this project. 
+[[https://guix.gnu.org/][Gnu Guix]] is used to package this project and manage its dependencies, as well as to provide
+reproducible development environments.
 
-A simple wrapper script ~site~ is provided that also takes care of building the static site
-and offering access to hakyll commands.
+A simple wrapper script [[./site][site]] is provided that wraps the hakyll powered site builder to
+offer some additional functionality.
 
 ** Start Development Environment
 
@@ -61,8 +64,10 @@ The development environment is defined by the following files:
 - [[./guix.scm][guix.scm]] :: Defines the package for this site, ~blog-rekahsoft-ca~.
 - [[./manifest.scm][manifest.scm]] :: Defines packages required for development of this site.
 
+To start a development environment, run the following:
+
 #+begin_src sh
-  guix time-machine -C channels.scm -- shell -CN -E LANG -E TERM -E PS1 -Df guix.scm -m manifest.scm
+  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -E '^PS1$' -Df guix.scm -m manifest.scm
 #+end_src
 
 This uses the [[info:guix#Invoking guix time-machine][guix time-machine]] feature to ensure the development environment is reproducible
@@ -75,6 +80,30 @@ container to ensure the development shell behaves correctly. Finally, ~-Df guix.
 indicates that development dependencies of the ~blog-rekahsoft-ca~ package should be included
 in the environment and ~-m manifest.scm~ ensures that extra tools for development are
 included as well.
+
+*** Deployment Development Environment
+
+[[https://guix.gnu.org/][Gnu Guix]] is used, similar to in the [[*Start Development Environment][previous section]], to create environments with all tools
+necessary for deployments, with a notable difference being a ~guix.scm~ file is not provided
+or needed, as the deployment environment is used solely for its side effects. 
+
+- [[./infra/channels.scm][infra/channels.scm]] :: Symlink to [[./channels.scm][../channels.scm]] to make the guix cli workflow nicer when
+  in the ~infra~ directory. Technically this doesn't need to be a symlink, however this would
+  complicate [[*Composing Site Development and Deployment Environments][Composing Site Development and Deployment Environments]].
+- [[./infra/manifest.scm][infra/manifest.scm]] :: Defines packages required for deployment of this site
+
+To start a deployment development environment, run the following:
+
+#+begin_src sh
+  cd infra
+  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -E '^PS1$' -E '^AWS.*$'
+#+end_src
+
+*** Composing Site Development and Deployment Environments
+
+#+begin_src sh
+  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -E '^PS1$' -E '^AWS.*$' -Df guix.scm -m manifest.scm -m infra/manifest.scm
+#+end_src
 
 ** Build Site
 
@@ -96,41 +125,95 @@ included as well.
 
 ** Deploy Site
 
+Terraform is used to deploy this site. Its configuration files are located in ~./infra~.
+
+Under normal conditions, all deployments occur from my internal ci/cd system. This ensures
+that the deployment process is reliable, repeatable and quick. However, in the case of both
+development and emergency deployments, clear documentation surrounding the deployment process
+is necessary.
+
+*** TODO ~site deploy~ command
+
 #+begin_src sh
   site deploy
 #+end_src
 
-** Test
+*** Start [[*Deployment Development Environment][Deployment Development Environment]]
+*** Setup a Particular Environment
+
+Three environments (terraform workspaces) are currently available, including:
+
+  - default    :: unused default terraform workspace
+  - staging    :: https://www.blog.staging.rekahsoft.ca
+  - production :: https://www.blog.rekahsoft.ca
 
 #+begin_src sh
-  site test
+  make setup ENV=<env>
 #+end_src
 
+From this point onward, any ~make~ target run will operate on the selected environment,
+unless its switched with the ~workspace~ or ~setup~ targets, or manually with ~terraform~.
+
+*** See What Infrastructure Will Change
+
+Run a terraform plan to see how the selected environments infrastructure will change.
+
+#+begin_src sh
+  make plan
+#+end_src
+
+*** Deploy the Site
+
+Run a terraform apply to deploy to the selected environment.
+
+#+begin_src sh
+  make deploy
+#+end_src
+
+*** Working with Terraform Directly
+
+Within a development environment, ~terraform~, its providers and all other dependencies are
+available. As such, its possible to directly leverage ~terraform~ and its various operations.
+This is particularly useful when debugging or adding make targets.
+
+** Clean up Guix Store
+
+#+begin_src sh
+  guix gc --list-dead | grep -e '^/gnu/store/.*-blog-rekahsoft-ca-.*' | xargs guix gc -D
+#+end_src
+
+* Building a Release
+
+The software built that itself builds this blog is released as a Guix package. It is
+currently not, and is not ever expected to be distributed via a channel, as it provides
+little benefit to anyone except myself, and is meant to operate along with stateful data,
+including the site templates, content, pages, posts, etc..
+
+To build a release, run the following command:
+
+#+begin_src sh
+  guix time-machine -C channels.scm -- build -f guix.scm
+#+end_src
+
+This will produce a guix package with the following three outputs:
+
+- ~out~ :: The ~blog-rekahsoft-ca~ site builder and ~gencss~ css generator binaries, as well
+   as ~site~ user script
+- ~site~ :: A build of the website made with the site builder, etc.. in the ~out~ output of
+  this package, using the content at the same version
+- ~static~ :: License file
+
+** TODO What is done with the release?
+  
 * Writing a Blog Post
 
 #+begin_src sh
-  guix time-machine -C channels.scm -- shell -CN -E LANG
-#+end_src
-
-* Deploying
-
-Terraform is used to deploy this site. Its configuration files are located in ~./infra~. Three
-workspaces are currently available, including:
-
-  - default (unused)
-  - staging
-  - production
-
-For example, this is how to deploy the production version of the site:
-
-#+begin_src shell
-  cd infra
-  terraform workspace select production
-  terraform plan --var-file=production.tfvars --out local.plan
-  terraform apply local.plan
+  guix time-machine -C channels.scm -- shell -CN -E LANG -E TERM -E PS1 -f guix.scm -- site watch
 #+end_src
 
 * Known Issues
 
 If you have an issue while browsing [[http://www.blog.rekahsoft.ca][my blog]] please file a issue in the [[https://git.rekahsoft.ca/rekahsoft/blog-rekahsoft-ca/issues][blog-rekahsoft-ca]]
 issue tracker.
+
+To see a list of already known issues, see [[./TODO.org][TODO.org]].

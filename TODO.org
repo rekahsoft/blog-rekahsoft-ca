@@ -35,3 +35,7 @@ The backend is just embedded in [[./infra/main.tf][infra/main.tf]].
 See: http://blog.tpleyer.de/posts/2019-04-21-external-code-inclusion-with-hakyll.html
 * TODO Ensure [[./blog-rekahsoft-ca.cabal][blog-rekahsoft-ca.cabal]] is usable with cabal and has the correct dependencies
 * TODO Build the site as a guix package output of ~blog-rekahsoft-ca~
+* TODO Invalid page urls load as the home page
+
+Eg. https://blog.rekahsoft.ca/this-is-not-a-valid-page.html will show the home page, and
+retain this url. However, it should show a page not found page.

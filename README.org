@@ -88,8 +88,11 @@ necessary for deployments, with a notable difference being a ~guix.scm~ file is 
 or needed, as the deployment environment is used solely for its side effects. 
 
 - [[./infra/channels.scm][infra/channels.scm]] :: Symlink to [[./channels.scm][../channels.scm]] to make the guix cli workflow nicer when
-  in the ~infra~ directory. Technically this doesn't need to be a symlink, however this would
-  complicate [[*Composing Site Development and Deployment Environments][Composing Site Development and Deployment Environments]].
+  in the ~infra~ directory. Technically this doesn't need to be a symlink, and could be a
+  different set of channels or version of channels compared to the channels file at the
+  top-level of the repository, however this would complicate [[*Composing Site Development and Deployment Environments][Composing Site Development and
+  Deployment Environments]], so its preferred that all guix environments for the project,
+  including the development and deployment environment use the same set of Guix channels.
 - [[./infra/manifest.scm][infra/manifest.scm]] :: Defines packages required for deployment of this site
 
 To start a deployment development environment, run the following:
@@ -201,7 +204,7 @@ This will produce a guix package with the following three outputs:
    as ~site~ user script
 - ~site~ :: A build of the website made with the site builder, etc.. in the ~out~ output of
   this package, using the content at the same version
-- ~static~ :: License file
+- ~static~ :: License file and any other file that should be distributed (eg manual)
 
 ** TODO What is done with the release?
   

@@ -62,12 +62,11 @@ The development environment is defined by the following files:
 
 - [[./channels.scm][channels.scm]] :: Specifically defines a set of available software, their versions and their build recipe.
 - [[./guix.scm][guix.scm]] :: Defines the package for this site, ~blog-rekahsoft-ca~.
-- [[./manifest.scm][manifest.scm]] :: Defines packages required for development of this site.
 
 To start a development environment, run the following:
 
 #+begin_src sh
-  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -E '^PS1$' -Df guix.scm -m manifest.scm
+  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -E '^PS1$' -f guix.scm -Df guix.scm
 #+end_src
 
 This uses the [[info:guix#Invoking guix time-machine][guix time-machine]] feature to ensure the development environment is reproducible
@@ -76,10 +75,9 @@ shell]] command is used within the time-machine to start a development environme
 container (~-C~), which shares the hosts network namespace (~-N~). The environment variable
 ~LANG~ is passed into the container to ensure locales work as expected; without this, site
 building will fail! Additionally, the environment variable ~TERM~ is passed into the
-container to ensure the development shell behaves correctly. Finally, ~-Df guix.scm~
-indicates that development dependencies of the ~blog-rekahsoft-ca~ package should be included
-in the environment and ~-m manifest.scm~ ensures that extra tools for development are
-included as well.
+container to ensure the development shell behaves correctly. Finally, ~-f guix.scm~ loads the
+~blog-rekahsoft-ca~ package, and ~-Df guix.scm~ indicates that development dependencies of
+the ~blog-rekahsoft-ca~ package should be included in the environment.
 
 *** Deployment Development Environment
 
@@ -105,7 +103,7 @@ To start a deployment development environment, run the following:
 *** Composing Site Development and Deployment Environments
 
 #+begin_src sh
-  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -E '^PS1$' -E '^AWS.*$' -Df guix.scm -m manifest.scm -m infra/manifest.scm
+  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -E '^PS1$' -E '^AWS.*$' -f guix.scm -Df guix.scm -m infra/manifest.scm
 #+end_src
 
 ** Build Site

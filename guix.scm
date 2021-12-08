@@ -27,6 +27,8 @@
  (rekahsoft-gnu packages haskell-web)
  (git))
 
+(setenv "PS1" "\\W [env]\\$ ")
+
 (define %srcdir
   (dirname (current-filename)))
 

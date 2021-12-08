@@ -108,11 +108,23 @@ To start a deployment development environment, run the following:
 
 ** Build Site
 
+This website is built from a collection of markdown files and templates that are processed by
+pandoc and are stitched together using Hakyll. To build the html/css/jss and all other assets
+required to deploy and distribute the site, the hakyll derived site-builder,
+~blog-rekahsoft-ca~ must be invoked. Under usual conditions it is not invoked directly, but
+instead via the ~site~ wrapper script. For example, this is how within a development
+environment the site can be built.
+
 #+begin_src sh
   site build
 #+end_src
 
 ** Clean Site
+
+[[*Build Site][Building the site]] has the side effect of writing a couple files/directories to disk as a
+result of the build process. In some cases, its useful to start of with a clean slate and
+remove any files that were generated for the site. To so so, the ~clean~ sub-command can be
+used:
 
 #+begin_src sh
   site clean

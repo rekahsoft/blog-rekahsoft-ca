@@ -1,17 +1,114 @@
+---
 kind: pipeline
 type: docker
-name: blog-rekahsoft-ca
+name: validate
 
-node:
-  guix: on
-
-workspace:
-  path: /drone/blog-rekahsoft-ca
+platform:
+  os: linux
+  arch: amd64
 
 steps:
 - name: build
   pull: if-not-exists
   image: docker.nexus.home.rekahsoft.ca/guix:latest
   commands:
-  - guix --version
   - guix time-machine -C channels.scm -- build -f guix.scm
+
+- name: promote-staging
+  pull: if-not-exists
+  image: docker.nexus.home.rekahsoft.ca/drone/cli:1.4-alpine
+  commands:
+  - export DRONE_SERVER="${DRONE_SYSTEM_PROTO}://${DRONE_SYSTEM_HOST}"
+  - DRONE_PROMOTED_PIPELINE_ID=$(drone build promote --format '{{ .Number }}' "$DRONE_REPO" "$DRONE_BUILD_NUMBER" "staging")
+  - "while status=\"$(drone build info $DRONE_REPO $DRONE_PROMOTED_PIPELINE_ID)\"; do\ncase \"$status\" in\n  running)\n    sleep 30s\n    ;;\n  success)\n    break\n    ;;\n  failure|error|killed)\n    echo \"Promoted job with id $DRONE_PROMOTED_PIPELINE_ID failed with status '$status'.\"\n    exit 1\n    ;;\n  *)\n    echo \"Unknown pipeline status '$status'.\"\n    exit 1\nesac\ndone"
+  environment:
+    DRONE_TOKEN:
+      from_secret: drone_token
+  when:
+    branch:
+    - master
+    event:
+    - push
+
+- name: promote-production
+  pull: if-not-exists
+  image: docker.nexus.home.rekahsoft.ca/drone/cli:1.4-alpine
+  commands:
+  - export DRONE_SERVER="${DRONE_SYSTEM_PROTO}://${DRONE_SYSTEM_HOST}"
+  - DRONE_PROMOTED_PIPELINE_ID=$(drone build promote --format '{{ .Number }}' "$DRONE_REPO" "$DRONE_BUILD_NUMBER" "production")
+  - "while status=\"$(drone build info $DRONE_REPO $DRONE_PROMOTED_PIPELINE_ID)\"; do\ncase \"$status\" in\n  running)\n    sleep 30s\n    ;;\n  success)\n    break\n    ;;\n  failure|error|killed)\n    echo \"Promoted job with id $DRONE_PROMOTED_PIPELINE_ID failed with status '$status'.\"\n    exit 1\n    ;;\n  *)\n    echo \"Unknown pipeline status '$status'.\"\n    exit 1\nesac\ndone"
+  environment:
+    DRONE_TOKEN:
+      from_secret: drone_token
+  when:
+    branch:
+    - master
+    event:
+    - push
+
+node:
+  guix: on
+
+trigger:
+  event:
+  - push
+  - pull_request
+  - tag
+
+---
+kind: pipeline
+type: docker
+name: deploy
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: init
+  pull: if-not-exists
+  image: docker.nexus.home.rekahsoft.ca/guix:latest
+  commands:
+  - cd infra
+  - "guix time-machine -C ../channels.scm -- shell -CN -E \"^AWS.*$\" -- make setup ENV=\"${DRONE_DEPLOY_TO}\" "
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: aws_access_key_id
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: aws_secret_access_key
+    PLAN: out.plan
+
+- name: plan
+  pull: if-not-exists
+  image: docker.nexus.home.rekahsoft.ca/guix:latest
+  commands:
+  - cd infra
+  - "guix time-machine -C ../channels.scm -- shell -CN -E \"^AWS.*$\" -- make plan ENV=\"${DRONE_DEPLOY_TO}\" "
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: aws_access_key_id
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: aws_secret_access_key
+    PLAN: out.plan
+
+- name: deploy
+  pull: if-not-exists
+  image: docker.nexus.home.rekahsoft.ca/guix:latest
+  commands:
+  - cd infra
+  - "guix time-machine -C ../channels.scm -- shell -CN -E \"^AWS.*$\" -- make deploy ENV=\"${DRONE_DEPLOY_TO}\" "
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: aws_access_key_id
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: aws_secret_access_key
+    PLAN: out.plan
+
+node:
+  guix: on
+
+trigger:
+  event:
+  - promote
+
+...

@@ -14,9 +14,7 @@ setup: init workspace
 .PHONY: workspace
 workspace:
 ifneq ($(SELECTED_WORKSPACE),$(ENV))
-ifndef CI
 	@terraform workspace select $(ENV)
-endif
 endif
 
 .PHONY: init

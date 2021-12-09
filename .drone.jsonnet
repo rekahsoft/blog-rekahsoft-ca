@@ -106,7 +106,7 @@ local promoteStep(env,
 
 local deployStep(name, target=name, args=[]) = guix_step_time_machine(
   name,
-  std.format('shell -CN -E "^AWS.*$" -- make %s ENV="${DRONE_DEPLOY_TO}" %s', [target, std.join(" ", args)]),
+  std.format('shell -CN -E "^AWS.*$" -m manifest.scm -- make %s ENV="${DRONE_DEPLOY_TO}" %s', [target, std.join(" ", args)]),
   cwd="infra",
   channels="../channels.scm")
     .withEnv({ PLAN: "out.plan" } + env_from_secret({

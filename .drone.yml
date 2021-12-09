@@ -84,6 +84,7 @@ steps:
   pull: if-not-exists
   image: docker.nexus.home.rekahsoft.ca/guix:latest
   commands:
+  - export TF_VAR_site_static_files_dir="$(guix time-machine -C channels.scm -- build -f guix.scm | grep -e '^.*-site$')"
   - cd infra
   - echo 'root:x:0:0:root:/root:/bin/bash' >> /etc/passwd
   - "guix time-machine -C ../channels.scm -- shell -m manifest.scm -- make plan ENV=\"${DRONE_DEPLOY_TO}\" "

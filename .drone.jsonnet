@@ -20,7 +20,12 @@ local pipeline = {
     withPullIfNotExists():: self + { pull: 'if-not-exists' },
     withCommands(commands):: self + if std.type(commands) == 'array' then { commands: commands } else { commands: [commands] },
     withTrigger(trigger):: self + { trigger: trigger }, // TODO: this is duplicated in pipeline object
-    withEnv(envs):: self + { environment: envs },
+    withEnv(envs):: self + { environment+: envs },
+    withRuntimeEnvVar(envs):: (local existingCmds = if std.objectHas(self, "commands") then self.commands else [];
+                               self + {
+                                 commands: std.map(function (i) std.format('export %s="%s"', [i, envs[i]]),
+                                                   std.objectFields(envs)) + existingCmds
+                               }),
     withWhen(when):: self + { when: when },
     withSettings(settings):: self + { settings: settings },
   },
@@ -128,7 +133,9 @@ local deployStep(name, target=name, args=[]) = guix_step_time_machine(
 
   guix_pipeline("deploy").withTrigger(trigger.new().withEvent("promote")).withSteps([
     deployStep("init", "setup"),
-    deployStep("plan"),
+    deployStep("plan").withRuntimeEnvVar({
+      TF_VAR_site_static_files_dir: "$(guix time-machine -C channels.scm -- build -f guix.scm | grep -e '^.*-site$')"
+    }),
     deployStep("deploy"),
   ])
 ]

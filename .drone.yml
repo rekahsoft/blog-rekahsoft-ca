@@ -80,20 +80,6 @@ steps:
       from_secret: aws_secret_access_key
     PLAN: out.plan
 
-- name: workspace
-  pull: if-not-exists
-  image: docker.nexus.home.rekahsoft.ca/guix:latest
-  commands:
-  - cd infra
-  - echo 'root:x:0:0:root:/root:/bin/bash' >> /etc/passwd
-  - "guix time-machine -C ../channels.scm -- shell -m manifest.scm -- make workspace ENV=\"${DRONE_DEPLOY_TO}\" "
-  environment:
-    AWS_ACCESS_KEY_ID:
-      from_secret: aws_access_key_id
-    AWS_SECRET_ACCESS_KEY:
-      from_secret: aws_secret_access_key
-    PLAN: out.plan
-
 - name: plan
   pull: if-not-exists
   image: docker.nexus.home.rekahsoft.ca/guix:latest

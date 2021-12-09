@@ -128,7 +128,6 @@ local deployStep(name, target=name, args=[]) = guix_step_time_machine(
 
   guix_pipeline("deploy").withTrigger(trigger.new().withEvent("promote")).withSteps([
     deployStep("init", "setup"),
-    deployStep("workspace"),
     deployStep("plan"),
     deployStep("deploy"),
   ])

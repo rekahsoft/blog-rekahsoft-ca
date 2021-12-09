@@ -72,7 +72,7 @@ steps:
   commands:
   - cd infra
   - echo 'root:x:0:0:root:/root:/bin/bash' >> /etc/passwd
-  - "guix time-machine -C ../channels.scm -- shell -CN -E \"^AWS.*$\" -m manifest.scm -- make setup ENV=\"${DRONE_DEPLOY_TO}\" "
+  - "guix time-machine -C ../channels.scm -- shell -m manifest.scm -- make setup ENV=\"${DRONE_DEPLOY_TO}\" "
   environment:
     AWS_ACCESS_KEY_ID:
       from_secret: aws_access_key_id
@@ -86,7 +86,7 @@ steps:
   commands:
   - cd infra
   - echo 'root:x:0:0:root:/root:/bin/bash' >> /etc/passwd
-  - "guix time-machine -C ../channels.scm -- shell -CN -E \"^AWS.*$\" -m manifest.scm -- make plan ENV=\"${DRONE_DEPLOY_TO}\" "
+  - "guix time-machine -C ../channels.scm -- shell -m manifest.scm -- make plan ENV=\"${DRONE_DEPLOY_TO}\" "
   environment:
     AWS_ACCESS_KEY_ID:
       from_secret: aws_access_key_id
@@ -100,7 +100,7 @@ steps:
   commands:
   - cd infra
   - echo 'root:x:0:0:root:/root:/bin/bash' >> /etc/passwd
-  - "guix time-machine -C ../channels.scm -- shell -CN -E \"^AWS.*$\" -m manifest.scm -- make deploy ENV=\"${DRONE_DEPLOY_TO}\" "
+  - "guix time-machine -C ../channels.scm -- shell -m manifest.scm -- make deploy ENV=\"${DRONE_DEPLOY_TO}\" "
   environment:
     AWS_ACCESS_KEY_ID:
       from_secret: aws_access_key_id

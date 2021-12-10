@@ -1,5 +1,3 @@
-// See: https://github.com/kradalby/drone-jsonnet/blob/master/drone.libsonnet
-
 local droneStatus = ['success', 'failure'];
 
 local ci = {

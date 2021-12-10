@@ -20,6 +20,7 @@ steps:
   image: docker.nexus.home.rekahsoft.ca/drone/cli:1.4-alpine
   commands:
   - export DRONE_SERVER="${DRONE_SYSTEM_PROTO}://${DRONE_SYSTEM_HOST}"
+  - export DRONE_TOKEN
   - DRONE_PROMOTED_PIPELINE_ID=$(drone build promote --format '{{ .Number }}' "$DRONE_REPO" "$DRONE_BUILD_NUMBER" "staging")
   - "while status=\"$(drone build info $DRONE_REPO $DRONE_PROMOTED_PIPELINE_ID)\"; do\ncase \"$status\" in\n  running)\n    sleep 30s\n    ;;\n  success)\n    break\n    ;;\n  failure|error|killed)\n    echo \"Promoted job with id $DRONE_PROMOTED_PIPELINE_ID failed with status '$status'.\"\n    exit 1\n    ;;\n  *)\n    echo \"Unknown pipeline status '$status'.\"\n    exit 1\nesac\ndone"
   environment:
@@ -36,6 +37,7 @@ steps:
   image: docker.nexus.home.rekahsoft.ca/drone/cli:1.4-alpine
   commands:
   - export DRONE_SERVER="${DRONE_SYSTEM_PROTO}://${DRONE_SYSTEM_HOST}"
+  - export DRONE_TOKEN
   - DRONE_PROMOTED_PIPELINE_ID=$(drone build promote --format '{{ .Number }}' "$DRONE_REPO" "$DRONE_BUILD_NUMBER" "production")
   - "while status=\"$(drone build info $DRONE_REPO $DRONE_PROMOTED_PIPELINE_ID)\"; do\ncase \"$status\" in\n  running)\n    sleep 30s\n    ;;\n  success)\n    break\n    ;;\n  failure|error|killed)\n    echo \"Promoted job with id $DRONE_PROMOTED_PIPELINE_ID failed with status '$status'.\"\n    exit 1\n    ;;\n  *)\n    echo \"Unknown pipeline status '$status'.\"\n    exit 1\nesac\ndone"
   environment:

@@ -2,7 +2,7 @@
 #+AUTHOR: Collin J. Doering
 
 #+BEGIN_EXPORT html
-<p><a href="https://ci.home.rekahsoft.ca/rekahsoft/blog-rekahsoft-ca"><img src="https://ci.home.rekahsoft.ca/api/badges/rekahsoft/blog-rekahsoft-ca/status.svg" alt="Build Status"></a></p>
+<p><a href="https://ci.home.rekahsoft.ca/rekahsoft-public/blog-rekahsoft-ca"><img src="https://ci.home.rekahsoft.ca/api/badges/rekahsoft-public/blog-rekahsoft-ca/status.svg" alt="Build Status"></a></p>
 #+END_EXPORT
 
 #+begin_abstract

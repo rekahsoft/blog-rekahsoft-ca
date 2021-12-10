@@ -83,7 +83,7 @@ local dronePromoteCmd(env) = [
   "export DRONE_SERVER=\"${DRONE_SYSTEM_PROTO}://${DRONE_SYSTEM_HOST}\"",
   "export DRONE_TOKEN",
   std.format('DRONE_PROMOTED_PIPELINE_ID=$(drone build promote --format \'{{ .Number }}\' "$DRONE_REPO" "$DRONE_BUILD_NUMBER" "%s")', env),
-  'while status="$(drone build info $DRONE_REPO $DRONE_PROMOTED_PIPELINE_ID)"; do
+  'while status="$(drone build info --format \'{{ .Status }}\' $DRONE_REPO $DRONE_PROMOTED_PIPELINE_ID)"; do
 case "$status" in
   running)
     sleep 30s

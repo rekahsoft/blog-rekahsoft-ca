@@ -181,8 +181,6 @@ local guix_step_time_machine(name,
       // Conditionally change directory
       (if cwd == "."
       then [] else [std.format("cd %s", cwd)]) +
-      // Drone-ci does not populate a /etc/passwd which causes issues with guix
-      ["echo 'root:x:0:0:root:/root:/bin/bash' >> /etc/passwd"] +
       // Expand provide guix commands into executable shell
       std.map(function(i) std.format("guix time-machine -C %s -- %s", [channels, i]),
         if std.type(commands) == 'array' then commands else [commands]));

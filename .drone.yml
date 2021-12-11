@@ -78,7 +78,6 @@ steps:
       from_secret: aws_access_key_id
     AWS_SECRET_ACCESS_KEY:
       from_secret: aws_secret_access_key
-    PLAN: out.plan
 
 - name: plan
   pull: if-not-exists

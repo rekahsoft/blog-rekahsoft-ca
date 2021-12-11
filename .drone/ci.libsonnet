@@ -127,6 +127,26 @@
     for key in std.objectFields(dict)
   },
 
+  guix:: {
+    pipeline(name)::
+      ci.pipeline.new()
+      .withName(name)
+      .withType("docker")
+      .withNode({ "guix": "on"}),
+
+    step(name, commands, image="docker.nexus.home.rekahsoft.ca/guix:latest")::
+      ci.pipeline.step.new(name, image).withPullIfNotExists().withCommands(commands),
+
+    stepTimeMachine(name, commands, cwd=".", channels="channels.scm", image="docker.nexus.home.rekahsoft.ca/guix:latest")::
+      ci.pipeline.step.new(name, image).withPullIfNotExists().withCommands(
+        // Conditionally change directory
+        (if cwd == "."
+         then [] else [std.format("cd %s", cwd)]) +
+        // Expand provide guix commands into executable shell
+        std.map(function(i) std.format("guix time-machine -C %s -- %s", [channels, i]),
+                if std.type(commands) == 'array' then commands else [commands])),
+  },
+
   promoteStep(env,
               secret_name_drone_token="drone_token",
               image="docker.nexus.home.rekahsoft.ca/drone/cli:1.4-alpine")::
@@ -160,5 +180,16 @@ done',
     .withCommands(dronePromoteCmd(env))
     .withEnv(ci.env_from_secret({
       DRONE_TOKEN: "drone_token"
-    }))
+    })),
+
+  awsDeployStep(name, target=name, args=[])::
+    ci.guix.stepTimeMachine(
+      name,
+      std.format('shell -m manifest.scm -- make %s ENV="${DRONE_DEPLOY_TO}" %s', [target, std.join(" ", args)]),
+      cwd="infra",
+      channels="../channels.scm")
+    .withEnv(ci.env_from_secret({
+      AWS_ACCESS_KEY_ID: "aws_access_key_id",
+      AWS_SECRET_ACCESS_KEY: "aws_secret_access_key",
+    })),
 }

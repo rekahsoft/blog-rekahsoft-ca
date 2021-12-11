@@ -1,5 +1,4 @@
 # Editor specific files
-.*
 *~
 .dir-locals.el
 .tern-port

@@ -9,7 +9,11 @@ CLOSED: [2021-11-28 Sun 10:43]
 See:
 - [[file:js/default.js::// Add fullscreen functionality to inline-images and figures][Fullscreen image onclik functionality is added in the router upon content loading, which doesn't occur on the intial page load]]
 * TODO Completely replace all references to stack
-* TODO Fix analytics (pywiki is no longer in use, find and use something else)
+* DONE Fix analytics (pywiki is no longer in use, find and use something else)
+CLOSED: [2021-12-18 Sat 20:31]
+- Note taken on [2021-12-18 Sat 20:31] \\
+  Decided to use [[https://github.com/plausible/analytics][Plausible]], self hosted on my single use AWS ec2.
+- State "DONE"       from "TODO"       [2021-12-18 Sat 20:31]
 * TODO Modernize javascript in [[file:js/default.js][js/default.js]]
 * TODO Allow posts (and pages?) to be written in org-mode
 

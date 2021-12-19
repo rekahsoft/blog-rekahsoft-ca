@@ -1,0 +1,21 @@
+<script>
+  var ref = document.createElement("script");
+  ref.setAttribute("type", "text/javascript");
+
+  var script = "https://analytics.rekahsoft.ca/js/plausible.js";
+
+  switch (window.location.hostname) {
+  case "www.blog.rekahsoft.ca":
+      ref.setAttribute("data-domain", "blog.rekahsoft.ca");
+      break;
+  case "www.blog.staging.rekahsoft.ca":
+      ref.setAttribute("data-domain", "blog.staging.rekahsoft.ca");
+      break;
+  default:
+      script = "https://analytics.rekahsoft.ca/js/plausible.exclusions.local.js";
+      ref.setAttribute("data-domain", "localhost:3000");
+      ref.setAttribute("data-exclude", "localhost:3000");
+  }
+  ref.setAttribute("src", script);
+  document.getElementsByTagName("head")[0].appendChild(ref)
+</script>

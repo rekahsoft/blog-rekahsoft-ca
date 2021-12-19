@@ -27,9 +27,6 @@
 /*global jQuery, MathJax*/
 //------------------------
 
-// Global array for processing piwik analytics commands
-var _paq = _paq || [];
-
 (function ($, mj) {
     "use strict";
 
@@ -194,49 +191,6 @@ var _paq = _paq || [];
         });
 
         return spec;
-    }()),
-
-    analytics = (function () {
-        var inited = false,
-            spec = {
-                trackPageView: trackPageView,
-                debugEnable: function () {
-                    init();
-                }
-            };
-
-        function trackPageView (href) {
-            if (inited) {
-                _paq.push(["setDocumentTitle", document.domain + href]);
-                _paq.push(["trackPageView"]);
-            }
-        }
-
-        function init() {
-            if (!inited) {
-                _paq.push(["setDoNotTrack", true]);
-                _paq.push(["enableLinkTracking"]);
-                _paq.push(["setTrackerUrl", "//analytics.rekahsoft.ca/piwik.php"]);
-                _paq.push(["setSiteId", 1]);
-
-                inited = true;
-            }
-        }
-
-        // Initialize piwik.js when site is initially loaded
-        router.onInit(function () {
-            if (document.domain != "localhost") {
-                init();
-                trackPageView('/');
-            }
-        });
-
-        // Track page views with piwik each time the url changes
-        router.onChange(function (url, dta) {
-            trackPageView(url);
-        });
-
-        return spec
     }()),
 
     site = (function () {

@@ -151,9 +151,7 @@ main = hakyllWith myConfig $ do
                   paginateContext paginatedTaggedPosts pageNum          <>
                   constField "tag" tag                                  <>
                   listField "posts" (taggedPostCtx tags) (return posts)
-            indexCtx = if pageNum <= 2
-                       then appCacheCtx <> navCtx
-                       else navCtx
+            indexCtx = navCtx
 
         makeItem ""
           >>= loadAndApplyTemplate "templates/tag-page.html" ctx
@@ -186,9 +184,7 @@ main = hakyllWith myConfig $ do
       let ctx = taggedPostCtx tags                                    <>
                 paginateContext paginatedPosts pageNum                <>
                 listField "posts" (taggedPostCtx tags) (return posts)
-          indexCtx = if pageNum <= 2
-                     then appCacheCtx <> navCtx
-                     else navCtx
+          indexCtx = navCtx
 
       makeItem ""
         >>= loadAndApplyTemplate "templates/pages/blog.html" ctx
@@ -215,7 +211,7 @@ main = hakyllWith myConfig $ do
             listField "posts" (taggedPostCtx tags) (return posts)             <>
             tagCloudField "tagCloud" 65 135 tags                              <>
             defaultContext
-          indexCtx = navCtx <> appCacheCtx
+          indexCtx = navCtx
 
       sectionCtx <- getResourceBody >>= genSectionContext
       pg <- loadSnapshot (fromFilePath pageTemplate) "original"
@@ -285,9 +281,6 @@ postCtx = dateField "date" "%B %e, %Y"   <>
 
 taggedPostCtx :: Tags -> Context String
 taggedPostCtx tags = tagsField "tags" tags <> postCtx
-
-appCacheCtx :: Context String
-appCacheCtx = constField "appcache" "true"
 
 pageWeight :: (Functor f, MonadMetadata f) => Item a -> f Int
 pageWeight i = fmap (maybe 0 read) $ getMetadataField (itemIdentifier i) "weight"

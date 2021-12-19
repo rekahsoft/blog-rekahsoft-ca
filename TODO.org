@@ -1,33 +1,6 @@
 #+TITLE: blog-rekahsoft-ca TODO's
 #+AUTHOR: Collin J. Doering
 
-* TODO [#A] Invalid page urls load as the home page
-
-Eg. https://blog.rekahsoft.ca/this-is-not-a-valid-page.html will show the home page, and
-retain this url. However, it should show a page not found page.
-* TODO The image full screen features does not work on initial page loads and requires going to at least one other page :bug:
-
-See:
-- [[file:js/default.js::// Add fullscreen functionality to inline-images and figures][Fullscreen image onclik functionality is added in the router upon content loading, which doesn't occur on the intial page load]]
-* DOING Completely replace all references to stack
-- State "DOING"      from "TODO"       [2021-12-18 Sat 20:33]
-* TODO Modernize javascript in [[file:js/default.js][js/default.js]]
-* TODO Allow posts (and pages?) to be written in org-mode
-
-See:
-- https://github.com/jaspervdj/hakyll/issues/700
-- https://turbomack.github.io/posts/2016-12-21-org-mode-in-hakyll.html
-* TODO Use javascript/css sources from guix packages instead of vendoring them or using them from the internet
-- [ ] jQuery
-- [ ] mathjax
-- [ ] skeleton
-* TODO Figure out fast workflow for modifying haskell sources without rebuilding guix package
-*** TODO [[./clay][clay sources]]
-*** TODO [[./src][hakell sources]]
-* TODO Allow external code files to be included in pages and blog entries
-
-See: http://blog.tpleyer.de/posts/2019-04-21-external-code-inclusion-with-hakyll.html
-* TODO Ensure [[./blog-rekahsoft-ca.cabal][blog-rekahsoft-ca.cabal]] is usable with cabal and has the correct dependencies
 * Archive                                                           :ARCHIVE:
 ** DONE Remove the use of application cache now that most major browsers are pulling support
 CLOSED: [2021-11-28 Sun 10:43]
@@ -73,3 +46,41 @@ CLOSED: [2021-12-18 Sat 20:34]
 :END:
 - State "DONE"       from "TODO"       [2021-12-18 Sat 20:34]
 
+* TODO [#A] Invalid page urls load as the home page
+
+Eg. https://blog.rekahsoft.ca/this-is-not-a-valid-page.html will show the home page, and
+retain this url. However, it should show a page not found page.
+* TODO The image full screen features does not work on initial page loads and requires going to at least one other page :bug:
+
+See:
+- [[file:js/default.js::// Add fullscreen functionality to inline-images and figures][Fullscreen image onclik functionality is added in the router upon content loading, which doesn't occur on the intial page load]]
+* DOING Completely replace all references to stack
+- State "DOING"      from "TODO"       [2021-12-18 Sat 20:33]
+* TODO Modernize javascript in [[file:js/default.js][js/default.js]]
+* TODO Allow posts (and pages?) to be written in org-mode
+
+See:
+- https://github.com/jaspervdj/hakyll/issues/700
+- https://turbomack.github.io/posts/2016-12-21-org-mode-in-hakyll.html
+* TODO Use javascript/css sources from guix packages instead of vendoring them or using them from the internet
+- [ ] jQuery
+- [ ] mathjax
+- [ ] skeleton
+* TODO Figure out fast workflow for modifying haskell sources without rebuilding guix package
+*** TODO [[./clay][clay sources]]
+*** TODO [[./src][hakell sources]]
+* TODO Allow external code files to be included in pages and blog entries
+
+See: http://blog.tpleyer.de/posts/2019-04-21-external-code-inclusion-with-hakyll.html
+* TODO Ensure [[./blog-rekahsoft-ca.cabal][blog-rekahsoft-ca.cabal]] is usable with cabal and has the correct dependencies
+* TODO Add a way to submit commits on articles
+
+See:
+- https://posativ.org/isso/
+- https://remark42.com/
+- Another option is to use the fediverse as a source of comments:
+  https://news.ycombinator.com/item?id=25570268
+
+* TODO Proxy analytics traffic through same domain to avoid adblockers
+
+See: https://plausible.io/docs/proxy/introduction

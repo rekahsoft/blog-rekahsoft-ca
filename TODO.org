@@ -1,36 +1,26 @@
 #+TITLE: blog-rekahsoft-ca TODO's
 #+AUTHOR: Collin J. Doering
 
-* DONE Remove the use of application cache now that most major browsers are pulling support
-CLOSED: [2021-11-28 Sun 10:43]
-- State "DONE"       from "TODO"       [2021-11-28 Sun 10:43]
+* TODO [#A] Invalid page urls load as the home page
+
+Eg. https://blog.rekahsoft.ca/this-is-not-a-valid-page.html will show the home page, and
+retain this url. However, it should show a page not found page.
 * TODO The image full screen features does not work on initial page loads and requires going to at least one other page :bug:
 
 See:
 - [[file:js/default.js::// Add fullscreen functionality to inline-images and figures][Fullscreen image onclik functionality is added in the router upon content loading, which doesn't occur on the intial page load]]
-* TODO Completely replace all references to stack
-* DONE Fix analytics (pywiki is no longer in use, find and use something else)
-CLOSED: [2021-12-18 Sat 20:31]
-- Note taken on [2021-12-18 Sat 20:31] \\
-  Decided to use [[https://github.com/plausible/analytics][Plausible]], self hosted on my single use AWS ec2.
-- State "DONE"       from "TODO"       [2021-12-18 Sat 20:31]
+* DOING Completely replace all references to stack
+- State "DOING"      from "TODO"       [2021-12-18 Sat 20:33]
 * TODO Modernize javascript in [[file:js/default.js][js/default.js]]
 * TODO Allow posts (and pages?) to be written in org-mode
 
 See:
 - https://github.com/jaspervdj/hakyll/issues/700
 - https://turbomack.github.io/posts/2016-12-21-org-mode-in-hakyll.html
-* TODO Fix rendering of mathjax
 * TODO Use javascript/css sources from guix packages instead of vendoring them or using them from the internet
 - [ ] jQuery
 - [ ] mathjax
 - [ ] skeleton
-* TODO Setup automated deployment from ci
-* TODO Use separate file for terraform backend
-
-Used to be: +Add missing terraform backend files to repository+, however this was not true.
-The backend is just embedded in [[./infra/main.tf][infra/main.tf]].
-
 * TODO Figure out fast workflow for modifying haskell sources without rebuilding guix package
 *** TODO [[./clay][clay sources]]
 *** TODO [[./src][hakell sources]]
@@ -38,8 +28,48 @@ The backend is just embedded in [[./infra/main.tf][infra/main.tf]].
 
 See: http://blog.tpleyer.de/posts/2019-04-21-external-code-inclusion-with-hakyll.html
 * TODO Ensure [[./blog-rekahsoft-ca.cabal][blog-rekahsoft-ca.cabal]] is usable with cabal and has the correct dependencies
-* TODO Build the site as a guix package output of ~blog-rekahsoft-ca~
-* TODO Invalid page urls load as the home page
+* Archive                                                           :ARCHIVE:
+** DONE Remove the use of application cache now that most major browsers are pulling support
+CLOSED: [2021-11-28 Sun 10:43]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-18 Sat 20:36
+:END:
+- State "DONE"       from "TODO"       [2021-11-28 Sun 10:43]
+** DONE Fix analytics (pywiki is no longer in use, find and use something else)
+CLOSED: [2021-12-18 Sat 20:31]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-18 Sat 20:36
+:END:
+- Note taken on [2021-12-18 Sat 20:31] \\
+  Decided to use [[https://github.com/plausible/analytics][Plausible]], self hosted on my single use AWS ec2.
+- State "DONE"       from "TODO"       [2021-12-18 Sat 20:31]
+** DONE Fix rendering of mathjax
+CLOSED: [2021-12-18 Sat 20:33]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-18 Sat 20:36
+:END:
+- State "DONE"       from "TODO"       [2021-12-18 Sat 20:33]
+** DONE Setup automated deployment from ci
+CLOSED: [2021-12-18 Sat 20:33]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-18 Sat 20:36
+:END:
+- State "DONE"       from "TODO"       [2021-12-18 Sat 20:33]
+** CANCELED Use separate file for terraform backend
+CLOSED: [2021-12-18 Sat 20:33]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-18 Sat 20:36
+:END:
 
-Eg. https://blog.rekahsoft.ca/this-is-not-a-valid-page.html will show the home page, and
-retain this url. However, it should show a page not found page.
+- State "CANCELED"   from "TODO"       [2021-12-18 Sat 20:33] \\
+  No need. Embedding the backend into main.tf is file for the time being
+Used to be: +Add missing terraform backend files to repository+, however this was not true.
+The backend is just embedded in [[./infra/main.tf][infra/main.tf]].
+
+** DONE Build the site as a guix package output of ~blog-rekahsoft-ca~
+CLOSED: [2021-12-18 Sat 20:34]
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-12-18 Sat 20:36
+:END:
+- State "DONE"       from "TODO"       [2021-12-18 Sat 20:34]
+

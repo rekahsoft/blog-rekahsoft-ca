@@ -36,12 +36,8 @@ provider "random" {
   version = "= 2.1.2"
 }
 
-provider "template" {
-  version = "= 2.2.0"
-}
-
 #
-# Local values to be re-used throughout this template
+# Local values to be re-used throughout
 
 locals {
   common_tags = {

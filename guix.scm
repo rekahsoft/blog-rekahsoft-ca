@@ -35,7 +35,7 @@
 (define %blog-rekahsoft-ca
   (let ((commit (oid->string
                  (reference-target
-                  (repository-head (repository-open (getcwd))))))
+                  (repository-head (repository-open %srcdir)))))
         (revision "1"))
     (package
       (name "blog-rekahsoft-ca")

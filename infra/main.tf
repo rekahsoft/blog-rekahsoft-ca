@@ -399,7 +399,7 @@ aws configure --profile ${aws_iam_user.app_deploy.name} set aws_secret_access_ke
 aws configure --profile ${aws_iam_user.app_deploy.name} set region ${var.region};
 
 : Sync latest app build to s3 bucket;
-aws --profile ${aws_iam_user.app_deploy.name} s3 sync --delete ${var.site_static_files_dir} s3://${aws_s3_bucket.static.id}/;
+aws --profile ${aws_iam_user.app_deploy.name} s3 sync --delete ${var.site_static_files_dir} --size-only s3://${aws_s3_bucket.static.id}/;
 
 : Cleanup temporary aws config and credentials files
 rm $${AWS_CONFIG_FILE} $${AWS_SHARED_CREDENTIALS_FILE};

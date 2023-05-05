@@ -389,6 +389,8 @@ resource "null_resource" "deploy_app" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
     command     = <<SCRIPT
+set -eo pipefail;
+
 : Create temporary aws config and credentials files
 export AWS_CONFIG_FILE=$(mktemp);
 export AWS_SHARED_CREDENTIALS_FILE=$(mktemp);
@@ -398,11 +400,20 @@ aws configure --profile ${aws_iam_user.app_deploy.name} set aws_access_key_id ${
 aws configure --profile ${aws_iam_user.app_deploy.name} set aws_secret_access_key ${aws_iam_access_key.app_deploy.secret};
 aws configure --profile ${aws_iam_user.app_deploy.name} set region ${var.region};
 
-: Sync latest app build to s3 bucket;
-aws --profile ${aws_iam_user.app_deploy.name} s3 sync --delete --size-only ${var.site_static_files_dir} s3://${aws_s3_bucket.static.id}/;
+: Create a random string to be used as a temporary directory name;
+TMPDIR=/tmp/$$(printf '%s' {a..z} {A..Z} {0..9} | fold -w1 | shuf | paste -s -d '' | head -c16);
 
-: Cleanup temporary aws config and credentials files
-rm $${AWS_CONFIG_FILE} $${AWS_SHARED_CREDENTIALS_FILE};
+: Copy site files so that they get a new date/time stamp, allowing 's3 sync' to operate correctly;
+cp -r ${var.site_static_files_dir} $${TMPDIR};
+
+: Allow copied site files to be removable after deployment;
+chmod u+rw -R $${TMPDIR};
+
+: Sync latest app build to s3 bucket;
+aws --profile ${aws_iam_user.app_deploy.name} s3 sync --delete $${TMPDIR} s3://${aws_s3_bucket.static.id}/;
+
+: Cleanup temporary aws config, its credentials files as well as the copied site files;
+rm -r $${AWS_CONFIG_FILE} $${AWS_SHARED_CREDENTIALS_FILE} $${TMPDIR};
 SCRIPT
 
   }

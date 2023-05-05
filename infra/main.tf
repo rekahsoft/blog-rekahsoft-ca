@@ -401,7 +401,7 @@ aws configure --profile ${aws_iam_user.app_deploy.name} set aws_secret_access_ke
 aws configure --profile ${aws_iam_user.app_deploy.name} set region ${var.region};
 
 : Create a random string to be used as a temporary directory name;
-TMPDIR=/tmp/$$(printf '%s' {a..z} {A..Z} {0..9} | fold -w1 | shuf | paste -s -d '' | head -c16);
+TMPDIR=/tmp/$(printf '%s' {a..z} {A..Z} {0..9} | fold -w1 | shuf | paste -s -d '' | head -c16);
 
 : Copy site files so that they get a new date/time stamp, allowing 's3 sync' to operate correctly;
 cp -r ${var.site_static_files_dir} $${TMPDIR};

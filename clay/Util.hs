@@ -32,7 +32,7 @@ makeBorderBox pad backCol =
       backCol' = fromMaybe (rgba 250 250 255 165) backCol
   in do
     backgroundColor backCol'
-    border solid (px 1) "#888"
+    border (px 1) solid "#888"
     borderRadius (px 5) (px 5) (px 5) (px 5)
 --    boxShadow (px 2) (px 5) (px 2) "#888"
     sym padding pad'

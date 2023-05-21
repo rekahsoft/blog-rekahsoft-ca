@@ -50,7 +50,7 @@ aPost = do
 
     header ? do
       marginBottom (em 0.8)
-      border solid (px 2) "#eee"
+      border (px 2) solid "#eee"
       sym borderRadius (px 3)
       sym padding (em 0.35)
       paddingLeft (px 65)
@@ -84,7 +84,7 @@ aPost = do
 
     footer ? do
       padding (em 0.75) nil (em 0.25) nil
-      borderTop solid (px 1) "#eee"
+      borderTop (px 1) solid "#eee"
 
       ".read-more" ? fontWeight bold
       ".no-teaser" ? do
@@ -122,7 +122,7 @@ aPost = do
 businessCard :: Css
 businessCard = do
   "#business-card" ? do
-    border solid (px 2) black
+    border (px 2) solid black
     sym borderRadius (px 5)
     sym padding (px 10)
     minHeight (px 215)
@@ -133,7 +133,7 @@ businessCard = do
       backgroundImage $ url "/images/business-card.png"
       backgroundSize cover
       backgroundPosition $ placed sideCenter sideCenter
-      border solid (px 1) black
+      border (px 1) solid black
       sym borderRadius (px 10)
       minHeight (px 215)
       minWidth (px 150)
@@ -141,7 +141,7 @@ businessCard = do
       marginRight (px 10)
 
     ".info" ? do
-      borderTop solid (px 2) black
+      borderTop (px 2) solid black
       overflow hidden
       paddingTop (px 8)
     
@@ -185,11 +185,11 @@ srcCodeBlock = do
     <> table # ".sourceCode" ** pre ? do
       sym margin nil
       sym padding nil
-      border none nil black
+      border nil none black
       verticalAlign vAlignBaseline
 
   td # ".lineNumbers" ? do
-    borderRight solid (px 1) "#AAAAAA"
+    borderRight (px 1) solid "#AAAAAA"
     textAlign $ alignSide sideRight
     color "#AAAAAA"
     paddingLeft (px 8)
@@ -222,7 +222,7 @@ srcCodeBlock = do
 postFigures :: Css
 postFigures = do
   figure ? do
-    border solid (px 1) black
+    border (px 1) solid black
     sym borderRadius (px 3)
     clear both
 
@@ -230,7 +230,7 @@ postFigures = do
     img <? do
       display block
       width (pct 100)
-      borderBottom solid (px 1) black
+      borderBottom (px 1) solid black
       cursor pointer
 
     figcaption # ":before" <? do
@@ -249,7 +249,7 @@ inlinePostImages = article # ".post" ? do
     clear clearRight
     float floatRight
     width (pct 30)
-    border solid (px 1) black
+    border (px 1) solid black
     sym borderRadius (px 3)
     sym margin (em 1)
     cursor pointer

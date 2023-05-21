@@ -55,7 +55,7 @@ navigation = do
     (backgroundPosition $ positioned (px 304) nil)
 
   "#nav" ? do
-    border solid (px 2) black
+    border (px 2) solid black
     borderRightWidth 0
     borderLeftWidth 0
     backgroundImage $ url "/images/diagonal-stripes.png"
@@ -126,8 +126,8 @@ statusMessage :: Css
 statusMessage = do
   "#status" ? do
     display none
-    border solid (px 1) black
-    borderTop solid nil black
+    border (px 1) solid black
+    borderTop nil solid black
     borderBottomRightRadius (px 5) (px 5)
     borderBottomLeftRadius (px 5) (px 5)
     backgroundColor $ rgb 146 208 240

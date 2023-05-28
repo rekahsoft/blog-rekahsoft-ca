@@ -137,6 +137,6 @@ to obtain a *FPGA* and complete the implementation (will a VGA screen and a PS2 
 keyboard). Also just to reintegrate, for those of those interested in the inner workings of a
 computer, I highly recommend checking out the *Nand to Tetris* course.
 
-[hack-git]: http://git.rekahsoft.ca/hack/
-[hack-docs]: http://git.rekahsoft.ca/hack/about
+[hack-git]: https://git.rekahsoft.ca/rekahsoft/hack/
+[hack-docs]: https://git.rekahsoft.ca/rekahsoft/hack/src/branch/master/README.md
 [GtkWave]: http://gtkwave.sourceforge.net/

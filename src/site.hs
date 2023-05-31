@@ -84,14 +84,14 @@ pandocWriterOptions = defaultHakyllWriterOptions
 
 myConfig :: Configuration
 myConfig = defaultConfiguration
-        { deployCommand = "echo 'Deploying website...' && " ++
+        { deployCommand = "echo 'TODO (what to do with this cmd) Deploying website...' && " ++
                           "aws s3 sync _site/ s3://$S3_BUCKET &&"  ++
                           "echo 'Done!'"
         , previewPort = 3000
         }
 
-main :: IO ()
-main = hakyllWith myConfig $ do
+siteRules :: Rules ()
+siteRules = do
   match ("action/**" .||. "files/**" .||. "images/**" .||. "fonts/**" .||. "robots.txt") $ do
     route   idRoute
     compile copyFileCompiler
@@ -116,22 +116,11 @@ main = hakyllWith myConfig $ do
                     ("posts/**" .&&. hasNoVersion)
                     (\n -> fromCapture "blog*.html" (show n))
 
-  clayDeps <- makePatternDependency $ fromGlob "clay/**.hs"
+  clayDeps <- makePatternDependency $ fromGlob "clay/*.hs"
 
   rulesExtraDependencies [clayDeps] $ create ["default.css"] $ do
     route     idRoute
     compile $ makeItem =<< (unsafeCompiler $ readProcess "gencss" ["compact"] "")
-
-  match "css/**" $ do
-    route   idRoute
-    compile compressCssCompiler
-
-  match "lib/Skeleton/*.css" $ do
-    route   $ gsubRoute "Skeleton" (const "css")
-    compile compressCssCompiler
-
-  match "templates/**" $ compile $ getResourceBody >>= saveSnapshot "original"
-    >> templateCompiler
 
   -- Generate tag pages
   forM_ (tagsMap tags) $ \(tag, identifiers) -> do
@@ -243,6 +232,14 @@ main = hakyllWith myConfig $ do
     match p $ do
         route   r
         compile $ copyFileCompiler
+
+_devWatch :: IO ()
+_devWatch = do
+  _ <- hakyllWithExitCodeAndArgs myConfig (Options { verbosity = False, optCommand = Rebuild }) $ siteRules
+  hakyllWithArgs myConfig (Options { verbosity = False, optCommand = Watch "localhost" 3000 False }) $ siteRules
+
+main :: IO ()
+main = hakyllWith myConfig $ siteRules
 
 ---------------------------------------------------------------------------------------------------------
 -- Functions & Constants --------------------------------------------------------------------------------

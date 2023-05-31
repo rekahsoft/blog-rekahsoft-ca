@@ -24,10 +24,9 @@
  (guix git-download)
  (guix gexp)
  (gnu packages base)
+ (gnu packages haskell-apps)
  (rekahsoft-gnu packages haskell-web)
  (git))
-
-(setenv "PS1" "\\W [env]\\$ ")
 
 (define %srcdir
   (dirname (current-filename)))
@@ -44,7 +43,9 @@
                           #:recursive? #t
                           #:select? (git-predicate %srcdir)))
       (build-system haskell-build-system)
-      (native-inputs `(("glibc-utf8-locales" ,glibc-utf8-locales)))
+      (native-inputs `(("glibc-utf8-locales" ,glibc-utf8-locales)
+                       ("make" ,gnu-make)
+                       ("ghcid" ,ghcid)))
       (inputs `(("ghc-hakyll" ,ghc-hakyll)
                 ("ghc-clay" ,ghc-clay)))
       (outputs '("out" "site" "static"))
@@ -55,7 +56,7 @@
              (lambda* (#:key outputs #:allow-other-keys)
                (let ((out (assoc-ref outputs "out")))
                  (setenv "PATH" (string-append out "/bin:" (getenv "PATH")))
-                 (install-file "site" (string-append out "/bin/"))
+                 (symlink (string-append out "/bin/blog-rekahsoft-ca") (string-append out "/bin/site"))
                  #t)))
            (add-after 'install-site-script 'build-site
              (lambda* (#:key outputs #:allow-other-keys)

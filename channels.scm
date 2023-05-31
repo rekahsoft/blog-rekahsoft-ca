@@ -12,7 +12,7 @@
         (name 'rekahsoft-guix)
         (url "https://git.rekahsoft.ca/rekahsoft/rekahsoft-guix.git")
         (commit
-          "58deed23414b5c7e82fc415ad06d15f39a2dfa56")
+          "e016a7e7a9eb3d27a4d6368861222e9916e27a47")
         (introduction
           (make-channel-introduction
             "191cdaa0947657e0c85fe89ebbb8e7b1e7a8e0a4"

@@ -92,9 +92,20 @@ myConfig = defaultConfiguration
 
 siteRules :: Rules ()
 siteRules = do
-  match ("action/**" .||. "files/**" .||. "images/**" .||. "fonts/**" .||. "robots.txt") $ do
+  match ("js/**"
+         .||. "files/**"
+         .||. "images/**"
+         .||. "fonts/**"
+         .||. "robots.txt") $ do
     route   idRoute
     compile copyFileCompiler
+
+  forM_ [("lib/MathJax/fonts/HTML-CSS/**", gsubRoute "lib/MathJax/" $ const ""),
+         ("lib/MathJax/**" .&&. complement "lib/MathJax/fonts", gsubRoute "lib/" $ const ""),
+         ("lib/JQuery/*", gsubRoute "JQuery" $ const "js")] $ \(p, r) ->
+    match p $ do
+        route   r
+        compile $ copyFileCompiler
 
   match "css/**" $ do
     route   idRoute
@@ -227,19 +238,13 @@ siteRules = do
                      >>= fmap (take 10) . recentFirst
       renderAtom (feedConfiguration Nothing) feedCtx blogPosts
 
-  forM_ [("js/**", idRoute),
-         ("lib/JQuery/*", gsubRoute "JQuery" $ const "js")] $ \(p, r) ->
-    match p $ do
-        route   r
-        compile $ copyFileCompiler
-
 _devWatch :: IO ()
 _devWatch = do
   _ <- hakyllWithExitCodeAndArgs myConfig (Options { verbosity = False, optCommand = Rebuild }) $ siteRules
   hakyllWithArgs myConfig (Options { verbosity = False, optCommand = Watch "localhost" 3000 False }) $ siteRules
 
 main :: IO ()
-main = hakyllWith myConfig $ siteRules
+main = hakyllWith myConfig siteRules
 
 ---------------------------------------------------------------------------------------------------------
 -- Functions & Constants --------------------------------------------------------------------------------

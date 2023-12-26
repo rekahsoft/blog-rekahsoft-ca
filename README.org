@@ -26,7 +26,7 @@ libraries:
 - [[http://fvisser.nl/clay/][Clay]] is used for CSS pre-processing
 - [[http://www.getskeleton.com/][Skeleton]] is used for CSS boilerplate
 - [[http://www.mathjax.org/][MathJax]] is used for rendering mathematics
-- [[http://jquery.com][JQuery]] and [[https://github.com/asual/jquery-address][JQuery-address]] are used for various DOM manipulations
+- [[http://jquery.com][JQuery]] is used for various DOM manipulations
 - [[https://guix.gnu.org/][Gnu Guix]] is used to manage development environments and packaging
 - [[http://inkscape.org/][Inkscape]] and the [[http://www.gimp.org/][Gimp]] were used to create various images/artwork
 - [[http://www.gnu.org/software/freefont/][Gnu Free Fonts]], specifically *FreeMono* is used as main font
@@ -45,64 +45,42 @@ Various licenses ([[https://www.gnu.org/licenses/gpl.html][GPLv3]], [[http://cre
 License]]) are deployed dependent on which part of the site is in question. Please see the
 [[./LICENSE][LICENSE]] file for full details.
 
-* TODO Repository Structure
+* Repository Structure
 
-#+begin_src text
-  .
-  ├── blog-rekahsoft-ca.cabal
-  ├── bootstrap.sh
-  ├── channels.scm --
-  ├── clay
-  │  └── *.hs -- clay source files
-  ├── css
-  ├── drafts
-  │  └── *.md -- draft posts
-  ├── files
-  │  ├── images
-  │  └── source
-  ├── fonts
-  │  └── *.{ttf,woff,...} -- font files
-  ├── guix.scm
-  ├── images
-  │  └── ...
-  ├── images-src
-  │  └── ...
-  ├── infra
-  │  ├── channels.scm -> ../channels.scm
-  │  ├── main.tf
-  │  ├── Makefile
-  │  ├── manifest.scm
-  │  ├── outputs.tf
-  │  ├── production.tfvars
-  │  ├── staging.tfvars
-  │  └── variables.tf
-  ├── js
-  │  └── *.js -- javascript files
-  ├── lib
-  │  └── ... -- javascript libraries
-  ├── LICENSE
-  ├── manifest.scm
-  ├── pages
-  │  └── ...
-  ├── posts
-  │  └── ...
-  ├── README.org
-  ├── robots.txt
-  ├── Setup.hs
-  ├── site
-  ├── src
-  │  └── site.hs
-  └── templates
-     ├── default.html
-     ├── pages
-     ├── partials
-     └── tag-page.html
-#+end_src
+- ~blog-rekahsoft-ca.cabal~   :: Cabal package definition.
+- ~bootstrap.sh~              :: Generate development scripts, Makefile, and setup vendor links based on this literate configurationl
+- ~channels.scm~              :: Guix Channel File.
+- ~clay/*.hs~                 :: Clay source files.
+- ~css/*.css~                 :: CSS source files (will be minified).
+- ~drafts/*.md~               :: Draft posts.
+- ~files/images/~             :: Folder for images used in posts.
+- ~files/source/~             :: Folder for source code used in blog posts/pages.
+- ~fonts/*.{ttf,woff,...}~    :: Font files
+- ~guix.scm~                  :: Guix package definition for this site-builder and its resulting site.
+- ~images/*~                  :: Folder for images used on pages or in templates.
+- ~images-src/*~              :: Folder for the image source files (should be 1-to-1 with files in ~images/*~).
+- ~infra/~                    :: Infrastructure folder; contains terraform based Infrastructure As Code (IAC).
+- ~infra/channels.scm~        :: Symlink to ~../channels.scm~ (can be independent if needed).
+- ~infra/*.tf~                :: Terraform source files.
+- ~infra/*.tfvars~            :: Terraform variables files for each environment (non-secrets).
+- ~infra/Makefile~            :: Makefile used for terraform deployments.
+- ~infra/manifest.scm~        :: Guix manifest that defines the necessary deployment environment.
+- ~js/*.js~                   :: Javascript files.
+- ~lib/*~                     :: Javascript libraries.
+- ~LICENSE~                   :: License file.
+- ~pages/*.markdown~          :: Page content.
+- ~posts/*.markdown~          :: Blog posts.
+- ~README.org~                :: Org-mode documentation.
+- ~robots.txt~                :: Robot Exclusion Protocol file.
+- ~Setup.hs~                  :: Cabal build script for this site.
+- ~src/*.hs~                  :: Hakyll powered site builder.
+- ~templates/~                :: Folder for all template files.
+- ~templates/default.html~    :: Entry point template (defines html document used for all pages).
+- ~templates/pages/*.html~    :: Html page templates (correspond 1-to-1 with pages/*.markdown files).
+- ~templates/partials/*.html~ :: Partial template files, for use within templates.
+- ~templates/tag-page.html~   :: Template for creating pages about tags with a specific tag.
 
-* TODO Guix Development Environment
-:PROPERTIES:
-:header-args:  :session *vterm blog-rekahsoft-ca* :results none
-:END:
+* Guix Development Environment
 
 [[https://guix.gnu.org/][Gnu Guix]] is used to package this project and manage its dependencies, as well as to provide
 reproducible development environments.
@@ -131,7 +109,7 @@ Then run the development 'auto-watching' environment:
 
 This starts a containerized local development environment that uses [[https://github.com/ndmitchell/ghcid/][ghcid]] to watch haskell
 sources and restart hakyll's [[*Watch][site watch]] feature when changes occur. The site will be
-available at http://localhost:3000, and will be automatically rebuild as site files change
+available at http://localhost:3000, and will automatically rebuild as site files change
 (templates, post, pages, etc..).
 
 ** Start Development Environment
@@ -144,7 +122,7 @@ The development environment is defined by the following files:
 To start a development environment, run the following:
 
 #+begin_src sh :mkdirp yes :tangle ./scripts/start-development-environment.sh :tangle-mode (identity #o555)
-  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -f guix.scm -Df guix.scm
+  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -f guix.scm -Df guix.scm $@
 #+end_src
 
 This uses the [[info:guix#Invoking guix time-machine][guix time-machine]] feature to ensure the development environment is reproducible
@@ -169,7 +147,7 @@ or needed, as the deployment environment is used solely for its side effects.
   top-level of the repository, however this would complicate [[*Composing Site Development and Deployment Environments][Composing Site Development and
   Deployment Environments]], so its preferred that all guix environments for the project,
   including the development and deployment environment use the same set of Guix channels.
-- [[./infra/manifest.scm][infra/manifest.scm]] :: Defines packages required for deployment of this site
+- [[./infra/manifest.scm][infra/manifest.scm]] :: Defines packages required for deployment of this site.
 
 To start a deployment environment, run the following:
 
@@ -181,7 +159,7 @@ To start a deployment environment, run the following:
 *** Composing Site Development and Deployment Environments
 
 #+begin_src sh :mkdirp yes :tangle ./scripts/start-development-and-deployment-environment.sh :tangle-mode (identity #o555)
-  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -E '^AWS.*$' -f guix.scm -Df guix.scm -m infra/manifest.scm
+  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -E '^AWS.*$' -f guix.scm -Df guix.scm -m infra/manifest.scm $@
 #+end_src
 
 ** Hakyll Site Commands
@@ -235,8 +213,9 @@ provided by Hakyll.
 When making adjustments to the site builder itself, it is useful to have functionality
 similar to the site content watching feature of Hakyll, but for haskell source files.
 Luckily, [[https://github.com/ndmitchell/ghcid/][ghcid]] can be used for this, and is included in the projects development
-~manifest.scm~ file.
+dependencies, specified in the ~guix.scm~ file.
 
+#+name: watch-all
 #+begin_src sh :mkdirp yes :tangle ./scripts/watch-all.sh :tangle-mode (identity #o555)
   ghcid --test _devWatch
 #+end_src
@@ -322,13 +301,26 @@ content development, this is not a concern.
   guix time-machine -C channels.scm -- shell -CN -E LANG -E TERM -f guix.scm
 #+end_src
 
-* TODO Makefile
+* DOING Vendor external libraries using Guix
+
+Some ...
+
+#+begin_src sh :mkdirp yes :tangle ./scripts/vendor-deps.sh :tangle-mode (identity #o555)
+  [ -h lib/MathJax ] && rm lib/MathJax
+  [ -e lib/MathJax ] && echo "lib/MathJax exists, but not as a symlink; please manually remove it!" && exit 1
+  ln -s $(guix time-machine -C channels.scm -- shell -Df guix.scm -- bash -c 'echo $GUIX_ENVIRONMENT')/share/javascript/mathjax lib/MathJax
+#+end_src
+
+* Makefile
+
+In order to simplify running the various commands outlined throughout this document, a
+~Makefile~ is defined below.
 
 #+begin_src makefile :noweb yes :tangle Makefile :tangle-mode (identity #o444)
 # THIS IS A GENERATED FILE, DO NOT EDIT!
 # Instead modify README.org appropriately
 
-.DEFAULT_GOAL := watch-all
+.DEFAULT_GOAL := watch
 
 .PHONY: bootstrap
 bootstrap:
@@ -350,13 +342,22 @@ dev-all:
 watch-all:
 	./scripts/watch-all.sh
 
+.PHONY: watch
+watch:
+	./scripts/start-development-environment.sh -- <<watch-all>>
+
 .PHONY: build
 build-release:
 	./scripts/build-release.sh
 
+.PHONY: vendor
+vendor:
+	./scripts/vendor-deps.sh
+
 .PHONY: clean
 clean:
 	./scripts/clean-guix-store.sh
+	rm -rf scripts lib/MathJax Makefile
 #+end_src
 
 * Continuous Integration & Delivery
@@ -376,5 +377,4 @@ with docker as follows, where ~<version>~ is the drone-cli version.
 
 * Known Issues
 
-If you have an issue while browsing [[http://www.blog.rekahsoft.ca][my blog]] please file a issue in the [[https://git.rekahsoft.ca/rekahsoft/blog-rekahsoft-ca/issues][blog-rekahsoft-ca]]
-issue tracker.
+If you have an issue while browsing [[http://www.blog.rekahsoft.ca][my blog]] please let me know via [[https://www.blog.rekahsoft.ca/contact.html][email]].

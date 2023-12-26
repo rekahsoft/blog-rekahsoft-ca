@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="en" $if(appcache)$manifest="/manifest.appcache"$endif$>
+<html class="en">
   <head>
     <!-- Basic Page Needs -->
     <meta charset="utf-8">
@@ -50,7 +50,8 @@
 
     <!-- External javascript libraries: JQuery, MathJax -->
     <script src="/lib/js/jquery-1.12.3.js" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+    <script src="/MathJax/MathJax.js" type="text/javascript"></script>
+    <script src="/MathJax/config/TeX-MML-AM_CHTML.js" type="text/javascript"></script>
 
     <!-- Custom javascript for user interactivity -->
     <script src="/js/default.js" type="text/javascript"></script>

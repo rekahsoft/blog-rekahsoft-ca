@@ -24,6 +24,7 @@
  (guix git-download)
  (guix gexp)
  (gnu packages base)
+ (gnu packages javascript)
  (gnu packages haskell-apps)
  (rekahsoft-gnu packages haskell-web)
  (git))
@@ -47,7 +48,8 @@
                        ("make" ,gnu-make)
                        ("ghcid" ,ghcid)))
       (inputs `(("ghc-hakyll" ,ghc-hakyll)
-                ("ghc-clay" ,ghc-clay)))
+                ("ghc-clay" ,ghc-clay)
+                ("js-mathjax" ,js-mathjax)))
       (outputs '("out" "site" "static"))
       (arguments
        `(#:phases
@@ -62,6 +64,11 @@
              (lambda* (#:key outputs #:allow-other-keys)
                (let* ((out (assoc-ref outputs "out"))
                       (site (assoc-ref outputs "site")))
+                 ;; Copy (vendor) dependencies: MathJax
+                 (copy-recursively (string-append (assoc-ref %build-inputs "js-mathjax")
+                                                  "/share/javascript/mathjax")
+                                   "lib/MathJax" #:follow-symlinks? #t)
+
                  ;; All source files are read-only and need to be adjusted to allow the
                  ;; site to be generated at the end of the build
                  (for-each make-file-writable (find-files "."))

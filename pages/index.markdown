@@ -15,7 +15,6 @@ This website was proudly made with open source software! Specifically:
 - [Clay][]
 - [Skeleton][]
 - [JQuery][]
-- [JQuery-address][]
 - [MathJax][]
 - [Inkscape][]
 - [Gimp][]

@@ -32,6 +32,5 @@
    "terraform-provider-aws"
    "terraform-provider-null@2.1.2"
    "terraform-provider-random"
-   "terraform-provider-template"
    "awscliv2"
    "nss-certs"))

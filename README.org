@@ -241,6 +241,16 @@ This will produce a guix package with the following three outputs:
   this package, using the content at the same version
 - ~static~ :: License file and any other file that should be distributed (eg manual)
 
+** Verifying a Release
+
+To manually verify a release, any http webserver can be used to serve the ~site~ output of
+the guix build. For instance, this is how Python's ~http.server~ builtin http server can be
+used.
+
+#+begin_src sh
+  guix shell python-wrapper -- python -m http.server -d $(guix time-machine -C channels.scm -- build -f guix.scm | grep -E '^.*-site') 3000
+#+end_src
+
 ** TODO What is done with the release?
   
 * Deploying the Site

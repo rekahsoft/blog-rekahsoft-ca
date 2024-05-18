@@ -134,10 +134,10 @@
       .withType("docker")
       .withNode({ "guix": "on"}),
 
-    step(name, commands, image="docker.nexus.home.rekahsoft.ca/guix:latest")::
+    step(name, commands, image="docker.nexus.home.rekahsoft.ca/guix-builder:latest")::
       ci.pipeline.step.new(name, image).withPullIfNotExists().withCommands(commands),
 
-    stepTimeMachine(name, commands, cwd=".", channels="channels.scm", image="docker.nexus.home.rekahsoft.ca/guix:latest")::
+    stepTimeMachine(name, commands, cwd=".", channels="channels.scm", image="docker.nexus.home.rekahsoft.ca/guix-builder:latest")::
       ci.pipeline.step.new(name, image).withPullIfNotExists().withCommands(
         // Conditionally change directory
         (if cwd == "."

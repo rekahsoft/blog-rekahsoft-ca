@@ -48,7 +48,7 @@ License]]) are deployed dependent on which part of the site is in question. Plea
 * Repository Structure
 
 - ~blog-rekahsoft-ca.cabal~   :: Cabal package definition.
-- ~bootstrap.sh~              :: Generate development scripts, Makefile, and setup vendor links based on this literate configurationl
+- ~bootstrap.sh~              :: Generate development scripts, Makefile, and setup vendor links based on this literate configuration.
 - ~channels.scm~              :: Guix Channel File.
 - ~clay/*.hs~                 :: Clay source files.
 - ~css/*.css~                 :: CSS source files (will be minified).

@@ -1,8 +1,9 @@
 (list (channel
         (name 'guix)
-        (url "https://git.savannah.gnu.org/git/guix.git")
+        (url "https://codeberg.org/guix/guix.git")
+        (branch "master")
         (commit
-          "348c75949043a41dc8771a26f63fd29018aabfea")
+          "72accc03456e9b0feab93751790194de0f74b6fb")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
@@ -11,10 +12,11 @@
       (channel
         (name 'rekahsoft-guix)
         (url "https://git.rekahsoft.ca/rekahsoft/rekahsoft-guix.git")
+        (branch "master")
         (commit
-          "c7d6d6805034738ff8a4c28891bfa73d33b87043")
+          "41946f9cb8865240b4bc30227e0da1b6968d457c")
         (introduction
           (make-channel-introduction
-            "191cdaa0947657e0c85fe89ebbb8e7b1e7a8e0a4"
+            "d910ac4ca1e1a115934b10921bc23f50bd481043"
             (openpgp-fingerprint
               "F8D5 46F3 AF37 EF53 D1B6  48BE 7B4D EB93 212B 3022")))))

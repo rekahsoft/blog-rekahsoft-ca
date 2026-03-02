@@ -316,9 +316,9 @@ content development, this is not a concern.
 Some ...
 
 #+begin_src sh :mkdirp yes :tangle ./scripts/vendor-deps.sh :tangle-mode (identity #o555)
-  [ -h lib/MathJax ] && rm lib/MathJax
-  [ -e lib/MathJax ] && echo "lib/MathJax exists, but not as a symlink; please manually remove it!" && exit 1
-  ln -s $(guix time-machine -C channels.scm -- shell -Df guix.scm -- bash -c 'echo $GUIX_ENVIRONMENT')/share/javascript/mathjax lib/MathJax
+  [ -e lib/MathJax ] && rm -r lib/MathJax
+  cp -LR $(guix time-machine -C channels.scm -- shell -Df guix.scm -- bash -c 'echo $GUIX_ENVIRONMENT')/share/javascript/mathjax lib/MathJax
+  chmod -R +w lib/MathJax
 #+end_src
 
 * Makefile

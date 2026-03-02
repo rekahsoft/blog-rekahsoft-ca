@@ -153,7 +153,7 @@ To start a deployment environment, run the following:
 
 #+begin_src sh :mkdirp yes :tangle ./scripts/start-deployment-environment.sh :tangle-mode (identity #o555)
   cd infra
-  guix time-machine -C channels.scm -- shell -CN -E '^LANG$' -E '^TERM$' -E '^AWS.*$'
+  guix time-machine -C channels.scm -- shell -m manifest.scm -CN -E '^LANG$' -E '^TERM$' -E '^AWS.*$'
 #+end_src
 
 *** Composing Site Development and Deployment Environments
